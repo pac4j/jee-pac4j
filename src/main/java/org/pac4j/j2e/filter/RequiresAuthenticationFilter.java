@@ -24,8 +24,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.j2e.configuration.ClientsConfiguration;
@@ -57,6 +59,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
     }
     
     @Override
+    @SuppressWarnings("unchecked")
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                   final HttpSession session, final FilterChain chain) throws IOException,
         ServletException {
@@ -79,13 +82,18 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
             } else {
                 // no authentication tried -> redirect to provider
                 // keep the current url
-                final String requestedUrl = request.getRequestURL().toString() + "?" + request.getQueryString();
+                String requestedUrl = request.getRequestURL().toString();
+                String queryString = request.getQueryString();
+                if (CommonHelper.isNotBlank(queryString)) {
+                    requestedUrl += "?" + queryString;
+                }
                 logger.debug("requestedUrl : {}", requestedUrl);
                 session.setAttribute(ORIGINAL_REQUESTED_URL, requestedUrl);
                 // compute and perform the redirection
                 final WebContext context = new J2EContext(request, response);
-                final String redirectUrl = ClientsConfiguration.getClients().findClient(this.clientName)
-                    .getRedirectionUrl(context);
+                BaseClient<Credentials, CommonProfile> baseClients = (BaseClient<Credentials, CommonProfile>) ClientsConfiguration
+                    .getClients().findClient(this.clientName);
+                String redirectUrl = baseClients.getRedirectionUrl(context, true);
                 logger.debug("redirectUrl : {}", redirectUrl);
                 response.sendRedirect(redirectUrl);
             }
