@@ -61,25 +61,94 @@ If you want to use a specific client support, you need to add the appropriate Ma
 * for OpenID support, the *pac4j-openid* dependency is required.
 
 For example, to add OAuth support, add the following XML snippet :
-    <dependency>
-      <groupId>org.pac4j</groupId>
-      <artifactId>pac4j-oauth</artifactId>
-      <version>1.4.1-SNAPSHOT</version>
-    </dependency>
+
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.pac4j&lt;/groupId&gt;
+      &lt;artifactId&gt;pac4j-oauth&lt;/artifactId&gt;
+      &lt;version&gt;1.4.1-SNAPSHOT&lt;/version&gt;
+    &lt;/dependency&gt;
 
 As these snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate repository must be added in the *pom.xml* file also :
-    <repositories>
-      <repository>
-        <id>sonatype-nexus-snapshots</id>
-        <name>Sonatype Nexus Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        <releases>
-          <enabled>false</enabled>
-        </releases>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-      </repository>
-    </repositories>
+
+    &lt;repositories&gt;
+      &lt;repository&gt;
+        &lt;id&gt;sonatype-nexus-snapshots&lt;/id&gt;
+        &lt;name&gt;Sonatype Nexus Snapshots&lt;/name&gt;
+        &lt;url&gt;https://oss.sonatype.org/content/repositories/snapshots&lt;/url&gt;
+        &lt;releases&gt;
+          &lt;enabled&gt;false&lt;/enabled&gt;
+        &lt;/releases&gt;
+        &lt;snapshots&gt;
+          &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/snapshots&gt;
+      &lt;/repository&gt;
+    &lt;/repositories&gt;
 
 ### Define the clients
+
+All the clients used to communicate with various providers (Facebook, Twitter, a CAS server...) must be defined in a specific class implementing the *org.pac4j.j2e.configuration.ClientsFactory* interface. For example :
+
+    public class MyClientsFactory implements ClientsFactory {
+      
+      @Override
+      public Clients build() {
+        final FacebookClient facebookClient = new FacebookClient("fbkey", "fbsecret");
+        final TwitterClient twitterClient = new TwitterClient("twkey", "twsecret");
+        // HTTP
+        final FormClient formClient = new FormClient("http://localhost:8080/theForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
+        final BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());        
+        // CAS
+        final CasClient casClient = new CasClient();
+        casClient.setCasLoginUrl("http://localhost:8888/cas/login");        
+        // OpenID
+        final MyOpenIdClient myOpenIdClient = new MyOpenIdClient();
+        final Clients clients = new Clients("http://localhost:8080/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient, myOpenIdClient);
+        return clients;
+      }
+    }
+    
+### Define the "callback filter"
+
+To handle callback from providers, you need to define the appropriate J2E filter and its mapping :
+
+    &lt;filter&gt;
+      &lt;filter-name&gt;CallbackFilter&lt;/filter-name&gt;
+      &lt;filter-class&gt;org.pac4j.j2e.filter.CallbackFilter&lt;/filter-class&gt;
+      &lt;init-param&gt;
+      	&lt;param-name&gt;clientsFactory</param-name&gt;
+      	&lt;param-value&gt;org.leleuj.config.MyClientsFactory</param-value&gt;
+      &lt;/init-param&gt;
+      &lt;init-param&gt;
+      	&lt;param-name&gt;defaultUrl&lt;/param-name&gt;
+      	&lt;param-value&gt;/&lt;/param-value&gt;
+      &lt;/init-param&gt;
+    &lt;/filter&gt;
+    &lt;filter-mapping&gt;
+      &lt;filter-name&gt;CallbackFilter&lt;/filter-name&gt;
+      &lt;url-pattern&gt;/callback&lt;/url-pattern&gt;
+      &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
+    &lt;/filter-mapping&gt;
+
+### Protect the urls
+
+You can protect your urls and force the user to be authenticated by a client by using the appropriate filter and mapping. Key parameters are all the clients and the specific client (*clientName*) used by this filter.  
+For example, for Facebook :
+
+    &lt;filter&gt;
+      &lt;filter-name&gt;FacebookFilter&lt;/filter-name&gt;
+      &lt;filter-class&gt;org.pac4j.j2e.filter.RequiresAuthenticationFilter&lt;/filter-class&gt;
+      &lt;init-param&gt;
+       	&lt;param-name&gt;clientsFactory&lt;/param-name&gt;
+       	&lt;param-value&gt;org.leleuj.config.MyClientsFactory&lt;/param-value&gt;
+      &lt;/init-param&gt;
+      &lt;init-param&gt;
+       	&lt;param-name&gt;clientName&lt;/param-name&gt;
+       	&lt;param-value&gt;FacebookClient&lt;/param-value&gt;
+      &lt;/init-param&gt;
+    &lt;/filter&gt;
+    &lt;filter-mapping&gt;
+      &lt;filter-name&gt;FacebookFilter&lt;/filter-name&gt;
+      &lt;url-pattern&gt;/facebook/*&lt;/url-pattern&gt;
+      &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
+    &lt;/filter-mapping&gt;
+
