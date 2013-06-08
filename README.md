@@ -70,19 +70,19 @@ For example, to add OAuth support, add the following XML snippet :
 
 As these snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate repository must be added in the *pom.xml* file also :
 
-    &lt;repositories&gt;
-      &lt;repository&gt;
-        &lt;id&gt;sonatype-nexus-snapshots&lt;/id&gt;
-        &lt;name&gt;Sonatype Nexus Snapshots&lt;/name&gt;
-        &lt;url&gt;https://oss.sonatype.org/content/repositories/snapshots&lt;/url&gt;
-        &lt;releases&gt;
-          &lt;enabled&gt;false&lt;/enabled&gt;
-        &lt;/releases&gt;
-        &lt;snapshots&gt;
-          &lt;enabled&gt;true&lt;/enabled&gt;
-        &lt;/snapshots&gt;
-      &lt;/repository&gt;
-    &lt;/repositories&gt;
+    <repositories>
+      <repository>
+        <id>sonatype-nexus-snapshots</id>
+        <name>Sonatype Nexus Snapshots</name>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+          <enabled>false</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
 
 ### Define the clients
 
