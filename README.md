@@ -111,44 +111,86 @@ All the clients used to communicate with various providers (Facebook, Twitter, a
 
 To handle callback from providers, you need to define the appropriate J2E filter and its mapping :
 
-    &lt;filter&gt;
-      &lt;filter-name&gt;CallbackFilter&lt;/filter-name&gt;
-      &lt;filter-class&gt;org.pac4j.j2e.filter.CallbackFilter&lt;/filter-class&gt;
-      &lt;init-param&gt;
-      	&lt;param-name&gt;clientsFactory</param-name&gt;
-      	&lt;param-value&gt;org.leleuj.config.MyClientsFactory</param-value&gt;
-      &lt;/init-param&gt;
-      &lt;init-param&gt;
-      	&lt;param-name&gt;defaultUrl&lt;/param-name&gt;
-      	&lt;param-value&gt;/&lt;/param-value&gt;
-      &lt;/init-param&gt;
-    &lt;/filter&gt;
-    &lt;filter-mapping&gt;
-      &lt;filter-name&gt;CallbackFilter&lt;/filter-name&gt;
-      &lt;url-pattern&gt;/callback&lt;/url-pattern&gt;
-      &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
-    &lt;/filter-mapping&gt;
+    <filter>
+      <filter-name>CallbackFilter</filter-name>
+      <filter-class>org.pac4j.j2e.filter.CallbackFilter</filter-class>
+      <init-param>
+      	<param-name>clientsFactory</param-name>
+      	<param-value>org.leleuj.config.MyClientsFactory</param-value>
+      </init-param>
+      <init-param>
+      	<param-name>defaultUrl</param-name>
+      	<param-value>/</param-value>
+      </init-param>
+    </filter>
+    <filter-mapping>
+      <filter-name>CallbackFilter</filter-name>
+      <url-pattern>/callback</url-pattern>
+      <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
 
 ### Protect the urls
 
 You can protect your urls and force the user to be authenticated by a client by using the appropriate filter and mapping. Key parameters are all the clients and the specific client (*clientName*) used by this filter.  
 For example, for Facebook :
 
-    &lt;filter&gt;
-      &lt;filter-name&gt;FacebookFilter&lt;/filter-name&gt;
-      &lt;filter-class&gt;org.pac4j.j2e.filter.RequiresAuthenticationFilter&lt;/filter-class&gt;
-      &lt;init-param&gt;
-       	&lt;param-name&gt;clientsFactory&lt;/param-name&gt;
-       	&lt;param-value&gt;org.leleuj.config.MyClientsFactory&lt;/param-value&gt;
-      &lt;/init-param&gt;
-      &lt;init-param&gt;
-       	&lt;param-name&gt;clientName&lt;/param-name&gt;
-       	&lt;param-value&gt;FacebookClient&lt;/param-value&gt;
-      &lt;/init-param&gt;
-    &lt;/filter&gt;
-    &lt;filter-mapping&gt;
-      &lt;filter-name&gt;FacebookFilter&lt;/filter-name&gt;
-      &lt;url-pattern&gt;/facebook/*&lt;/url-pattern&gt;
-      &lt;dispatcher&gt;REQUEST&lt;/dispatcher&gt;
-    &lt;/filter-mapping&gt;
+    <filter>
+      <filter-name>FacebookFilter</filter-name>
+      <filter-class>org.pac4j.j2e.filter.RequiresAuthenticationFilter</filter-class>
+      <init-param>
+       	<param-name>clientsFactory</param-name>
+       	<param-value>org.leleuj.config.MyClientsFactory</param-value>
+      </init-param>
+      <init-param>
+       	<param-name>clientName</param-name>
+       	<param-value>FacebookClient</param-value>
+      </init-param>
+    </filter>
+    <filter-mapping>
+      <filter-name>FacebookFilter</filter-name>
+      <url-pattern>/facebook/*</url-pattern>
+      <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
 
+### Get redirection urls
+
+You can also explicitely compute a redirection url to a provider for authentication by using the *getRedirectionUrl* method and the *ClientsConfiguration* class. For example with Facebook :
+
+    <%
+	  WebContext context = new J2EContext(request, response);
+	  Clients client = ClientsConfiguration.getClients();
+	  FacebookClient fbClient = (FacebookClient) client.findClient("FacebookClient");
+	  String redirectionUrl = Client.getRedirectionUrl(context);
+	%>
+
+### Get the user profile
+
+After successful authentication, you can test if the user is authenticated using ```UserUtils.isAuthenticated()``` or get the user profile using ```UserUtils.getUserProfile()```.
+
+The profile returned is a *CommonProfile*, from which you can retrieve the most common properties that all profiles share. 
+But you can also cast the user profile to the appropriate profile according to the provider used for authentication.
+For example, after a Facebook authentication :
+ 
+    // facebook profile
+    FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
+
+Or for all the OAuth 1.0/2.0 profiles, to get the access token :
+    
+    OAuth10Profile oauthProfile = (OAuth10Profile) commonProfile
+    String accessToken = oauthProfile.getAccessToken();
+    // or
+    String accessToken = facebookProfile.getAccessToken();
+
+### Demo
+
+A demo with Facebook, Twitter, CAS, form authentication, basic auth authentication and myopenid.com providers is available with [j2e-pac4j-demo](https://github.com/leleuj/j2e-pac4j-demo).
+
+
+## Versions
+
+The current version **1.0.0-SNAPSHOT** is under development...
+
+
+## Contact
+
+Find me on [LinkedIn](http://www.linkedin.com/in/jleleu) or by email : leleuj@gmail.com
