@@ -62,12 +62,11 @@ If you want to use a specific client support, you need to add the appropriate Ma
 
 For example, to add OAuth support, add the following XML snippet :
 
-```<dependency>
-  <groupId>org.pac4j</groupId>
-  <artifactId>pac4j-oauth</artifactId>
-  <version>1.4.1-SNAPSHOT</version>
-</dependency>
-```
+    <dependency>
+      <groupId>org.pac4j</groupId>
+      <artifactId>pac4j-oauth</artifactId>
+      <version>1.4.1-SNAPSHOT</version>
+    </dependency>
 
 As these snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate repository must be added in the *pom.xml* file also :
 
