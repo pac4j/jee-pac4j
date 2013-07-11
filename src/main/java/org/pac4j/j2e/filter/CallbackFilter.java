@@ -84,8 +84,10 @@ public class CallbackFilter extends ClientsConfigFilter {
             // save that this kind of authentication has already been attempted and returns a null profile
             session.setAttribute(client.getName() + RequiresAuthenticationFilter.ATTEMPTED_AUTHENTICATION_SUFFIX,
                                  "true");
+        } else {
+            // only save profile when it's not null
+            UserUtils.setProfile(session, profile);
         }
-        UserUtils.setProfile(session, profile);
         
         final String requestedUrl = (String) session.getAttribute(RequiresAuthenticationFilter.ORIGINAL_REQUESTED_URL);
         logger.debug("requestedUrl : {}", requestedUrl);
