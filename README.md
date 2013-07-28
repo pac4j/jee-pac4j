@@ -1,7 +1,3 @@
----
-published: false
----
-
 ## What is the j2e-pac4j library ?
 
 The **j2e-pac4j** library is a J2E multi-protocols client.
