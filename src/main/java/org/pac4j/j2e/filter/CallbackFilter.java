@@ -77,7 +77,7 @@ public class CallbackFilter extends ClientsConfigFilter {
         logger.debug("credentials : {}", credentials);
         
         // get user profile
-        final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials);
+        final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, context);
         logger.debug("profile : {}", profile);
         
         if (profile == null) {
