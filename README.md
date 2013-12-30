@@ -162,7 +162,7 @@ You can also explicitely compute a redirection url to a provider for authenticat
 	  WebContext context = new J2EContext(request, response);
 	  Clients client = ClientsConfiguration.getClients();
 	  FacebookClient fbClient = (FacebookClient) client.findClient("FacebookClient");
-	  String redirectionUrl = Client.getRedirectionUrl(context);
+	  String redirectionUrl = Client.getRedirectionUrl(context, false, false);
 	%>
 
 ### Get the user profile

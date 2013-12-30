@@ -80,11 +80,7 @@ public class CallbackFilter extends ClientsConfigFilter {
         final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, context);
         logger.debug("profile : {}", profile);
         
-        if (profile == null) {
-            // save that this kind of authentication has already been attempted and returns a null profile
-            session.setAttribute(client.getName() + RequiresAuthenticationFilter.ATTEMPTED_AUTHENTICATION_SUFFIX,
-                                 "true");
-        } else {
+        if (profile != null) {
             // only save profile when it's not null
             UserUtils.setProfile(session, profile);
         }
