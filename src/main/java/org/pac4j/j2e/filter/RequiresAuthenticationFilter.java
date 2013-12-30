@@ -81,10 +81,9 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
             session.setAttribute(ORIGINAL_REQUESTED_URL, requestedUrl);
             // compute and perform the redirection
             final WebContext context = new J2EContext(request, response);
-            Client<Credentials, CommonProfile> baseClients = ClientsConfiguration.getClients()
-                .findClient(this.clientName);
+            Client<Credentials, CommonProfile> client = ClientsConfiguration.getClients().findClient(this.clientName);
             try {
-                String redirectUrl = baseClients.getRedirectionUrl(context, true, false);
+                String redirectUrl = client.getRedirectionUrl(context, true, false);
                 logger.debug("redirectUrl : {}", redirectUrl);
                 response.sendRedirect(redirectUrl);
             } catch (RequiresHttpAction e) {
