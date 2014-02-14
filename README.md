@@ -1,4 +1,4 @@
-## What is the j2e-pac4j library ?
+## What is the j2e-pac4j library ? [![Build Status](https://travis-ci.org/leleuj/j2e-pac4j.png?branch=master)](https://travis-ci.org/leleuj/j2e-pac4j)
 
 The **j2e-pac4j** library is a J2E multi-protocols client.
 
