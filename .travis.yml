@@ -7,6 +7,6 @@ jdk:
 
 env:
   global:
-  - secure: "cDN6+bwe7NVMjvevGMwk9tdglhGf66yi3nvbnfSgio207FuNG4duF/RNOUOMsuWX1Sc79ZMDuOttZ5AvL3ZHKPtmzTBMvCdDkf1FwFmzU6N+x84rT4zyos+gZLgHbV0M0M28y8aJIJq2kcwiqVwuMBay5tjrpJ8IMPoY6eDl4uE="
-  - secure: "FMcvaLiOywLOlP7HeczaWfjei8B8sZk6ddXiVnFJEVQYq+SlLIqIBfFcCw08DwJ4eW9CyZbF0JGHMbBahj0A/UchQ1kenm9FIklG9oLuTeGwAk4V2Vot2hgVgsYK3k+OIDNd2UOi/Cs+WS3GcyWpfPAj68p0ti5IvZCgV8k2usU="
+  - secure: "VBNeW0ob0Bc8FCQllHaQsRnbKCHZcmdwi3QA13vdn+4g84/601kRv/XvQ4d4gvzKfVNULBzOh9JBM7uZEerrroxRfzVXKjQ0yLjnwkb8zssPNkDNGAg/cOfrUz55bdv5CTwkmVT0iSCu1xoIVqZNKISgwjT4yK0KMb/cOqp8fHo="
+  - secure: "f1qX5i2iXSxYTwrLUlOshzCTHC4YM+FQ2hjM0LOTO6UGGgUB1jvJ58vO4Mob4gfHUlmZt1ULyXmmGbh0H4dxCGQxgiHFiWPMRQ9xeDWapEIq11HPCX7G/E+bt5igThppaVSQ2kNLFn0rCBtBhhYouxQJO+sPm/ANsacCNrU8oHY="
 
