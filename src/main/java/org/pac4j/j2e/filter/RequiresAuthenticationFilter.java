@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.pac4j.core.client.Client;
+import org.pac4j.core.client.RedirectAction;
+import org.pac4j.core.client.RedirectAction.RedirectType;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
@@ -83,9 +85,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
             final WebContext context = new J2EContext(request, response);
             Client<Credentials, CommonProfile> client = ClientsConfiguration.getClients().findClient(this.clientName);
             try {
-                String redirectUrl = client.getRedirectionUrl(context, true, false);
-                logger.debug("redirectUrl : {}", redirectUrl);
-                response.sendRedirect(redirectUrl);
+                client.redirect(context, true, false);
             } catch (RequiresHttpAction e) {
                 logger.debug("extra HTTP action required : {}", e.getCode());
             }
