@@ -43,29 +43,28 @@ import org.slf4j.LoggerFactory;
  * @since 1.0.0
  */
 public class RequiresAuthenticationFilter extends ClientsConfigFilter {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RequiresAuthenticationFilter.class);
-    
+
     public final static String ORIGINAL_REQUESTED_URL = "pac4jOriginalRequestedUrl";
-    
+
     private String clientName;
-    
+
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         super.init(filterConfig);
         this.clientName = filterConfig.getInitParameter("clientName");
         CommonHelper.assertNotBlank("clientName", this.clientName);
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
-                                  final HttpSession session, final FilterChain chain) throws IOException,
-        ServletException {
-        
+            final HttpSession session, final FilterChain chain) throws IOException, ServletException {
+
         final CommonProfile profile = UserUtils.getProfile(request);
         logger.debug("profile : {}", profile);
-        
+
         // profile not null, already authenticated -> access
         if (profile != null) {
             chain.doFilter(request, response);
@@ -83,9 +82,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
             final WebContext context = new J2EContext(request, response);
             Client<Credentials, CommonProfile> client = ClientsConfiguration.getClients().findClient(this.clientName);
             try {
-                String redirectUrl = client.getRedirectionUrl(context, true, false);
-                logger.debug("redirectUrl : {}", redirectUrl);
-                response.sendRedirect(redirectUrl);
+                client.redirect(context, true, false);
             } catch (RequiresHttpAction e) {
                 logger.debug("extra HTTP action required : {}", e.getCode());
             }

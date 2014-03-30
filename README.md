@@ -2,12 +2,13 @@
 
 The **j2e-pac4j** library is a J2E multi-protocols client.
 
-It supports these 4 protocols on client side :
+It supports these 5 protocols on client side :
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
-4. OpenID.
+4. OpenID
+5. SAML (2.0) (*still experimental*).
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
 
@@ -33,6 +34,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
 <tr><td>Google</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
+<tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
 </table>
 
 
@@ -61,7 +63,8 @@ If you want to use a specific client support, you need to add the appropriate Ma
 * for OAuth support, the *pac4j-oauth* dependency is required
 * for CAS support, the *pac4j-cas* dependency is required
 * for HTTP support, the *pac4j-http* dependency is required
-* for OpenID support, the *pac4j-openid* dependency is required.
+* for OpenID support, the *pac4j-openid* dependency is required
+* for SAML support, the *pac4j-saml* dependency is required.
 
 For example, to add OAuth support, add the following XML snippet :
 
