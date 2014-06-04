@@ -202,7 +202,7 @@ The last released version is the **1.0.3** :
     <dependency>
         <groupId>org.pac4j</groupId>
         <artifactId>j2e-pac4j</artifactId>
-        <version>1.0.2</version>
+        <version>1.0.3</version>
     </dependency>
 
 See the [release notes](https://github.com/leleuj/j2e-pac4j/wiki/Release-Notes).
