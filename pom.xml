@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
-            <version>1.5.1</version>
+            <version>1.6.0-RC2-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
