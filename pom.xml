@@ -27,7 +27,7 @@
     <artifactId>j2e-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>J2E pac4j</name>
-    <version>1.0.4</version>
+    <version>1.0.5-SNAPSHOT</version>
     <description>J2E multi protocols (CAS, OAuth, OpenID, HTTP...) client</description>
     <url>https://github.com/leleuj/j2e-pac4j</url>
 
