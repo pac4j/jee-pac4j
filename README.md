@@ -2,13 +2,14 @@
 
 The **j2e-pac4j** library is a J2E multi-protocols client.
 
-It supports these 5 protocols on client side :
+It supports these 6 authentication mechanisms on client side :
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
 4. OpenID
-5. SAML (2.0) (*still experimental*).
+5. SAML (2.0) (*still experimental*)
+6. GAE UserService
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
 
@@ -75,7 +76,7 @@ For example, to add OAuth support, add the following XML snippet :
     <dependency>
       <groupId>org.pac4j</groupId>
       <artifactId>pac4j-oauth</artifactId>
-      <version>1.5.1</version>
+      <version>1.6.0</version>
     </dependency>
 
 As these snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate repository must be added in the *pom.xml* file also :
@@ -198,14 +199,14 @@ A demo with Facebook, Twitter, CAS, form authentication and basic auth authentic
 
 ## Versions
 
-The current version **1.0.4-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
+The current version **1.0.5-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
 
-The last released version is the **1.0.3** :
+The last released version is the **1.0.4** :
 
     <dependency>
         <groupId>org.pac4j</groupId>
         <artifactId>j2e-pac4j</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
     </dependency>
 
 See the [release notes](https://github.com/leleuj/j2e-pac4j/wiki/Release-Notes).
