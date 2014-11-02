@@ -8,7 +8,7 @@ It supports these 6 authentication mechanisms on client side :
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
 4. OpenID
-5. SAML (2.0) (*still experimental*)
+5. SAML (2.0)
 6. GAE UserService
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
@@ -69,7 +69,8 @@ If you want to use a specific client support, you need to add the appropriate Ma
 * for CAS support, the *pac4j-cas* dependency is required
 * for HTTP support, the *pac4j-http* dependency is required
 * for OpenID support, the *pac4j-openid* dependency is required
-* for SAML support, the *pac4j-saml* dependency is required.
+* for SAML support, the *pac4j-saml* dependency is required
+* for Google App Engine support, the *pac4j-gae* dependency is required.
 
 For example, to add OAuth support, add the following XML snippet :
 
