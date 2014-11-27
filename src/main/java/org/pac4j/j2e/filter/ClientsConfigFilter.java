@@ -25,7 +25,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.j2e.configuration.ClientsConfiguration;
@@ -37,27 +36,25 @@ import org.pac4j.j2e.configuration.ClientsConfiguration;
  * @since 1.0.0
  */
 public abstract class ClientsConfigFilter implements Filter {
-    
+
     public void init(final FilterConfig filterConfig) throws ServletException {
         final String clientsFactory = filterConfig.getInitParameter("clientsFactory");
         CommonHelper.assertNotBlank("clientsFactory", clientsFactory);
         ClientsConfiguration.build(clientsFactory);
         CommonHelper.assertNotNull("clients", ClientsConfiguration.getClients());
     }
-    
+
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
-        throws IOException, ServletException {
+            throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse resp = (HttpServletResponse) response;
-        final HttpSession session = req.getSession(true);
-        
-        internalFilter(req, resp, session, chain);
+
+        internalFilter(req, resp, chain);
     }
-    
+
     protected abstract void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
-                                           final HttpSession session, final FilterChain chain) throws IOException,
-        ServletException;
-    
+            final FilterChain chain) throws IOException, ServletException;
+
     public void destroy() {
     }
 }
