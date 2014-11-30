@@ -126,10 +126,10 @@ All the clients used to communicate with various providers (Facebook, Twitter, a
 Pac4j was initially designed to provide authentication flows for web applications. This means it relies on a session concept and on HTTP redirections: this is the statefull mode and it is activated by default.
 In this mode, you need to configure what we call the callback filter in order to finish the authentication process.
 
-Since j2e-pac4j version 1.1.0, we support now a stateless mode. This can be typically used to protect REST WS where a single HTTP call must be enough to retrieve the resource.
+Since **j2e-pac4j version 1.1.0**, we support now a stateless mode. This can be typically used to protect REST WS where a single HTTP call must be enough to retrieve the resource.
 A good example of stateless authentication is the basic-auth method where the browser includes in all requests the HTTP Authorization header with the login and password base64 encoded.
 
-Statefull mode:
+## I. Statefull mode
 
 #### Define the "callback filter"
 
@@ -205,9 +205,9 @@ Or for all the OAuth 1.0/2.0 profiles, to get the access token :
     // or
     String accessToken = facebookProfile.getAccessToken();
 
-Stateless mode:
+## II. Stateless mode
 
-In this mode, you need just to protect your resources with the ClientAuthenticationFilter filter and configure the 'stateless' parameter to true.
+In this mode, you need just to protect your resources with the `ClientAuthenticationFilter` filter and configure the `stateless` parameter to true.
 
     <filter>
       <filter-name>StatelessBasicAuthFilter</filter-name>
@@ -233,18 +233,19 @@ In this mode, you need just to protect your resources with the ClientAuthenticat
 
 #### Get the user profile
 
-After successful authentication, you can get the user profile from the HttpServletRequest object with the attribute .
+After successful authentication, you can get the user profile from the `HttpServletRequest` object with the attribute `HttpConstants.USER_PROFILE`.
 
-    request.getAttribute();
+    request.getAttribute(HttpConstants.USER_PROFILE);
 
 ### Handling authorization
 
-When you protect a resource with the ClientAuthenticationFilter, you can also restrict its access to predefined roles depending on the user profiles.
+When you protect a resource with the `ClientAuthenticationFilter`, you can also restrict its access to predefined roles depending on the user profiles.
 You can use two parameters for that:
-1. requireAnyRole
-2. requireAllRoles
 
-For example if you want to restrict the access to the user having the role ROLE_ADMIN:
+1. **requireAnyRole**
+2. **requireAllRoles**
+
+For example if you want to restrict the access to the user having the role **ROLE_ADMIN**:
 
     <filter>
       <filter-name>StatelessBasicAuthFilter</filter-name>
