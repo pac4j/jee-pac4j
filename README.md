@@ -50,16 +50,21 @@ This library has **only 6 classes** :
 1. the **ClientConfiguration** class gathers all the clients configuration
 2. the **ClientFactory** is the interface to implement to define the clients
 3. the **ClientsConfigFilter** is an abstract J2E filter in charge of loading clients configuration
-4. the **ClientAuthenticationFilter** is a J2E filter to protect urls and requires authentication for them. The filter has a statefull or stateless mode.
+4. the **RequiresAuthenticationFilter** is a J2E filter to protect urls and requires authentication for them. The filter has a stateful or stateless mode.
 5. the **CallbackFilter** is a J2E filter to handle the callback of the provider after authentication to finish the authentication process
 6. the **UserUtils** is an helper class to know if the user is authenticated, his profile and log out him.
-
-Note: the **RequiresAuthenticationFilter** is a deprecated filter and you should use the **ClientAuthenticationFilter** instead. It is still present for compatibility reasons.
 
 and is based on the <i>pac4j-*</i> libraries.
 
 Learn more by browsing the [j2e-pac4j Javadoc](http://www.pac4j.org/apidocs/j2e-pac4j/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
 
+### Sequence diagram of the RequiresAuthenticationFilter
+
+<img src="http://www.pac4j.org/img/pac4j-requires-authentication.jpg" />
+
+### Sequence diagram of the CallbackFilter
+
+<img src="http://www.pac4j.org/img/pac4j-callback.jpg" />
 
 ## How to use it ?
 
@@ -121,15 +126,15 @@ All the clients used to communicate with various providers (Facebook, Twitter, a
       }
     }
     
-### Choose between statefull or stateless mode
+### Choose between stateful or stateless mode
 
-Pac4j was initially designed to provide authentication flows for web applications. This means it relies on a session concept and on HTTP redirections: this is the statefull mode and it is activated by default.
+Pac4j was initially designed to provide authentication flows for web applications. This means it relies on a session concept and on HTTP redirections: this is the stateful mode and it is activated by default.
 In this mode, you need to configure what we call the callback filter in order to finish the authentication process.
 
 Since **j2e-pac4j version 1.1.0**, we support now a stateless mode. This can be typically used to protect REST WS where a single HTTP call must be enough to retrieve the resource.
 A good example of stateless authentication is the basic-auth method where the browser includes in all requests the HTTP Authorization header with the login and password base64 encoded.
 
-## I. Statefull mode
+## I. stateful mode
 
 #### Define the "callback filter"
 
@@ -211,7 +216,7 @@ In this mode, you need just to protect your resources with the `ClientAuthentica
 
     <filter>
       <filter-name>StatelessBasicAuthFilter</filter-name>
-      <filter-class>org.pac4j.j2e.filter.ClientAuthenticationFilter</filter-class>
+      <filter-class>org.pac4j.j2e.filter.RequiresAuthenticationFilter</filter-class>
       <init-param>
        	<param-name>clientsFactory</param-name>
        	<param-value>org.leleuj.config.MyClientsFactory</param-value>
@@ -233,9 +238,7 @@ In this mode, you need just to protect your resources with the `ClientAuthentica
 
 #### Get the user profile
 
-After successful authentication, you can get the user profile from the `HttpServletRequest` object with the attribute `HttpConstants.USER_PROFILE`.
-
-    request.getAttribute(HttpConstants.USER_PROFILE);
+After successful authentication, you can test if the user is authenticated using ```UserUtils.isAuthenticated()``` or get the user profile using ```UserUtils.getUserProfile()```.
 
 ### Handling authorization
 
@@ -249,7 +252,7 @@ For example if you want to restrict the access to the user having the role **ROL
 
     <filter>
       <filter-name>StatelessBasicAuthFilter</filter-name>
-      <filter-class>org.pac4j.j2e.filter.ClientAuthenticationFilter</filter-class>
+      <filter-class>org.pac4j.j2e.filter.RequiresAuthenticationFilter</filter-class>
       <init-param>
        	<param-name>clientsFactory</param-name>
        	<param-value>org.leleuj.config.MyClientsFactory</param-value>
@@ -273,7 +276,6 @@ Of course you need also to configure a correct AuthorizationGenerator (see [auth
 ### Demo
 
 A demo with Facebook, Twitter, CAS, form authentication and basic auth authentication providers is available with [j2e-pac4j-demo](https://github.com/leleuj/j2e-pac4j-demo).
-
 
 ## Versions
 

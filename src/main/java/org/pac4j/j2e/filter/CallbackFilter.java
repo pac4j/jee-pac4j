@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public class CallbackFilter extends ClientAuthenticationFilter {
+public class CallbackFilter extends RequiresAuthenticationFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(CallbackFilter.class);
 
