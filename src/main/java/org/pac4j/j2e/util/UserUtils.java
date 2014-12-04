@@ -18,6 +18,7 @@ package org.pac4j.j2e.util;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.profile.CommonProfile;
 
 /**
@@ -27,9 +28,7 @@ import org.pac4j.core.profile.CommonProfile;
  * @since 1.0.0
  */
 public class UserUtils {
-    
-    private final static String PAC4J_PROFILE = "pac4jProfile";
-    
+
     /**
      * Return if the user is authenticated.
      * 
@@ -39,7 +38,7 @@ public class UserUtils {
     public static boolean isAuthenticated(final HttpServletRequest request) {
         return getProfile(request) != null;
     }
-    
+
     /**
      * Return if the user is authenticated.
      * 
@@ -49,17 +48,18 @@ public class UserUtils {
     public static boolean isAuthenticated(final HttpSession session) {
         return getProfile(session) != null;
     }
-    
+
     /**
-     * Read the profile from the request.
+     * Read the profile from the request (stateless mode) or from the session if none is found (stateful mode).
      * 
      * @param request
      * @return the user profile
      */
     public static CommonProfile getProfile(final HttpServletRequest request) {
-        return getProfile(request.getSession(false));
+        CommonProfile profile = (CommonProfile) request.getAttribute(HttpConstants.USER_PROFILE);
+        return (profile != null) ? profile : getProfile(request.getSession(false));
     }
-    
+
     /**
      * Read the profile from the session.
      * 
@@ -68,21 +68,39 @@ public class UserUtils {
      */
     public static CommonProfile getProfile(final HttpSession session) {
         if (session != null) {
-            return (CommonProfile) session.getAttribute(PAC4J_PROFILE);
+            return (CommonProfile) session.getAttribute(HttpConstants.USER_PROFILE);
         }
         return null;
     }
-    
+
     /**
+     * Save the profile in the request if stateless or in the session otherwise.
+     * 
+     * @param request
+     * @param profile
+     * @param stateless
+     */
+    public static void setProfile(final HttpServletRequest request, final CommonProfile profile, boolean stateless) {
+        if (stateless) {
+            request.setAttribute(HttpConstants.USER_PROFILE, profile);
+        } else {
+            setProfile(request.getSession(true), profile);
+        }
+    }
+
+    /**
+     * Use setProfile(request, profile, stateless) instead.
+     * 
      * Save the profile in session.
      * 
      * @param request
      * @param profile
      */
+    @Deprecated
     public static void setProfile(final HttpServletRequest request, final CommonProfile profile) {
         setProfile(request.getSession(true), profile);
     }
-    
+
     /**
      * Save the profile in session.
      * 
@@ -90,9 +108,9 @@ public class UserUtils {
      * @param profile
      */
     public static void setProfile(final HttpSession session, final CommonProfile profile) {
-        session.setAttribute(PAC4J_PROFILE, profile);
+        session.setAttribute(HttpConstants.USER_PROFILE, profile);
     }
-    
+
     /**
      * Logout the user.
      * 
@@ -101,7 +119,7 @@ public class UserUtils {
     public static void logout(final HttpServletRequest request) {
         setProfile(request, null);
     }
-    
+
     /**
      * Logout the user.
      * 
