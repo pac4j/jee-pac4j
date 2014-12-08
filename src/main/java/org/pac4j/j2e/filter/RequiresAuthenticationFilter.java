@@ -232,7 +232,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
         Client<Credentials, CommonProfile> client = ClientsConfiguration.getClients()
                 .findClient(getClientName(context));
         try {
-            client.redirect(context, true, false);
+            client.redirect(context, true);
         } catch (RequiresHttpAction e) {
             logger.debug("extra HTTP action required : {}", e.getCode());
         }
