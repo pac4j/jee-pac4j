@@ -56,6 +56,8 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
 
     private boolean stateless = false;
 
+    private boolean isAjax = false;
+
     private String requireAnyRole;
 
     private String requireAllRoles;
@@ -68,8 +70,12 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
         if (statelessParam != null) {
             stateless = Boolean.parseBoolean(statelessParam);
         }
-        this.requireAnyRole = filterConfig.getInitParameter("requireAnyRole");
-        this.requireAllRoles = filterConfig.getInitParameter("requireAllRoles");
+        String isAjaxParam = filterConfig.getInitParameter("isAjax");
+        if (isAjaxParam != null) {
+            isAjax = Boolean.parseBoolean(isAjaxParam);
+        }
+        requireAnyRole = filterConfig.getInitParameter("requireAnyRole");
+        requireAllRoles = filterConfig.getInitParameter("requireAllRoles");
     }
 
     @Override
@@ -159,7 +165,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
      * @return
      */
     protected boolean hasAccess(CommonProfile profile, HttpServletRequest request) {
-        return profile.hasAccess(this.requireAnyRole, this.requireAllRoles);
+        return profile.hasAccess(requireAnyRole, requireAllRoles);
     }
 
     /**
@@ -183,7 +189,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
             // keep the current url
             saveOriginalUrl(request);
             // compute and perform the redirection
-            redirectToIdentityProvider(context);
+            redirectToIdentityProvider(request, context);
         }
     }
 
@@ -215,24 +221,30 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
     }
 
     protected void saveOriginalUrl(HttpServletRequest request) {
-        String requestedUrl = request.getRequestURL().toString();
-        String queryString = request.getQueryString();
-        if (CommonHelper.isNotBlank(queryString)) {
-            requestedUrl += "?" + queryString;
+        if (!isAjaxRequest(request)) {
+            String requestedUrl = request.getRequestURL().toString();
+            String queryString = request.getQueryString();
+            if (CommonHelper.isNotBlank(queryString)) {
+                requestedUrl += "?" + queryString;
+            }
+            logger.debug("requestedUrl : {}", requestedUrl);
+            request.getSession(true).setAttribute(HttpConstants.REQUESTED_URL, requestedUrl);
         }
-        logger.debug("requestedUrl : {}", requestedUrl);
-        request.getSession(true).setAttribute(HttpConstants.REQUESTED_URL, requestedUrl);
     }
 
     protected String retrieveOriginalUrl(HttpServletRequest request) {
         return (String) request.getSession(true).getAttribute(HttpConstants.REQUESTED_URL);
     }
 
-    private void redirectToIdentityProvider(WebContext context) {
+    protected boolean isAjaxRequest(HttpServletRequest request) {
+        return isAjax;
+    }
+
+    private void redirectToIdentityProvider(HttpServletRequest request, WebContext context) {
         Client<Credentials, CommonProfile> client = ClientsConfiguration.getClients()
                 .findClient(getClientName(context));
         try {
-            client.redirect(context, true);
+            client.redirect(context, true, isAjaxRequest(request));
         } catch (RequiresHttpAction e) {
             logger.debug("extra HTTP action required : {}", e.getCode());
         }
@@ -244,7 +256,7 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
      * @return
      */
     private boolean isStateless() {
-        return this.stateless;
+        return stateless;
     }
 
     /**
