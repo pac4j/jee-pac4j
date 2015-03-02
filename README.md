@@ -1,4 +1,4 @@
-## What is the j2e-pac4j library ? [![Build Status](https://travis-ci.org/leleuj/j2e-pac4j.png?branch=master)](https://travis-ci.org/leleuj/j2e-pac4j)
+## What is the j2e-pac4j library ? [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j)
 
 The **j2e-pac4j** library is a J2E multi-protocols authentication and authorization client.
 
@@ -11,7 +11,7 @@ It supports these 6 authentication mechanisms on client side :
 5. SAML (2.0)
 6. GAE UserService
 
-It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
+It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
 
 ## Providers supported
@@ -271,11 +271,11 @@ For example if you want to restrict the access to the user having the role **ROL
       </init-param>
     </filter>
 
-Of course you need also to configure a correct AuthorizationGenerator (see [authorizations](https://github.com/leleuj/pac4j#authorizations)). 
+Of course you need also to configure a correct AuthorizationGenerator (see [authorizations](https://github.com/pac4j/pac4j#authorizations)). 
 
 ### Demo
 
-A demo with Facebook, Twitter, CAS, form authentication and basic auth authentication providers is available with [j2e-pac4j-demo](https://github.com/leleuj/j2e-pac4j-demo).
+A demo with Facebook, Twitter, CAS, form authentication and basic auth authentication providers is available with [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo).
 
 ## Versions
 
@@ -289,7 +289,7 @@ The last released version is the **1.0.4** :
         <version>1.0.4</version>
     </dependency>
 
-See the [release notes](https://github.com/leleuj/j2e-pac4j/wiki/Release-Notes).
+See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes).
 
 
 ## Contact
