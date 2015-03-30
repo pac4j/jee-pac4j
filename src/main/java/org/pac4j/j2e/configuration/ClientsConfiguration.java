@@ -16,6 +16,7 @@
 package org.pac4j.j2e.configuration;
 
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.ClientsFactory;
 
 /**
  * This class represents the configuration of all clients.
@@ -39,7 +40,7 @@ public final class ClientsConfiguration {
             try {
                 final Class<ClientsFactory> clazz = (Class<ClientsFactory>) Class.forName(name);
                 final ClientsFactory factory = clazz.newInstance();
-                clients = factory.build();
+                clients = factory.build(null);
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
