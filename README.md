@@ -45,14 +45,13 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 
 ## Technical description
 
-This library has **only 6 classes** :
+This library has **only 5 classes** :
 
 1. the **ClientConfiguration** class gathers all the clients configuration
-2. the **ClientFactory** is the interface to implement to define the clients
-3. the **ClientsConfigFilter** is an abstract J2E filter in charge of loading clients configuration
-4. the **RequiresAuthenticationFilter** is a J2E filter to protect urls and requires authentication for them. The filter has a stateful or stateless mode.
-5. the **CallbackFilter** is a J2E filter to handle the callback of the provider after authentication to finish the authentication process
-6. the **UserUtils** is an helper class to know if the user is authenticated, his profile and log out him.
+2. the **ClientsConfigFilter** is an abstract J2E filter in charge of loading clients configuration
+3. the **RequiresAuthenticationFilter** is a J2E filter to protect urls and requires authentication for them. The filter has a stateful or stateless mode.
+4. the **CallbackFilter** is a J2E filter to handle the callback of the provider after authentication to finish the authentication process
+5. the **UserUtils** is an helper class to know if the user is authenticated, his profile and log out him.
 
 and is based on the <i>pac4j-*</i> libraries.
 
@@ -105,12 +104,12 @@ As these snapshot dependencies are only available in the [Sonatype snapshots rep
 
 ### Define the clients
 
-All the clients used to communicate with various providers (Facebook, Twitter, a CAS server...) must be defined in a specific class implementing the *org.pac4j.j2e.configuration.ClientsFactory* interface. For example :
+All the clients used to communicate with various providers (Facebook, Twitter, a CAS server...) must be defined in a specific class implementing the *org.pac4j.core.client.ClientsFactory* interface. For example :
 
     public class MyClientsFactory implements ClientsFactory {
       
       @Override
-      public Clients build() {
+      public Clients build(final Object env) {
         final FacebookClient facebookClient = new FacebookClient("fbkey", "fbsecret");
         final TwitterClient twitterClient = new TwitterClient("twkey", "twsecret");
         // HTTP
