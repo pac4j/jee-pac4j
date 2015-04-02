@@ -2,7 +2,7 @@
 
 The **j2e-pac4j** library is a J2E multi-protocols authentication and authorization client.
 
-It supports these 6 authentication mechanisms on client side :
+It supports these 7 authentication mechanisms on client side (redirection back and forth to an identity provider for login):
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
@@ -10,6 +10,9 @@ It supports these 6 authentication mechanisms on client side :
 4. OpenID
 5. SAML (2.0)
 6. GAE UserService
+7. OpenID Connect (1.0).
+
+as well as REST calls (direct access to the web application).
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
@@ -40,6 +43,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
 <tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
 <tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
+<tr><td>OpenID Connect Provider</td><td>OpenID Connect 1.0</td><td>pac4j-oidc</td><td>OidcClient</td><td>OidcProfile</td></tr>
 </table>
 
 
@@ -76,14 +80,15 @@ If you want to use a specific client support, you need to add the appropriate Ma
 * for HTTP support, the *pac4j-http* dependency is required
 * for OpenID support, the *pac4j-openid* dependency is required
 * for SAML support, the *pac4j-saml* dependency is required
-* for Google App Engine support, the *pac4j-gae* dependency is required.
+* for Google App Engine support, the *pac4j-gae* dependency is required
+* for OpenID Connect support, the *pac4j-oidc* dependency is required.
 
 For example, to add OAuth support, add the following XML snippet :
 
     <dependency>
       <groupId>org.pac4j</groupId>
       <artifactId>pac4j-oauth</artifactId>
-      <version>1.6.0</version>
+      <version>1.7.0</version>
     </dependency>
 
 As these snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate repository must be added in the *pom.xml* file also :
