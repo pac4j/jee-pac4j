@@ -31,7 +31,7 @@ public final class ClientsConfiguration {
     /**
      * Build the clients from the factory name.
      * 
-     * @param name
+     * @param name the client name
      */
     @SuppressWarnings("unchecked")
     public synchronized static void build(final String name) {

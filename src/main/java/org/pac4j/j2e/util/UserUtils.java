@@ -32,7 +32,7 @@ public class UserUtils {
     /**
      * Return if the user is authenticated.
      * 
-     * @param request
+     * @param request the HTTP request
      * @return if the user is authenticated
      */
     public static boolean isAuthenticated(final HttpServletRequest request) {
@@ -42,7 +42,7 @@ public class UserUtils {
     /**
      * Return if the user is authenticated.
      * 
-     * @param session
+     * @param session the HTTP session
      * @return if the user is authenticated
      */
     public static boolean isAuthenticated(final HttpSession session) {
@@ -52,7 +52,7 @@ public class UserUtils {
     /**
      * Read the profile from the request (stateless mode) or from the session if none is found (stateful mode).
      * 
-     * @param request
+     * @param request the HTTP request
      * @return the user profile
      */
     public static CommonProfile getProfile(final HttpServletRequest request) {
@@ -63,7 +63,7 @@ public class UserUtils {
     /**
      * Read the profile from the session.
      * 
-     * @param session
+     * @param session the HTTP session
      * @return the user profile
      */
     public static CommonProfile getProfile(final HttpSession session) {
@@ -76,9 +76,9 @@ public class UserUtils {
     /**
      * Save the profile in the request if stateless or in the session otherwise.
      * 
-     * @param request
-     * @param profile
-     * @param stateless
+     * @param request the HTTP request
+     * @param profile the user profile
+     * @param stateless if the authentication is stateless
      */
     public static void setProfile(final HttpServletRequest request, final CommonProfile profile, boolean stateless) {
         if (stateless) {
@@ -93,8 +93,8 @@ public class UserUtils {
      * 
      * Save the profile in session.
      * 
-     * @param request
-     * @param profile
+     * @param request the HTTP request
+     * @param profile the user profile
      */
     @Deprecated
     public static void setProfile(final HttpServletRequest request, final CommonProfile profile) {
@@ -104,8 +104,8 @@ public class UserUtils {
     /**
      * Save the profile in session.
      * 
-     * @param session
-     * @param profile
+     * @param session the HTTP session
+     * @param profile the user profile
      */
     public static void setProfile(final HttpSession session, final CommonProfile profile) {
         session.setAttribute(HttpConstants.USER_PROFILE, profile);
@@ -114,7 +114,7 @@ public class UserUtils {
     /**
      * Logout the user.
      * 
-     * @param request
+     * @param request the HTTP request
      */
     public static void logout(final HttpServletRequest request) {
         setProfile(request, null);
@@ -123,7 +123,7 @@ public class UserUtils {
     /**
      * Logout the user.
      * 
-     * @param session
+     * @param session the HTTP session
      */
     public static void logout(final HttpSession session) {
         setProfile(session, null);
