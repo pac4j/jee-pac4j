@@ -1,5 +1,5 @@
 /*
-  Copyright 2013 - 2014 Jerome Leleu
+  Copyright 2013 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public final class ClientsConfiguration {
     /**
      * Build the clients from the factory name.
      * 
-     * @param name
+     * @param name the client name
      */
     @SuppressWarnings("unchecked")
     public synchronized static void build(final String name) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright 2013 - 2014 Jerome Leleu
+   Copyright 2013 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
-            <version>1.7.0-SNAPSHOT</version>
+            <version>1.7.0</version>
         </dependency>
 
     </dependencies>

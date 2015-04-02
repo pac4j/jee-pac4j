@@ -1,5 +1,5 @@
 /*
-  Copyright 2013 - 2014 Jerome Leleu
+  Copyright 2013 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -107,11 +107,11 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
      * Retrieve user profile either by looking in the session or trying to authenticate directly
      * if stateless web service.
      * 
-     * @param request
-     * @param response
-     * @param context
-     * @return
-     * @throws RequiresHttpAction
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param context the current web context
+     * @return the current user profile
+     * @throws RequiresHttpAction if an additional HTTP action is required
      */
     protected CommonProfile retrieveUserProfile(HttpServletRequest request, HttpServletResponse response,
             WebContext context) throws RequiresHttpAction {
@@ -127,8 +127,8 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
     /**
      * Save the user profile in session or attach it to the request if stateless web service.
      * 
-     * @param profile
-     * @param request
+     * @param profile the user profile
+     * @param request the HTTP request
      */
     protected void saveUserProfile(CommonProfile profile, HttpServletRequest request) {
         UserUtils.setProfile(request, profile, isStateless());
@@ -138,13 +138,13 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
      * Default authentication success strategy which forward to the next filter if the user
      * has access or returns an access denied error otherwise.
      * 
-     * @param profile
-     * @param request
-     * @param response
-     * @param chain
-     * @param context 
-     * @throws IOException
-     * @throws ServletException
+     * @param profile the user profile
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param chain the filter chain
+     * @param context the current web context
+     * @throws IOException IO exception
+     * @throws ServletException Servlet exception
      */
     protected void authenticationSuccess(CommonProfile profile, HttpServletRequest request,
             HttpServletResponse response, FilterChain chain, WebContext context) throws IOException, ServletException {
@@ -160,9 +160,9 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
      * Returns true if the user defined by the profile has access to the underlying resource
      * depending on the requireAnyRole and requireAllRoles fields.
      * 
-     * @param profile
-     * @param request 
-     * @return
+     * @param profile the user profile
+     * @param request the HTTP request
+     * @return if the user has access
      */
     protected boolean hasAccess(CommonProfile profile, HttpServletRequest request) {
         return profile.hasAccess(requireAnyRole, requireAllRoles);
@@ -172,12 +172,12 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
      * Default authentication failure strategy which generates an unauthorized page if stateless web service
      * or redirect to the authentication provider after saving the original url.
      * 
-     * @param request
-     * @param response
-     * @param chain 
-     * @param context
-     * @throws IOException
-     * @throws ServletException
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param chain the filter chain
+     * @param context the current web context
+     * @throws IOException IO exception
+     * @throws ServletException Servlet exception
      */
     protected void authenticationFailure(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
             WebContext context) throws IOException, ServletException {
@@ -196,11 +196,11 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
     /**
      * Authenticates the current request by getting the credentials and the corresponding user profile.
      * 
-     * @param request
-     * @param response
-     * @param context
-     * @return
-     * @throws RequiresHttpAction
+     * @param request the HTTP request
+     * @param response the HTTP response
+     * @param context the current web context
+     * @return the authenticated user profile
+     * @throws RequiresHttpAction if an additional HTTP action is required
      */
     protected CommonProfile authenticate(HttpServletRequest request, HttpServletResponse response, WebContext context)
             throws RequiresHttpAction {
