@@ -2,7 +2,7 @@
 
 The **j2e-pac4j** library is a J2E multi-protocols authentication and authorization client.
 
-It supports these 7 authentication mechanisms on client side (redirection back and forth to an identity provider for login):
+It supports these 7 authentication mechanisms on client side (stateful, redirection back and forth to an identity provider for login):
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
@@ -12,7 +12,7 @@ It supports these 7 authentication mechanisms on client side (redirection back a
 6. GAE UserService
 7. OpenID Connect (1.0).
 
-as well as REST calls (direct access to the web application).
+as well as stateless REST calls (direct access to the web application with credentials).
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
