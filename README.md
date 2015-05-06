@@ -2,7 +2,7 @@
 
 The **j2e-pac4j** library is a J2E multi-protocols authentication and authorization client.
 
-It supports these 6 authentication mechanisms on client side :
+It supports these 7 authentication mechanisms on client side (stateful, redirection back and forth to an identity provider for login):
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
@@ -10,6 +10,9 @@ It supports these 6 authentication mechanisms on client side :
 4. OpenID
 5. SAML (2.0)
 6. GAE UserService
+7. OpenID Connect (1.0)
+
+as well as stateless REST calls (direct access to the web application with credentials).
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
@@ -41,19 +44,19 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
 <tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
 <tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
+<tr><td>OpenID Connect Provider</td><td>OpenID Connect 1.0</td><td>pac4j-oidc</td><td>OidcClient</td><td>OidcProfile</td></tr>
 </table>
 
 
 ## Technical description
 
-This library has **only 6 classes** :
+This library has **only 5 classes** :
 
 1. the **ClientConfiguration** class gathers all the clients configuration
-2. the **ClientFactory** is the interface to implement to define the clients
-3. the **ClientsConfigFilter** is an abstract J2E filter in charge of loading clients configuration
-4. the **RequiresAuthenticationFilter** is a J2E filter to protect urls and requires authentication for them. The filter has a stateful or stateless mode.
-5. the **CallbackFilter** is a J2E filter to handle the callback of the provider after authentication to finish the authentication process
-6. the **UserUtils** is an helper class to know if the user is authenticated, his profile and log out him.
+2. the **ClientsConfigFilter** is an abstract J2E filter in charge of loading clients configuration
+3. the **RequiresAuthenticationFilter** is a J2E filter to protect urls and requires authentication for them. The filter has a stateful or stateless mode.
+4. the **CallbackFilter** is a J2E filter to handle the callback of the provider after authentication to finish the authentication process
+5. the **UserUtils** is an helper class to know if the user is authenticated, his profile and log out him.
 
 and is based on the <i>pac4j-*</i> libraries.
 
@@ -78,14 +81,15 @@ If you want to use a specific client support, you need to add the appropriate Ma
 * for HTTP support, the *pac4j-http* dependency is required
 * for OpenID support, the *pac4j-openid* dependency is required
 * for SAML support, the *pac4j-saml* dependency is required
-* for Google App Engine support, the *pac4j-gae* dependency is required.
+* for Google App Engine support, the *pac4j-gae* dependency is required
+* for OpenID Connect support, the *pac4j-oidc* dependency is required.
 
 For example, to add OAuth support, add the following XML snippet :
 
     <dependency>
       <groupId>org.pac4j</groupId>
       <artifactId>pac4j-oauth</artifactId>
-      <version>1.6.0</version>
+      <version>1.7.0</version>
     </dependency>
 
 As these snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate repository must be added in the *pom.xml* file also :
@@ -106,12 +110,12 @@ As these snapshot dependencies are only available in the [Sonatype snapshots rep
 
 ### Define the clients
 
-All the clients used to communicate with various providers (Facebook, Twitter, a CAS server...) must be defined in a specific class implementing the *org.pac4j.j2e.configuration.ClientsFactory* interface. For example :
+All the clients used to communicate with various providers (Facebook, Twitter, a CAS server...) must be defined in a specific class implementing the *org.pac4j.core.client.ClientsFactory* interface. For example :
 
     public class MyClientsFactory implements ClientsFactory {
       
       @Override
-      public Clients build() {
+      public Clients build(final Object env) {
         final FacebookClient facebookClient = new FacebookClient("fbkey", "fbsecret");
         final TwitterClient twitterClient = new TwitterClient("twkey", "twsecret");
         // HTTP
@@ -280,14 +284,14 @@ A demo with Facebook, Twitter, CAS, form authentication and basic auth authentic
 
 ## Versions
 
-The current version **1.1.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
+The current version **1.1.1-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
 
-The last released version is the **1.0.4** :
+The last released version is the **1.1.0** :
 
     <dependency>
         <groupId>org.pac4j</groupId>
         <artifactId>j2e-pac4j</artifactId>
-        <version>1.0.4</version>
+        <version>1.1.0</version>
     </dependency>
 
 See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes).

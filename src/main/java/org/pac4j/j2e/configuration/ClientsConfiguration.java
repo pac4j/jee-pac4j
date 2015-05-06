@@ -1,5 +1,5 @@
 /*
-  Copyright 2013 - 2014 Jerome Leleu
+  Copyright 2013 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.pac4j.j2e.configuration;
 
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.ClientsFactory;
 
 /**
  * This class represents the configuration of all clients.
@@ -30,7 +31,7 @@ public final class ClientsConfiguration {
     /**
      * Build the clients from the factory name.
      * 
-     * @param name
+     * @param name the client name
      */
     @SuppressWarnings("unchecked")
     public synchronized static void build(final String name) {
@@ -39,7 +40,7 @@ public final class ClientsConfiguration {
             try {
                 final Class<ClientsFactory> clazz = (Class<ClientsFactory>) Class.forName(name);
                 final ClientsFactory factory = clazz.newInstance();
-                clients = factory.build();
+                clients = factory.build(null);
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
