@@ -10,7 +10,7 @@ It supports these 7 authentication mechanisms on client side (stateful, redirect
 4. OpenID
 5. SAML (2.0)
 6. GAE UserService
-7. OpenID Connect (1.0).
+7. OpenID Connect (1.0)
 
 as well as stateless REST calls (direct access to the web application with credentials).
 
