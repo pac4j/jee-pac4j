@@ -251,9 +251,9 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
     }
 
     /**
-     * Indicates wether this authentication filter protects a stateless web service or not.
+     * Indicates whether this authentication filter protects a stateless web service or not.
      * 
-     * @return
+     * @return whether this authentication filter protects a stateless web service or not
      */
     private boolean isStateless() {
         return stateless;
@@ -269,6 +269,69 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
     private String getClientName(WebContext context) {
         return (clientName != null) ? clientName : context.getRequestParameter(ClientsConfiguration.getClients()
                 .getClientNameParameter());
+    }
+
+    /**
+     * @return the client name
+     */
+    public String getClientName() {
+        return clientName;
+    }
+
+    /**
+     * @param clientName the client name to set
+     */
+    public void setClientName(final String clientName) {
+        this.clientName = clientName;
+    }
+
+    /**
+     * @return whether it's an Ajax filter
+     */
+    public boolean isAjax() {
+        return isAjax;
+    }
+
+    /**
+     * @param isAjax whether it's an Ajax filter
+     */
+    public void setAjax(final boolean isAjax) {
+        this.isAjax = isAjax;
+    }
+
+    /**
+     * @return the roles, any one of which will authorize the user
+     */
+    public String getRequireAnyRole() {
+        return requireAnyRole;
+    }
+
+    /**
+     * @param requireAnyRole the roles to set which will authorize the user who has any of them
+     */
+    public void setRequireAnyRole(final String requireAnyRole) {
+        this.requireAnyRole = requireAnyRole;
+    }
+
+    /**
+     * @return the roles which the user must have all of to be authorized
+     */
+    public String getRequireAllRoles() {
+        return requireAllRoles;
+    }
+
+    /**
+     * @param requireAllRoles the roles to set which will authorize the user who has all of them
+     */
+    public void setRequireAllRoles(final String requireAllRoles) {
+        this.requireAllRoles = requireAllRoles;
+    }
+
+    /**
+     * @param stateless whether this authentication filter protects a stateless web service or not
+     */
+    public void setStateless(final boolean stateless) {
+        this.stateless = stateless;
     }
 
 }
