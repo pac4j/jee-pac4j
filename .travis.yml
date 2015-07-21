@@ -1,6 +1,8 @@
 language: java
 
-script: "mvn deploy -Pjs --settings travis/settings.xml"
+sudo: false
+
+script: "mvn deploy --settings travis/settings.xml"
 
 jdk:
   - oraclejdk7
