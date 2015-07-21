@@ -80,4 +80,18 @@ public class CallbackFilter extends RequiresAuthenticationFilter {
         }
     }
 
+    /**
+     * @return the default callback URL
+     */
+    public String getDefaultUrl() {
+        return defaultUrl;
+    }
+
+    /**
+     * @param defaultUrl the default callback URL to set
+     */
+    public void setDefaultUrl(final String defaultUrl) {
+        this.defaultUrl = defaultUrl;
+    }
+
 }
