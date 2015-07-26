@@ -23,12 +23,15 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pac4j.core.client.Client;
+import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.util.CommonHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This filter handles the callback from the provider to finish the authentication process.
@@ -36,62 +39,61 @@ import org.slf4j.LoggerFactory;
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public class CallbackFilter extends RequiresAuthenticationFilter {
-
-    private static final Logger logger = LoggerFactory.getLogger(CallbackFilter.class);
+public class CallbackFilter extends ClientsConfigFilter {
 
     private String defaultUrl = "/";
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         super.init(filterConfig);
-        this.defaultUrl = filterConfig.getInitParameter("defaultUrl");
+
+        this.defaultUrl = getStringParam(filterConfig, "defaultUrl", this.defaultUrl);
         CommonHelper.assertNotBlank("defaultUrl", this.defaultUrl);
     }
 
     @Override
-    protected CommonProfile retrieveUserProfile(HttpServletRequest request, HttpServletResponse response,
-            WebContext context) throws RequiresHttpAction {
+    protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
+                                           final FilterChain chain) throws IOException, ServletException {
 
-        return super.authenticate(request, response, context);
-    }
+        final WebContext context = new J2EContext(request, response);
+        final ProfileManager manager = new ProfileManager(context);
+        final Client client = getClients().findClient(context);
+        logger.debug("client: {}", client);
+        CommonHelper.assertNotNull("client", client);
 
-    @Override
-    protected void authenticationSuccess(CommonProfile profile, HttpServletRequest request,
-            HttpServletResponse response, FilterChain chain, WebContext context) throws IOException, ServletException {
+        final Credentials credentials;
+        try {
+            credentials = client.getCredentials(context);
+        } catch (final RequiresHttpAction e) {
+            logger.debug("extra HTTP action required: {}", e.getCode());
+            return;
+        }
+        logger.debug("credentials: {}", credentials);
 
-        redirectToTarget(request, response);
-    }
+        final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, context);
+        logger.debug("profile: {}", profile);
+        if (profile != null) {
+            manager.save(true, profile);
+        }
 
-    @Override
-    protected void authenticationFailure(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-            WebContext context) throws IOException, ServletException {
-
-        redirectToTarget(request, response);
-    }
-
-    private void redirectToTarget(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        final String requestedUrl = retrieveOriginalUrl(request);
-        logger.debug("requestedUrl : {}", requestedUrl);
+        final String requestedUrl = (String) context.getSessionAttribute(Pac4jConstants.REQUESTED_URL);
+        logger.debug("requestedUrl: {}", requestedUrl);
         if (CommonHelper.isNotBlank(requestedUrl)) {
+            context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, null);
             response.sendRedirect(requestedUrl);
         } else {
             response.sendRedirect(this.defaultUrl);
         }
     }
 
-    /**
-     * @return the default callback URL
-     */
     public String getDefaultUrl() {
-        return defaultUrl;
+        return this.defaultUrl;
     }
 
     /**
-     * @param defaultUrl the default callback URL to set
+     * @param defaultUrl the default URL after authentication
      */
     public void setDefaultUrl(final String defaultUrl) {
         this.defaultUrl = defaultUrl;
     }
-
 }

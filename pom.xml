@@ -26,9 +26,9 @@
     <groupId>org.pac4j</groupId>
     <artifactId>j2e-pac4j</artifactId>
     <packaging>jar</packaging>
-    <name>J2E pac4j</name>
+    <name>J2E pac4j implementation</name>
     <version>1.2.0-SNAPSHOT</version>
-    <description>J2E multi protocols (CAS, OAuth, OpenID, HTTP...) client</description>
+    <description>Authentication/authorization library for J2E based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
     <licenses>
@@ -56,14 +56,14 @@
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.0-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
@@ -73,17 +73,17 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.5.1</version>
+                <version>3.3</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>2.2</version>
+                <version>2.4</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -96,7 +96,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>2.10.3</version>
                 <configuration>
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
