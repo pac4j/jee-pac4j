@@ -26,6 +26,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.ClientsFactory;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.j2e.configuration.ClientsConfiguration;
 
@@ -37,11 +39,19 @@ import org.pac4j.j2e.configuration.ClientsConfiguration;
  */
 public abstract class ClientsConfigFilter implements Filter {
 
+    public final void setClientsFactory(final String clientsFactory) {
+        ClientsConfiguration.build(clientsFactory);
+        CommonHelper.assertNotNull("clients", ClientsConfiguration.getClients());
+    }
+
+    public final Clients getClientsFactory() {
+        return ClientsConfiguration.getClients();
+    }
+
     public void init(final FilterConfig filterConfig) throws ServletException {
         final String clientsFactory = filterConfig.getInitParameter("clientsFactory");
         CommonHelper.assertNotBlank("clientsFactory", clientsFactory);
-        ClientsConfiguration.build(clientsFactory);
-        CommonHelper.assertNotNull("clients", ClientsConfiguration.getClients());
+        setClientsFactory(clientsFactory);
     }
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
