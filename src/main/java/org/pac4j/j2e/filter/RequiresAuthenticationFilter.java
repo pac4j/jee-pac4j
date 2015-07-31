@@ -23,59 +23,67 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pac4j.core.authorization.Authorizer;
+import org.pac4j.core.authorization.IsAuthenticatedAuthorizer;
+import org.pac4j.core.authorization.RequireAllRolesAuthorizer;
+import org.pac4j.core.authorization.RequireAnyRoleAuthorizer;
 import org.pac4j.core.client.Client;
+import org.pac4j.core.client.DirectClient;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.j2e.configuration.ClientsConfiguration;
-import org.pac4j.j2e.util.UserUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * This filter aims to protect a secured resource.<br>
- * It handles both statefull (default) or stateless resources by delegating to a pac4j client.<br>
- *  - If statefull, it relies on the session and on the callback filter to terminate the authentication process.<br>
- *  - If stateless it validates the provided credentials and forward the request to
- * the underlying resource if the authentication succeeds.<br>
- * The filter also handles basic authorization based on two parameters: requireAnyRole and requireAllRoles.
+ * <p>This filter aims to protect a secured (stateful or stateless) resource.</p>
+ * <ul>
+ *  <li>If statefull, it relies on the session and on the callback filter to terminate the authentication process.</li>
+ *  <li>If stateless it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
+ * </ul>
+ * <p>The filter handles authorization based on an <code>Authorizer</code> (possibly built via two parameters: requireAnyRole and requireAllRoles).</p>
  * 
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings("unchecked")
 public class RequiresAuthenticationFilter extends ClientsConfigFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(RequiresAuthenticationFilter.class);
+    protected String clientName;
 
-    private String clientName;
+    protected boolean isAjax = false;
 
-    private boolean stateless = false;
+    protected String requireAnyRole;
 
-    private boolean isAjax = false;
+    protected String requireAllRoles;
 
-    private String requireAnyRole;
+    protected Authorizer authorizer = new IsAuthenticatedAuthorizer();
 
-    private String requireAllRoles;
+    protected boolean useSessionForDirectClient = false;
+
+    protected boolean allowDynamicClientSelection = false;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         super.init(filterConfig);
-        clientName = filterConfig.getInitParameter("clientName");
-        String statelessParam = filterConfig.getInitParameter("stateless");
-        if (statelessParam != null) {
-            stateless = Boolean.parseBoolean(statelessParam);
-        }
-        String isAjaxParam = filterConfig.getInitParameter("isAjax");
-        if (isAjaxParam != null) {
-            isAjax = Boolean.parseBoolean(isAjaxParam);
-        }
-        requireAnyRole = filterConfig.getInitParameter("requireAnyRole");
-        requireAllRoles = filterConfig.getInitParameter("requireAllRoles");
+
+        this.clientName = getStringParam(filterConfig, "clientName", this.clientName);
+        CommonHelper.assertNotNull("clientName", this.clientName);
+
+        this.isAjax = getBooleanParam(filterConfig, "isAjax", this.isAjax);
+
+        setRequireAnyRole(getStringParam(filterConfig, "requireAnyRole", this.requireAnyRole));
+        setRequireAnyRole(getStringParam(filterConfig, "requireAllRoles", this.requireAllRoles));
+        CommonHelper.assertNotNull("authorizer", this.authorizer);
+
+        this.useSessionForDirectClient = getBooleanParam(filterConfig, "useSessionForDirectClient", this.useSessionForDirectClient);
+        this.allowDynamicClientSelection = getBooleanParam(filterConfig, "allowDynamicClientSelection", this.allowDynamicClientSelection);
     }
 
     @Override
@@ -83,255 +91,184 @@ public class RequiresAuthenticationFilter extends ClientsConfigFilter {
             final FilterChain chain) throws IOException, ServletException {
 
         final WebContext context = new J2EContext(request, response);
+        final ProfileManager manager = new ProfileManager(context);
+        final Client client = findClient(context);
+        logger.debug("client: {}", client);
+        final boolean isDirectClient = client instanceof DirectClient;
 
-        // Try to get identity
-        CommonProfile profile = null;
-        try {
-            profile = retrieveUserProfile(request, response, context);
-        } catch (RequiresHttpAction e) {
-            logger.debug("extra HTTP action required : {}", e.getCode());
-            return;
-        }
+        UserProfile profile = manager.get(!isDirectClient || this.useSessionForDirectClient);
+        logger.debug("profile: {}", profile);
 
-        // authentication success or failure strategy
-        if (profile == null) {
-            authenticationFailure(request, response, chain, context);
-        } else {
-            saveUserProfile(profile, request);
-            authenticationSuccess(profile, request, response, chain, context);
-        }
-
-    }
-
-    /**
-     * Retrieve user profile either by looking in the session or trying to authenticate directly
-     * if stateless web service.
-     * 
-     * @param request the HTTP request
-     * @param response the HTTP response
-     * @param context the current web context
-     * @return the current user profile
-     * @throws RequiresHttpAction if an additional HTTP action is required
-     */
-    protected CommonProfile retrieveUserProfile(HttpServletRequest request, HttpServletResponse response,
-            WebContext context) throws RequiresHttpAction {
-        if (isStateless()) {
-            return authenticate(request, response, context);
-        } else {
-            CommonProfile profile = UserUtils.getProfile(request);
-            logger.debug("profile : {}", profile);
-            return profile;
-        }
-    }
-
-    /**
-     * Save the user profile in session or attach it to the request if stateless web service.
-     * 
-     * @param profile the user profile
-     * @param request the HTTP request
-     */
-    protected void saveUserProfile(CommonProfile profile, HttpServletRequest request) {
-        UserUtils.setProfile(request, profile, isStateless());
-    }
-
-    /**
-     * Default authentication success strategy which forward to the next filter if the user
-     * has access or returns an access denied error otherwise.
-     * 
-     * @param profile the user profile
-     * @param request the HTTP request
-     * @param response the HTTP response
-     * @param chain the filter chain
-     * @param context the current web context
-     * @throws IOException IO exception
-     * @throws ServletException Servlet exception
-     */
-    protected void authenticationSuccess(CommonProfile profile, HttpServletRequest request,
-            HttpServletResponse response, FilterChain chain, WebContext context) throws IOException, ServletException {
-
-        if (hasAccess(profile, request)) {
-            chain.doFilter(request, response);
-        } else {
-            context.setResponseStatus(HttpConstants.FORBIDDEN);
-        }
-    }
-
-    /**
-     * Returns true if the user defined by the profile has access to the underlying resource
-     * depending on the requireAnyRole and requireAllRoles fields.
-     * 
-     * @param profile the user profile
-     * @param request the HTTP request
-     * @return if the user has access
-     */
-    protected boolean hasAccess(CommonProfile profile, HttpServletRequest request) {
-        return profile.hasAccess(requireAnyRole, requireAllRoles);
-    }
-
-    /**
-     * Default authentication failure strategy which generates an unauthorized page if stateless web service
-     * or redirect to the authentication provider after saving the original url.
-     * 
-     * @param request the HTTP request
-     * @param response the HTTP response
-     * @param chain the filter chain
-     * @param context the current web context
-     * @throws IOException IO exception
-     * @throws ServletException Servlet exception
-     */
-    protected void authenticationFailure(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
-            WebContext context) throws IOException, ServletException {
-
-        if (isStateless()) {
-            context.setResponseStatus(HttpConstants.UNAUTHORIZED);
-        } else {
-            // no authentication tried -> redirect to provider
-            // keep the current url
-            saveOriginalUrl(request);
-            // compute and perform the redirection
-            redirectToIdentityProvider(request, context);
-        }
-    }
-
-    /**
-     * Authenticates the current request by getting the credentials and the corresponding user profile.
-     * 
-     * @param request the HTTP request
-     * @param response the HTTP response
-     * @param context the current web context
-     * @return the authenticated user profile
-     * @throws RequiresHttpAction if an additional HTTP action is required
-     */
-    protected CommonProfile authenticate(HttpServletRequest request, HttpServletResponse response, WebContext context)
-            throws RequiresHttpAction {
-        String currentClientName = getClientName(context);
-
-        final Client client = ClientsConfiguration.getClients().findClient(currentClientName);
-        logger.debug("client : {}", client);
-
-        final Credentials credentials;
-        credentials = client.getCredentials(context);
-        logger.debug("credentials : {}", credentials);
-
-        // get user profile
-        CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, context);
-        logger.debug("profile : {}", profile);
-
-        return profile;
-    }
-
-    protected void saveOriginalUrl(HttpServletRequest request) {
-        if (!isAjaxRequest(request)) {
-            String requestedUrl = request.getRequestURL().toString();
-            String queryString = request.getQueryString();
-            if (CommonHelper.isNotBlank(queryString)) {
-                requestedUrl += "?" + queryString;
+        if (profile == null && isDirectClient) {
+            final Credentials credentials;
+            try {
+                credentials = client.getCredentials(context);
+            } catch (final RequiresHttpAction e) {
+                throw new TechnicalException("Unexpected HTTP action", e);
             }
-            logger.debug("requestedUrl : {}", requestedUrl);
-            request.getSession(true).setAttribute(HttpConstants.REQUESTED_URL, requestedUrl);
+            logger.debug("credentials: {}", credentials);
+
+            profile = client.getUserProfile(credentials, context);
+            logger.debug("profile: {}", profile);
+            if (profile != null) {
+                manager.save(this.useSessionForDirectClient, profile);
+            }
+        }
+
+        if (profile != null) {
+            if (authorizer.isAuthorized(context, profile)) {
+                chain.doFilter(request, response);
+            } else {
+                context.setResponseStatus(HttpConstants.FORBIDDEN);
+            }
+        } else {
+            if (isDirectClient) {
+                context.setResponseStatus(HttpConstants.UNAUTHORIZED);
+            } else {
+                saveOriginalUrl(context);
+                redirectToIdentityProvider(client, context);
+            }
         }
     }
 
-    protected String retrieveOriginalUrl(HttpServletRequest request) {
-        return (String) request.getSession(true).getAttribute(HttpConstants.REQUESTED_URL);
+    /**
+     * Find the client from the request.
+     *
+     * @param context the web context
+     * @return the appropriate client
+     */
+    protected Client findClient(final WebContext context) {
+        Client client = null;
+        if (this.allowDynamicClientSelection) {
+            client = getClients().findClient(context);
+        }
+        if (client == null) {
+            client = getClients().findClient(clientName);
+        }
+        return client;
     }
 
-    protected boolean isAjaxRequest(HttpServletRequest request) {
-        return isAjax;
+    /**
+     * Save the current requested url.
+     *
+     * @param context the web context
+     */
+    protected void saveOriginalUrl(final WebContext context) {
+        if (!this.isAjax) {
+            final String requestedUrl = context.getFullRequestURL();
+            logger.debug("requestedUrl: {}", requestedUrl);
+            context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
+        }
     }
 
-    private void redirectToIdentityProvider(HttpServletRequest request, WebContext context) {
-        Client<Credentials, CommonProfile> client = ClientsConfiguration.getClients()
-                .findClient(getClientName(context));
+    /**
+     * Redirect the user to the identity provider for login.
+     *
+     * @param client the current client
+     * @param context the web context
+     */
+    protected void redirectToIdentityProvider(final Client client, final WebContext context) {
         try {
-            client.redirect(context, true, isAjaxRequest(request));
-        } catch (RequiresHttpAction e) {
-            logger.debug("extra HTTP action required : {}", e.getCode());
+            client.redirect(context, true, this.isAjax);
+        } catch (final RequiresHttpAction e) {
+            logger.debug("extra HTTP action required: {}", e.getCode());
         }
     }
 
-    /**
-     * Indicates whether this authentication filter protects a stateless web service or not.
-     * 
-     * @return whether this authentication filter protects a stateless web service or not
-     */
-    private boolean isStateless() {
-        return stateless;
-    }
-
-    /**
-     * Get the client name from the context (GET parameter) or from the configuration. 
-     * The configuration client name overrides the one from the context. 
-     * 
-     * @param context
-     * @return
-     */
-    private String getClientName(WebContext context) {
-        return (clientName != null) ? clientName : context.getRequestParameter(ClientsConfiguration.getClients()
-                .getClientNameParameter());
-    }
-
-    /**
-     * @return the client name
-     */
     public String getClientName() {
-        return clientName;
+        return this.clientName;
     }
 
     /**
-     * @param clientName the client name to set
+     * The client name to use for this filter.
+     *
+     * @param clientName the client name
      */
     public void setClientName(final String clientName) {
         this.clientName = clientName;
     }
 
-    /**
-     * @return whether it's an Ajax filter
-     */
     public boolean isAjax() {
-        return isAjax;
+        return this.isAjax;
     }
 
     /**
-     * @param isAjax whether it's an Ajax filter
+     * Define if this filter will be called in an AJAX way.
+     *
+     * @param isAjax whether it is an AJAX call
      */
     public void setAjax(final boolean isAjax) {
         this.isAjax = isAjax;
     }
 
-    /**
-     * @return the roles, any one of which will authorize the user
-     */
     public String getRequireAnyRole() {
-        return requireAnyRole;
+        return this.requireAnyRole;
     }
 
     /**
-     * @param requireAnyRole the roles to set which will authorize the user who has any of them
+     * Define that the user must have one of the roles to access the resource.
+     *
+     * @param requireAnyRole the roles list (separated by commas)
      */
     public void setRequireAnyRole(final String requireAnyRole) {
         this.requireAnyRole = requireAnyRole;
+        if (requireAnyRole != null) {
+            this.authorizer = new RequireAnyRoleAuthorizer(requireAnyRole.split(","));
+        }
     }
 
-    /**
-     * @return the roles which the user must have all of to be authorized
-     */
     public String getRequireAllRoles() {
-        return requireAllRoles;
+        return this.requireAllRoles;
     }
 
     /**
-     * @param requireAllRoles the roles to set which will authorize the user who has all of them
+     * Define that the user must have all roles to access the resource.
+     *
+     * @param requireAllRoles the roles list (separated by commas)
      */
     public void setRequireAllRoles(final String requireAllRoles) {
         this.requireAllRoles = requireAllRoles;
+        if (requireAllRoles != null) {
+            this.authorizer = new RequireAllRolesAuthorizer(requireAllRoles.split(","));
+        }
+    }
+
+    public Authorizer getAuthorizer() {
+        return this.authorizer;
     }
 
     /**
-     * @param stateless whether this authentication filter protects a stateless web service or not
+     * The authorizer used to protect this resource.
+     *
+     * @param authorizer the authorizer
      */
-    public void setStateless(final boolean stateless) {
-        this.stateless = stateless;
+    public void setAuthorizer(Authorizer authorizer) {
+        this.authorizer = authorizer;
     }
 
+    public boolean isUseSessionForDirectClient() {
+        return this.useSessionForDirectClient;
+    }
+
+    /**
+     * Define if the web session must be used even for REST support.
+     *
+     * @param useSessionForDirectClient whether the web session must be used even for REST support
+     */
+    public void setUseSessionForDirectClient(boolean useSessionForDirectClient) {
+        this.useSessionForDirectClient = useSessionForDirectClient;
+    }
+
+    public boolean isAllowDynamicClientSelection() {
+        return this.allowDynamicClientSelection;
+    }
+
+    /**
+     * Define if other client can be used on this filter (in addition to the one defined by the {@link #setClientName(String)}.
+     *
+     * @param allowDynamicClientSelection whether other client can be used on this filter
+     */
+    public void setAllowDynamicClientSelection(boolean allowDynamicClientSelection) {
+        this.allowDynamicClientSelection = allowDynamicClientSelection;
+    }
 }

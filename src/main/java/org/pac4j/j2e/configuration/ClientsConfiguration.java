@@ -17,6 +17,7 @@ package org.pac4j.j2e.configuration;
 
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.ClientsFactory;
+import org.pac4j.core.exception.TechnicalException;
 
 /**
  * This class represents the configuration of all clients.
@@ -42,7 +43,7 @@ public final class ClientsConfiguration {
                 final ClientsFactory factory = clazz.newInstance();
                 clients = factory.build(null);
             } catch (final Exception e) {
-                throw new RuntimeException(e);
+                throw new TechnicalException(e);
             }
         }
     }
@@ -50,4 +51,6 @@ public final class ClientsConfiguration {
     public static Clients getClients() {
         return clients;
     }
+
+    public static void setClients(final Clients clients) { ClientsConfiguration.clients = clients; }
 }
