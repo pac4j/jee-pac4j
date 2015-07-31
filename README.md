@@ -13,7 +13,8 @@ It supports stateful and stateless [authentication flows](https://github.com/pac
 7. **OpenID Connect** 1.0 using the `pac4j-oidc` module
 8. **JWT** using the `pac4j-jwt` module
 9. **LDAP** using the `pac4j-ldap` module
-10. **relational DB** using the `pac4j-sql` module. 
+10. **relational DB** using the `pac4j-sql` module
+11. **MongoDB** using the `pac4j-mongo` module.
 
 See [all authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Clients).
 
@@ -32,7 +33,7 @@ and is based on the `pac4j-core` library. Learn more by browsing the [j2e-pac4j 
 
 ## How to use it?
 
-### Add the required dependencies
+### Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
 
 You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *latest version*: **1.2.0-SNAPSHOT**) as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...  
 
@@ -52,8 +53,8 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
       </repository>
     </repositories>
 
-### Define the clients
 
+### Define the authentication mechanisms (`*Client` + `Clients` classes)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client. All clients must be gathered in a `Clients` class.  
 They can be defined in a specific class implementing the `org.pac4j.core.client.ClientsFactory` interface or through dependency injection. For example:
@@ -94,7 +95,7 @@ They can be defined in a specific class implementing the `org.pac4j.core.client.
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
 
-### Define the callback endpoint
+### Define the callback endpoint (only for stateful authentication mechanisms)
 
 Some authentication mechanisms rely on external identity providers (like Facebook) and thus require to define a callback endpoint where the user will be redirected after login at the identity provider. For REST support only, this callback endpoint is not necessary.  
 It must be define in the *web.xml* file by the `CallbackFilter` (callback url: "/callback", `defaultUrl`(optional): default url after authentication, clients defined via the `DemoClientsFactory`):
@@ -136,7 +137,7 @@ and the specific bean in the *application-context.xml* file:
         <property name="defaultUrl" value="/" />
     </bean>
 
-### Protect an url
+### Protect an url (authentication + authorization)
 
 You can protect an url and require the user to be authenticated by a client (and optionnally have the appropriate roles / permissions) by using the `RequiresAuthenticationFilter`
 (`clientName`: the authentication mechanism (`FacebookClient`), `requireAnyRole` (optional): one of the provided roles is necessary, `requireAllRoles` (optional): all roles are necessary, `allowDynamicClientSelection` (optional): if other clients can be used on this url (providing a *client_name* parameter in the url), `useSessionForDirectClient` (optional): if the session must be used (REST client), `isAjax` (optional): if this url is called in an AJAX way): 
@@ -159,14 +160,14 @@ You can protect an url and require the user to be authenticated by a client (and
         <dispatcher>REQUEST</dispatcher>
     </filter-mapping>
 
-Define the appropriate `AuthorizationGenerator` and attach it to the client (`addAuthorizationGenerator` method) to compute the roles / permissions of the authenticated user.
+Define the appropriate `AuthorizationGenerator` and attach it to the client (using the `addAuthorizationGenerator` method of the `UserProfile` class) to compute the roles / permissions of the authenticated user.
 
-This filter can be defined via dependency injection as well.
+This filter can be defined via dependency injection as well. In that case, the `authorizer` property of the `RequiresAuthenticationFilter` enables you to define a specific `Authorizer` for the protected url.
 
 
 #### Get redirection urls
 
-You can also explicitly compute a redirection url to a provider for login by using the `getRedirectAction` method and the `ClientsConfiguration` class. For example with Facebook:
+You can also explicitly compute a redirection url to a provider by using the `getRedirectAction` method and the `ClientsConfiguration` class, in order to create an explicit link for login. For example with Facebook:
 
 	Clients client = ClientsConfiguration.getClients();
 	FacebookClient fbClient = (FacebookClient) client.findClient("FacebookClient");
@@ -176,7 +177,7 @@ You can also explicitly compute a redirection url to a provider for login by usi
 
 #### Get the user profile
 
-After a successful authentication, you can test if the user is authenticated using the `ProfileManager.isAuthenticated()` method or get the user profile using the `ProfileManager.get(true)` method (`false` not to use the session).
+You can test if the user is authenticated using the `ProfileManager.isAuthenticated()` method or get the user profile using the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request).
 
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common properties that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
  
