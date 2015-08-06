@@ -44,10 +44,10 @@ import org.pac4j.core.util.CommonHelper;
 /**
  * <p>This filter aims to protect a secured (stateful or stateless) resource.</p>
  * <ul>
- *  <li>If statefull, it relies on the session and on the callback filter to terminate the authentication process.</li>
- *  <li>If stateless it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
+ *  <li>If statefull, it relies on the session and on the callback filter to terminate the authentication process</li>
+ *  <li>If stateless, it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
  * </ul>
- * <p>The filter handles authorization based on an <code>Authorizer</code> (possibly built via two parameters: requireAnyRole and requireAllRoles).</p>
+ * <p>The filter handles authorization using a directly defined <code>authorizer</code> or built from one of the two parameters: <code>requireAnyRole</code> or <code>requireAllRoles</code>.</p>
  * 
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
