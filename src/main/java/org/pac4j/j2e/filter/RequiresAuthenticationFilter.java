@@ -101,7 +101,7 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     @Override
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
-            final FilterChain chain) throws IOException, ServletException {
+                                        final FilterChain chain) throws IOException, ServletException {
 
         final Config config = ConfigSingleton.getConfig();
         CommonHelper.assertNotNull("config", config);
