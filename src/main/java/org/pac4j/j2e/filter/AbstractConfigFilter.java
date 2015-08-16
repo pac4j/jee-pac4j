@@ -26,44 +26,41 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.util.CommonHelper;
-import org.pac4j.j2e.configuration.ClientsConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An abstract class which handles the configuration of the clients.
+ * An abstract filter which handles configuration.
  * 
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public abstract class ClientsConfigFilter implements Filter {
+public abstract class AbstractConfigFilter implements Filter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected String getStringParam(final FilterConfig filterConfig, final String name, final String defaultValue) {
         final String param = filterConfig.getInitParameter(name);
+        final String value;
         if (param != null) {
-            return param;
+            value = param;
         } else {
-            return defaultValue;
+            value = defaultValue;
         }
+        logger.debug("{}: {}", name, value);
+        return value;
     }
 
     protected boolean getBooleanParam(final FilterConfig filterConfig, final String name, final boolean defaultValue) {
         final String param = filterConfig.getInitParameter(name);
+        final boolean value;
         if (param != null) {
-            return Boolean.parseBoolean(param);
+            value =  Boolean.parseBoolean(param);
         } else {
-            return defaultValue;
+            value = defaultValue;
         }
-    }
-
-    public void init(final FilterConfig filterConfig) throws ServletException {
-        final String clientsFactoryParam = filterConfig.getInitParameter("clientsFactory");
-        setClientsFactory(clientsFactoryParam);
-        CommonHelper.assertNotNull("clients", ClientsConfiguration.getClients());
+        logger.debug("{}: {}", name, value);
+        return value;
     }
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
@@ -78,19 +75,5 @@ public abstract class ClientsConfigFilter implements Filter {
             final FilterChain chain) throws IOException, ServletException;
 
     public void destroy() {
-    }
-
-    public Clients getClients() {
-        return ClientsConfiguration.getClients();
-    }
-
-    public void setClients(final Clients clients) {
-        ClientsConfiguration.setClients(clients);
-    }
-
-    public void setClientsFactory(String name) {
-        if (name != null) {
-            ClientsConfiguration.build(name);
-        }
     }
 }
