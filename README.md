@@ -53,11 +53,10 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
       </repository>
     </repositories>
 
+### Define the security configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
 
-### Define the authentication mechanisms (`*Client` + `Clients` classes)
-
-Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing `org.pac4j.core.client.Client`). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
-They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface, as well as the custom authorizers which will be used by the application. For example:
+Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
+They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the custom authorizers which will be used by the application. For example:
 
     public class DemoConfigFactory implements ConfigFactory {
     
