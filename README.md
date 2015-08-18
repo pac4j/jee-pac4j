@@ -21,12 +21,12 @@ See [all authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Clients)
 
 ## Technical description
 
-This library has **only 4 classes**:
+This project has **only 4 classes**:
 
 1. the `AbstractConfigFilter` is an abstract J2E filter to manage the configuration
 2. the `RequiresAuthenticationFilter` is a J2E filter to protect urls and requires authentication
 3. the `CallbackFilter` is a J2E filter to handle the callback from an identity provider after login to finish the authentication process
-4. the `ApplicationLogoutFilter` is a J2E filter to manage the application logout.
+4. the `ApplicationLogoutFilter` is a J2E filter to manage the application logout
 
 and is based on the `pac4j-core` library. Learn more by browsing the [j2e-pac4j Javadoc](http://www.pac4j.org/apidocs/j2e-pac4j/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
 
