@@ -53,7 +53,7 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
       </repository>
     </repositories>
 
-### Define the security configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
+### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
 They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the custom authorizers which will be used by the application. For example:
@@ -145,7 +145,7 @@ and the specific bean in the *application-context.xml* file:
 
 ### Protect an url (authentication + authorization)
 
-You can protect an url and require the user to be authenticated by a client (and optionnally have the appropriate roles / permissions) by using the `RequiresAuthenticationFilter`:
+You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate roles / permissions) by using the `RequiresAuthenticationFilter`:
 
     <filter>
         <filter-name>FacebookAdminFilter</filter-name>
@@ -187,9 +187,9 @@ Define the appropriate `org.pac4j.core.authorization.AuthorizationGenerator` and
 
 #### Get redirection urls
 
-You can also explicitly compute a redirection url to a provider by using the `getRedirectAction` method and the `org.pac4j.core.config.ConfigInstance` class, in order to create an explicit link for login. For example with Facebook:
+You can also explicitly compute a redirection url to a provider by using the `getRedirectAction` method and the `org.pac4j.core.config.ConfigSingleton` class, in order to create an explicit link for login. For example with Facebook:
 
-	Clients client = ConfigInstance.getConfig().getClients();
+	Clients client = ConfigSingleton.getConfig().getClients();
 	FacebookClient fbClient = (FacebookClient) client.findClient("FacebookClient");
 	WebContext context = new J2EContext(request, response);
 	String fbLoginUrl = fbClient.getRedirectAction(context, false, false).getLocation();
