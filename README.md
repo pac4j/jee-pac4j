@@ -185,7 +185,7 @@ This filter can be defined via dependency injection as well. In that case, the `
 Define the appropriate `org.pac4j.core.authorization.AuthorizationGenerator` and attach it to the client (using the `addAuthorizationGenerator` method) to compute the roles / permissions of the authenticated user.
 
 
-#### Get redirection urls
+### Get redirection urls
 
 You can also explicitly compute a redirection url to a provider by using the `getRedirectAction` method and the `org.pac4j.core.config.ConfigSingleton` class, in order to create an explicit link for login. For example with Facebook:
 
@@ -195,7 +195,7 @@ You can also explicitly compute a redirection url to a provider by using the `ge
 	String fbLoginUrl = fbClient.getRedirectAction(context, false, false).getLocation();
 
 
-#### Get the user profile
+### Get the user profile
 
 You can test if the user is authenticated using the `ProfileManager.isAuthenticated()` method or get the user profile using the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request).
 
@@ -204,7 +204,7 @@ The retrieved profile is at least a `CommonProfile`, from which you can retrieve
     FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 
-#### Logout
+### Logout
 
 You can log out the current authenticated user using the `ApplicationLogoutFilter`:
 
