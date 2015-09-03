@@ -49,12 +49,10 @@ import org.pac4j.core.util.CommonHelper;
  *  <li>If stateless, it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
  * </ul>
  * <p>Authorizations are also handled by this filter.</p>
- * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>isAjax</code>,
- * <code>requireAnyRole</code>, <code>requireAllRoles</code>, <code>authorizerName</code>, <code>useSessionForDirectClient</code>
- * and <code>allowDynamicClientSelection</code>.</p>
- * <p>Or the configuration can be defined via setter methods: {@link #setClients(Clients)}, {@link #setClientName(String)}, {@link #setIsAjax(boolean)},
- * {@link #setRequireAnyRole(String)}, {@link #setRequireAllRoles(String)}, {@link #setAuthorizer(Authorizer)}, {@link #setUseSessionForDirectClient(boolean)}
- * and {@link #setAllowDynamicClientSelection(boolean)}.</p>
+ * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>requireAnyRole</code>,
+ * <code>requireAllRoles</code>, <code>authorizerName</code>, <code>useSessionForDirectClient</code> and <code>allowDynamicClientSelection</code>.</p>
+ * <p>Or the configuration can be defined via setter methods: {@link #setClients(Clients)}, {@link #setClientName(String)}, {@link #setRequireAnyRole(String)},
+ * {@link #setRequireAllRoles(String)}, {@link #setAuthorizer(Authorizer)}, {@link #setUseSessionForDirectClient(boolean)} and {@link #setAllowDynamicClientSelection(boolean)}.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
@@ -63,8 +61,6 @@ import org.pac4j.core.util.CommonHelper;
 public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     protected String clientName;
-
-    protected boolean isAjax = false;
 
     protected String requireAnyRole;
 
@@ -88,8 +84,6 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
         this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
         CommonHelper.assertNotNull(Pac4jConstants.CLIENT_NAME, this.clientName);
-
-        this.isAjax = getBooleanParam(filterConfig, Pac4jConstants.IS_AJAX, this.isAjax);
 
         this.requireAnyRole = getStringParam(filterConfig, Pac4jConstants.REQUIRE_ANY_ROLE, this.requireAnyRole);
         this.requireAllRoles = getStringParam(filterConfig, Pac4jConstants.REQUIRE_ALL_ROLES, this.requireAllRoles);
@@ -164,16 +158,14 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
     }
 
     protected void saveRequestedUrl(final WebContext context) {
-        if (!this.isAjax) {
-            final String requestedUrl = context.getFullRequestURL();
-            logger.debug("requestedUrl: {}", requestedUrl);
-            context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
-        }
+        final String requestedUrl = context.getFullRequestURL();
+        logger.debug("requestedUrl: {}", requestedUrl);
+        context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
     }
 
     protected void redirectToIdentityProvider(final Client client, final WebContext context) {
         try {
-            client.redirect(context, true, this.isAjax);
+            client.redirect(context, true);
         } catch (final RequiresHttpAction e) {
             logger.debug("extra HTTP action required: {}", e.getCode());
         }
@@ -193,14 +185,6 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     public void setClientName(final String clientName) {
         this.clientName = clientName;
-    }
-
-    public boolean isAjax() {
-        return isAjax;
-    }
-
-    public void setIsAjax(final boolean isAjax) {
-        this.isAjax = isAjax;
     }
 
     public String getRequireAnyRole() {
