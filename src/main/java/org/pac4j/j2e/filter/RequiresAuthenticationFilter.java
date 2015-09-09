@@ -24,10 +24,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.authorization.Authorizer;
+import org.pac4j.core.authorization.AuthorizerBuilder;
 import org.pac4j.core.authorization.DefaultAuthorizerBuilder;
-import org.pac4j.core.client.Client;
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.client.DirectClient;
+import org.pac4j.core.client.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
 import org.pac4j.core.config.ConfigSingleton;
@@ -43,16 +42,15 @@ import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 
 /**
- * <p>This filter aims to protect a (stateful or stateless) resource.</p>
+ * <p>This filter protects a resource (authentication + authorization).</p>
  * <ul>
- *  <li>If statefull, it relies on the web session and on the {@link CallbackFilter} to terminate the authentication process</li>
- *  <li>If stateless, it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
+ *  <li>If a stateful / indirect client is used, it relies on the session to get the user profile (after the {@link CallbackFilter} has terminated the authentication process)</li>
+ *  <li>If a stateless / direct client is used, it validates the provided credentials from the request and retrieves the user profile if the authentication succeeds.</li>
  * </ul>
- * <p>Authorizations are also handled by this filter.</p>
- * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>requireAnyRole</code>,
- * <code>requireAllRoles</code>, <code>authorizerName</code>, <code>useSessionForDirectClient</code> and <code>allowDynamicClientSelection</code>.</p>
- * <p>Or the configuration can be defined via setter methods: {@link #setClients(Clients)}, {@link #setClientName(String)}, {@link #setRequireAnyRole(String)},
- * {@link #setRequireAllRoles(String)}, {@link #setAuthorizer(Authorizer)}, {@link #setUseSessionForDirectClient(boolean)} and {@link #setAllowDynamicClientSelection(boolean)}.</p>
+ * <p>Then, the authorization is checked before accessing the resource.</p>
+ * <p>Forbidden or unauthorized errors can be returned. An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
+ * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code> and <code>authorizerName</code>.</p>
+ * <p>Or it can be defined via setter methods: {@link #setClients(Clients)}, {@link #setClientName(String)} and {@link #setAuthorizer(Authorizer)}.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
@@ -60,19 +58,15 @@ import org.pac4j.core.util.CommonHelper;
 @SuppressWarnings("unchecked")
 public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
+    protected ClientFinder clientFinder = new DefaultClientFinder();
+
+    protected AuthorizerBuilder authorizerBuilder = new DefaultAuthorizerBuilder();
+
     protected String clientName;
-
-    protected String requireAnyRole;
-
-    protected String requireAllRoles;
 
     protected Authorizer authorizer;
 
     protected String authorizerName;
-
-    protected boolean useSessionForDirectClient = false;
-
-    protected boolean allowDynamicClientSelection = false;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -81,52 +75,44 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
             final Config config = ConfigBuilder.build(configFactoryParam);
             ConfigSingleton.setConfig(config);
         }
-
         this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
-        CommonHelper.assertNotNull(Pac4jConstants.CLIENT_NAME, this.clientName);
-
-        this.requireAnyRole = getStringParam(filterConfig, Pac4jConstants.REQUIRE_ANY_ROLE, this.requireAnyRole);
-        this.requireAllRoles = getStringParam(filterConfig, Pac4jConstants.REQUIRE_ALL_ROLES, this.requireAllRoles);
         this.authorizerName = getStringParam(filterConfig, Pac4jConstants.AUTHORIZER_NAME, this.authorizerName);
-
-        this.useSessionForDirectClient = getBooleanParam(filterConfig, Pac4jConstants.USE_SESSION_FOR_DIRECT_CLIENT, this.useSessionForDirectClient);
-        this.allowDynamicClientSelection = getBooleanParam(filterConfig, Pac4jConstants.ALLOW_DYNAMIC_CLIENT_SELECTION, this.allowDynamicClientSelection);
     }
 
     @Override
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain chain) throws IOException, ServletException {
 
+        final WebContext context = new J2EContext(request, response);
+
         final Config config = ConfigSingleton.getConfig();
         CommonHelper.assertNotNull("config", config);
         final Clients clients = config.getClients();
         CommonHelper.assertNotNull("clients", clients);
-        this.authorizer = DefaultAuthorizerBuilder.build(this.authorizer, this.authorizerName, config.getAuthorizers(),
-                this.requireAnyRole, this.requireAllRoles);
+        final Client client = clientFinder.find(clients, context, this.clientName);
+        logger.debug("client: {}", client);
+        this.authorizer = authorizerBuilder.build(context, this.authorizer, this.authorizerName, config.getAuthorizers());
+        logger.debug("authorizer: {}", this.authorizer);
         CommonHelper.assertNotNull("authorizer", this.authorizer);
 
-        final WebContext context = new J2EContext(request, response);
+        final boolean useSession = useSession(context, client);
+        logger.debug("useSession: {}", useSession);
         final ProfileManager manager = new ProfileManager(context);
-        final Client client = findClient(context);
-        logger.debug("client: {}", client);
-        final boolean isDirectClient = client instanceof DirectClient;
-
-        UserProfile profile = manager.get(!isDirectClient || this.useSessionForDirectClient);
+        UserProfile profile = manager.get(useSession);
         logger.debug("profile: {}", profile);
 
-        if (profile == null && isDirectClient) {
+        if (profile == null && client instanceof DirectClient) {
             final Credentials credentials;
             try {
                 credentials = client.getCredentials(context);
+                logger.debug("credentials: {}", credentials);
             } catch (final RequiresHttpAction e) {
                 throw new TechnicalException("Unexpected HTTP action", e);
             }
-            logger.debug("credentials: {}", credentials);
-
             profile = client.getUserProfile(credentials, context);
             logger.debug("profile: {}", profile);
             if (profile != null) {
-                manager.save(this.useSessionForDirectClient, profile);
+                manager.save(useSession, profile);
             }
         }
 
@@ -137,24 +123,17 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
                 context.setResponseStatus(HttpConstants.FORBIDDEN);
             }
         } else {
-            if (isDirectClient) {
-                context.setResponseStatus(HttpConstants.UNAUTHORIZED);
-            } else {
+            if (client instanceof IndirectClient) {
                 saveRequestedUrl(context);
                 redirectToIdentityProvider(client, context);
+            } else {
+                context.setResponseStatus(HttpConstants.UNAUTHORIZED);
             }
         }
     }
 
-    protected Client findClient(final WebContext context) {
-        Client client = null;
-        if (this.allowDynamicClientSelection) {
-            client = getClients().findClient(context);
-        }
-        if (client == null) {
-            client = getClients().findClient(clientName);
-        }
-        return client;
+    protected boolean useSession(final WebContext context, final Client client) {
+        return client == null || client instanceof IndirectClient;
     }
 
     protected void saveRequestedUrl(final WebContext context) {
@@ -187,43 +166,11 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         this.clientName = clientName;
     }
 
-    public String getRequireAnyRole() {
-        return requireAnyRole;
-    }
-
-    public void setRequireAnyRole(String requireAnyRole) {
-        this.requireAnyRole = requireAnyRole;
-    }
-
-    public String getRequireAllRoles() {
-        return requireAllRoles;
-    }
-
-    public void setRequireAllRoles(String requireAllRoles) {
-        this.requireAllRoles = requireAllRoles;
-    }
-
     public Authorizer getAuthorizer() {
         return this.authorizer;
     }
 
     public void setAuthorizer(Authorizer authorizer) {
         this.authorizer = authorizer;
-    }
-
-    public boolean isUseSessionForDirectClient() {
-        return this.useSessionForDirectClient;
-    }
-
-    public void setUseSessionForDirectClient(boolean useSessionForDirectClient) {
-        this.useSessionForDirectClient = useSessionForDirectClient;
-    }
-
-    public boolean isAllowDynamicClientSelection() {
-        return this.allowDynamicClientSelection;
-    }
-
-    public void setAllowDynamicClientSelection(boolean allowDynamicClientSelection) {
-        this.allowDynamicClientSelection = allowDynamicClientSelection;
     }
 }
