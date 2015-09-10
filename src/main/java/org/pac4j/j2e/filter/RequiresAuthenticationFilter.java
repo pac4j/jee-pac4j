@@ -77,6 +77,19 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         }
         this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
         this.authorizerName = getStringParam(filterConfig, Pac4jConstants.AUTHORIZER_NAME, this.authorizerName);
+
+        final String isAjaxParameter = getStringParam(filterConfig, Pac4jConstants.IS_AJAX, null);
+        if (CommonHelper.isNotBlank(isAjaxParameter)) {
+            logger.warn("the isAjax servlet parameter is no longer necessary and will be ignored as AJAX requests are automatically detected");
+        }
+        final String requireAnyRoleParameter = getStringParam(filterConfig, Pac4jConstants.REQUIRE_ANY_ROLE, null);
+        if (CommonHelper.isNotBlank(requireAnyRoleParameter)) {
+            throw new TechnicalException("the requireAnyRole servlet parameter is no longer supported: the authorizerName servlet parameter must be used instead");
+        }
+        final String requireAllRolesParameter = getStringParam(filterConfig, Pac4jConstants.REQUIRE_ALL_ROLES, null);
+        if (CommonHelper.isNotBlank(requireAllRolesParameter)) {
+            throw new TechnicalException("the requireAllRoles servlet parameter is no longer supported: the authorizerName servlet parameter must be used instead");
+        }
     }
 
     @Override
