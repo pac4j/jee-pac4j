@@ -26,6 +26,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,6 +64,25 @@ public abstract class AbstractConfigFilter implements Filter {
         logger.debug("{}: {}", name, value);
         return value;
     }
+
+    protected void checkUselessParameter(final FilterConfig filterConfig, final String name) {
+        final String parameter = getStringParam(filterConfig, name, null);
+        if (CommonHelper.isNotBlank(parameter)) {
+            final String message = "the " + name + " servlet parameter is no longer available and will be ignored";
+            logger.error(message);
+            throw new TechnicalException(message);
+        }
+    }
+
+    protected void checkForbiddenParameter(final FilterConfig filterConfig, final String name) {
+        final String parameter = getStringParam(filterConfig, name, null);
+        if (CommonHelper.isNotBlank(parameter)) {
+            final String message = "the " + name + " servlet parameter is no longer supported";
+            logger.error(message);
+            throw new TechnicalException(message);
+        }
+    }
+
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {

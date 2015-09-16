@@ -23,9 +23,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.pac4j.core.authorization.Authorizer;
-import org.pac4j.core.authorization.AuthorizerBuilder;
-import org.pac4j.core.authorization.DefaultAuthorizerBuilder;
+import org.pac4j.core.authorization.AuthorizationChecker;
+import org.pac4j.core.authorization.DefaultAuthorizationChecker;
 import org.pac4j.core.client.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
@@ -47,10 +46,10 @@ import org.pac4j.core.util.CommonHelper;
  *  <li>If a stateful / indirect client is used, it relies on the session to get the user profile (after the {@link CallbackFilter} has terminated the authentication process)</li>
  *  <li>If a stateless / direct client is used, it validates the provided credentials from the request and retrieves the user profile if the authentication succeeds.</li>
  * </ul>
- * <p>Then, the authorization is checked before accessing the resource.</p>
+ * <p>Then, authorizations are checked before accessing the resource.</p>
  * <p>Forbidden or unauthorized errors can be returned. An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
  * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code> and <code>authorizerName</code>.</p>
- * <p>Or it can be defined via setter methods: {@link #setClients(Clients)}, {@link #setClientName(String)} and {@link #setAuthorizer(Authorizer)}.</p>
+ * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClientName(String)} and {@link #setAuthorizerName(String)}.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
@@ -60,11 +59,9 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     protected ClientFinder clientFinder = new DefaultClientFinder();
 
-    protected AuthorizerBuilder authorizerBuilder = new DefaultAuthorizerBuilder();
+    protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
 
     protected String clientName;
-
-    protected Authorizer authorizer;
 
     protected String authorizerName;
 
@@ -78,21 +75,12 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
         this.authorizerName = getStringParam(filterConfig, Pac4jConstants.AUTHORIZER_NAME, this.authorizerName);
 
-        final String isAjaxParameter = getStringParam(filterConfig, Pac4jConstants.IS_AJAX, null);
-        if (CommonHelper.isNotBlank(isAjaxParameter)) {
-            logger.warn("the isAjax servlet parameter is no longer necessary and will be ignored as AJAX requests are automatically detected");
-        }
-        checkUnsupportedrequireParameter(filterConfig, Pac4jConstants.REQUIRE_ANY_ROLE);
-        checkUnsupportedrequireParameter(filterConfig, Pac4jConstants.REQUIRE_ALL_ROLES);
-    }
-
-    private void checkUnsupportedrequireParameter(final FilterConfig filterConfig, final String name) {
-        final String parameter = getStringParam(filterConfig, name, null);
-        if (CommonHelper.isNotBlank(parameter)) {
-            final String message = "the " + name + " servlet parameter is no longer supported: the authorizerName servlet parameter must be used instead";
-            logger.error(message);
-            throw new TechnicalException(message);
-        }
+        // to help with backward compatibility
+        checkUselessParameter(filterConfig, "clientsFactory");
+        checkUselessParameter(filterConfig, Pac4jConstants.IS_AJAX);
+        checkUselessParameter(filterConfig, Pac4jConstants.STATELESS);
+        checkForbiddenParameter(filterConfig, Pac4jConstants.REQUIRE_ANY_ROLE);
+        checkForbiddenParameter(filterConfig, Pac4jConstants.REQUIRE_ALL_ROLES);
     }
 
     @Override
@@ -105,11 +93,9 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         CommonHelper.assertNotNull("config", config);
         final Clients clients = config.getClients();
         CommonHelper.assertNotNull("clients", clients);
+        logger.debug("clientName: {}", clientName);
         final Client client = clientFinder.find(clients, context, this.clientName);
         logger.debug("client: {}", client);
-        this.authorizer = authorizerBuilder.build(context, this.authorizer, this.authorizerName, config.getAuthorizers());
-        logger.debug("authorizer: {}", this.authorizer);
-        CommonHelper.assertNotNull("authorizer", this.authorizer);
 
         final boolean useSession = useSession(context, client);
         logger.debug("useSession: {}", useSession);
@@ -133,7 +119,8 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         }
 
         if (profile != null) {
-            if (authorizer.isAuthorized(context, profile)) {
+            logger.debug("authorizerName: {}", authorizerName);
+            if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
                 chain.doFilter(request, response);
             } else {
                 context.setResponseStatus(HttpConstants.FORBIDDEN);
@@ -166,27 +153,27 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         }
     }
 
-    public Clients getClients() {
-        return ConfigSingleton.getConfig().getClients();
+    public Config getConfig() {
+        return ConfigSingleton.getConfig();
     }
 
-    public void setClients(final Clients clients) {
-        ConfigSingleton.getConfig().setClients(clients);
+    public void setConfig(final Config config) {
+        ConfigSingleton.setConfig(config);
     }
 
     public String getClientName() {
-        return this.clientName;
+        return clientName;
     }
 
     public void setClientName(final String clientName) {
         this.clientName = clientName;
     }
 
-    public Authorizer getAuthorizer() {
-        return this.authorizer;
+    public String getAuthorizerName() {
+        return authorizerName;
     }
 
-    public void setAuthorizer(Authorizer authorizer) {
-        this.authorizer = authorizer;
+    public void setAuthorizerName(final String authorizerName) {
+        this.authorizerName = authorizerName;
     }
 }

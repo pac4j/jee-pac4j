@@ -1,6 +1,6 @@
 ## What is the j2e-pac4j library? [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j)
 
-The `j2e-pac4j` project is an authentication / authorization security library for J2E. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `j2e-pac4j` project is an easy and powerful security library for simple J2E web applications which supports authentication and authorization, but also application logout. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
 It supports stateful / indirect and stateless / direct [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows) using external identity providers or internal credentials authenticators and user profile creators:
 
@@ -15,9 +15,7 @@ It supports stateful / indirect and stateless / direct [authentication flows](ht
 9. **LDAP** using the `pac4j-ldap` module
 10. **relational DB** using the `pac4j-sql` module
 11. **MongoDB** using the `pac4j-mongo` module
-12. [**Stormpath**](https://stormpath.com) using the `pac4j-stormpath` module.
-
-See [all authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Clients)
+12. **Stormpath** using the `pac4j-stormpath` module.
 
 
 ## Technical description
@@ -57,7 +55,8 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
-They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the authorizers which will be used by the application. For example:
+They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the authorizers which will be used by the application.
+For example:
 
     public class DemoConfigFactory implements ConfigFactory {
     
@@ -91,8 +90,8 @@ They can be defined in a specific class implementing the `org.pac4j.core.config.
                     twitterClient, formClient, basicAuthClient, casClient, parameterClient);
     
             final Config config = new Config(clients);
-            config.addAuthorizer("requireRoleAdmin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
-            config.addAuthorizer("customAuthorizer", new CustomAuthorizer());
+            config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
+            config.addAuthorizer("custom", new CustomAuthorizer());
     
             return config;
         }
@@ -100,7 +99,9 @@ They can be defined in a specific class implementing the `org.pac4j.core.config.
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
-If your application is configured via dependency injection, no factory is required to build the configuration. Only the `Clients` object will be defined.
+If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
+
+See all available [`Client`s and `Authenticator`s](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`s](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
@@ -145,7 +146,7 @@ and the specific bean in the *application-context.xml* file:
 
 ### Protect an url (authentication + authorization)
 
-You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate authorizations = roles / permissions) by using the `RequiresAuthenticationFilter`:
+You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate authorizations) by using the `RequiresAuthenticationFilter`:
 
     <filter>
         <filter-name>FacebookAdminFilter</filter-name>
@@ -160,7 +161,7 @@ You can protect an url and require the user to be authenticated by a client (and
         </init-param>
         <init-param>
             <param-name>authorizerName</param-name>
-            <param-value>requireRoleAdmin</param-value>
+            <param-value>admin</param-value>
         </init-param>
     </filter>
     <filter-mapping>
@@ -171,11 +172,11 @@ You can protect an url and require the user to be authenticated by a client (and
 
 The following parameters can be defined:
 
-- `clientName` (optional): the client name to start or perform the authentication (the first one if it is a list of client names). If the authentication mechanism is specified via the *client_name* request parameter, it must match one of the client names
+- `clientName` (optional): the client name to start or perform the authentication (the first one if it is a list of client names separated by commas). If the authentication mechanism is specified via the *client_name* request parameter, it must match one of the client names
 - `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
-- `authorizerName` (optional): the authorizer name which will protect the resource (it must exist in the authorizers configuration)
+- `authorizerName` (optional): the authorizer name (or a list of authorizer names separated by commas) which will protect the resource (they must exist in the authorizers configuration). By default (if blank), the user only requires to be authenticated to access the resource.
 
-This filter can be defined via dependency injection as well. In that case, the `configFactory` and `authorizerName` parameters are not necessary and the `setClients` and `setAuthorizer` methods must be used to define all the clients and the authorizer in charge of the resource protection. 
+This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
 
 Define the appropriate `org.pac4j.core.authorization.AuthorizationGenerator` and attach it to the client (using the `addAuthorizationGenerator` method) to compute the roles / permissions of the authenticated user.
 
@@ -217,13 +218,14 @@ and by calling the logout url ("/logout"). A blank page is displayed by default 
 
 The following parameters can be defined:
 
-- `defaultUrl`: the default logout url if the provided *url* parameter does not match the `logoutUrlPattern`
-- `logoutUrlPattern`: the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
+- `defaultUrl` (optional): the default logout url if the provided *url* parameter does not match the `logoutUrlPattern`
+- `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
 
 
 ## Migration guide
 
-The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead (by name or defined via setter).
+The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
+The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead.
 
 
 ## Demo

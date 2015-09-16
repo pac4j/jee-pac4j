@@ -53,6 +53,9 @@ public class CallbackFilter extends AbstractConfigFilter {
     public void init(final FilterConfig filterConfig) throws ServletException {
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         CommonHelper.assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
+
+        // to help with backward compatibility
+        checkUselessParameter(filterConfig, "clientsFactory");
     }
 
     @Override
