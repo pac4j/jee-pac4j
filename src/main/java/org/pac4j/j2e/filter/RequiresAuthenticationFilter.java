@@ -136,7 +136,6 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
             } else {
                 logger.debug("forbidden");
                 forbidden(context, currentClients);
-
             }
         } else {
             if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
