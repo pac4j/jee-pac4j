@@ -49,19 +49,7 @@ public abstract class AbstractConfigFilter implements Filter {
         } else {
             value = defaultValue;
         }
-        logger.debug("{}: {}", name, value);
-        return value;
-    }
-
-    protected boolean getBooleanParam(final FilterConfig filterConfig, final String name, final boolean defaultValue) {
-        final String param = filterConfig.getInitParameter(name);
-        final boolean value;
-        if (param != null) {
-            value =  Boolean.parseBoolean(param);
-        } else {
-            value = defaultValue;
-        }
-        logger.debug("{}: {}", name, value);
+        logger.debug("String param: {}: {}", name, value);
         return value;
     }
 

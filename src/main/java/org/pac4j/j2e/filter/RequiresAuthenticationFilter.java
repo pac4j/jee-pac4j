@@ -16,6 +16,7 @@
 package org.pac4j.j2e.filter;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -88,55 +89,74 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
                                         final FilterChain chain) throws IOException, ServletException {
 
         final WebContext context = new J2EContext(request, response);
+        logger.debug("url: {}", context.getFullRequestURL());
 
         final Config config = ConfigSingleton.getConfig();
         CommonHelper.assertNotNull("config", config);
-        final Clients clients = config.getClients();
-        CommonHelper.assertNotNull("clients", clients);
+        final Clients configClients = config.getClients();
+        CommonHelper.assertNotNull("configClients", configClients);
         logger.debug("clientName: {}", clientName);
-        final Client client = clientFinder.find(clients, context, this.clientName);
-        logger.debug("client: {}", client);
+        final List<Client> currentClients = clientFinder.find(configClients, context, this.clientName);
+        logger.debug("currentClients: {}", currentClients);
 
-        final boolean useSession = useSession(context, client);
+        final boolean useSession = useSession(context, currentClients);
         logger.debug("useSession: {}", useSession);
         final ProfileManager manager = new ProfileManager(context);
         UserProfile profile = manager.get(useSession);
         logger.debug("profile: {}", profile);
 
-        if (profile == null && client instanceof DirectClient) {
-            final Credentials credentials;
-            try {
-                credentials = client.getCredentials(context);
-                logger.debug("credentials: {}", credentials);
-            } catch (final RequiresHttpAction e) {
-                throw new TechnicalException("Unexpected HTTP action", e);
-            }
-            profile = client.getUserProfile(credentials, context);
-            logger.debug("profile: {}", profile);
-            if (profile != null) {
-                manager.save(useSession, profile);
+        // no profile and some current clients
+        if (profile == null && currentClients != null && currentClients.size() > 0) {
+            // loop on all clients searching direct ones to perform authentication
+            for (final Client currentClient: currentClients) {
+                if (currentClient instanceof DirectClient) {
+                    logger.debug("Performing authentication for client: {}", currentClient);
+                    final Credentials credentials;
+                    try {
+                        credentials = currentClient.getCredentials(context);
+                        logger.debug("credentials: {}", credentials);
+                    } catch (final RequiresHttpAction e) {
+                        throw new TechnicalException("Unexpected HTTP action", e);
+                    }
+                    profile = currentClient.getUserProfile(credentials, context);
+                    logger.debug("profile: {}", profile);
+                    if (profile != null) {
+                        manager.save(useSession, profile);
+                        break;
+                    }
+                }
             }
         }
 
         if (profile != null) {
             logger.debug("authorizerName: {}", authorizerName);
             if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+                logger.debug("grant access");
                 chain.doFilter(request, response);
             } else {
-                context.setResponseStatus(HttpConstants.FORBIDDEN);
+                logger.debug("forbidden");
+                forbidden(context, currentClients);
+
             }
         } else {
-            if (client instanceof IndirectClient) {
+            if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
+                final Client currentClient =  currentClients.get(0);
+                logger.debug("Starting authentication for client: {}", currentClient);
                 saveRequestedUrl(context);
-                redirectToIdentityProvider(client, context);
+                redirectToIdentityProvider(currentClient, context);
             } else {
+                logger.debug("unauthorized");
                 context.setResponseStatus(HttpConstants.UNAUTHORIZED);
             }
         }
     }
 
-    protected boolean useSession(final WebContext context, final Client client) {
-        return client == null || client instanceof IndirectClient;
+    protected boolean useSession(final WebContext context, final List<Client> currentClients) {
+        return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
+    }
+
+    protected void forbidden(final WebContext context, final List<Client> currentClients) {
+        context.setResponseStatus(HttpConstants.FORBIDDEN);
     }
 
     protected void saveRequestedUrl(final WebContext context) {
