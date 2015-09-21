@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.J2EContext;
@@ -32,8 +33,8 @@ import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
-import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 
 /**
@@ -52,6 +53,9 @@ public class CallbackFilter extends AbstractConfigFilter {
     public void init(final FilterConfig filterConfig) throws ServletException {
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         CommonHelper.assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
+
+        // to help with backward compatibility
+        checkUselessParameter(filterConfig, "clientsFactory");
     }
 
     @Override
@@ -59,7 +63,7 @@ public class CallbackFilter extends AbstractConfigFilter {
                                            final FilterChain chain) throws IOException, ServletException {
 
         final WebContext context = new J2EContext(request, response);
-        final ProfileManager manager = new ProfileManager(context);
+
         final Config config = ConfigSingleton.getConfig();
         CommonHelper.assertNotNull("config", config);
         final Clients clients = config.getClients();
@@ -67,6 +71,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         final Client client = clients.findClient(context);
         logger.debug("client: {}", client);
         CommonHelper.assertNotNull("client", client);
+        CommonHelper.assertTrue(client instanceof IndirectClient, "only indirect clients are allowed on the callback url");
 
         final Credentials credentials;
         try {
@@ -77,13 +82,17 @@ public class CallbackFilter extends AbstractConfigFilter {
         }
         logger.debug("credentials: {}", credentials);
 
-        final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, context);
+        final UserProfile profile = client.getUserProfile(credentials, context);
         logger.debug("profile: {}", profile);
+        saveUserProfile(context, profile);
+        redirectToOriginallyRequestedUrl(context, response);
+    }
+
+    protected void saveUserProfile(final WebContext context, final UserProfile profile) {
+        final ProfileManager manager = new ProfileManager(context);
         if (profile != null) {
             manager.save(true, profile);
         }
-
-        redirectToOriginallyRequestedUrl(context, response);
     }
 
     protected void redirectToOriginallyRequestedUrl(final WebContext context, final HttpServletResponse response) throws IOException {
