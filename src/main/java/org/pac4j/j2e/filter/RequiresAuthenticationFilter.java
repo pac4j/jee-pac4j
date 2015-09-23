@@ -135,17 +135,17 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
                 chain.doFilter(request, response);
             } else {
                 logger.debug("forbidden");
-                forbidden(context, currentClients);
+                forbidden(context, currentClients, profile);
             }
         } else {
             if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
-                final Client currentClient =  currentClients.get(0);
-                logger.debug("Starting authentication for client: {}", currentClient);
+                logger.debug("Starting authentication for client: {}", currentClients.get(0));
                 saveRequestedUrl(context);
-                redirectToIdentityProvider(currentClient, context);
+                redirectToIdentityProvider(context, currentClients);
             } else {
                 logger.debug("unauthorized");
-                context.setResponseStatus(HttpConstants.UNAUTHORIZED);
+                unauthorized(context, currentClients);
+
             }
         }
     }
@@ -154,7 +154,7 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
     }
 
-    protected void forbidden(final WebContext context, final List<Client> currentClients) {
+    protected void forbidden(final WebContext context, final List<Client> currentClients, final UserProfile profile) {
         context.setResponseStatus(HttpConstants.FORBIDDEN);
     }
 
@@ -164,12 +164,17 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
     }
 
-    protected void redirectToIdentityProvider(final Client client, final WebContext context) {
+    protected void redirectToIdentityProvider(final WebContext context, final List<Client> currentClients) {
         try {
-            client.redirect(context, true);
+            final IndirectClient currentClient = (IndirectClient) currentClients.get(0);
+            currentClient.redirect(context, true);
         } catch (final RequiresHttpAction e) {
             logger.debug("extra HTTP action required: {}", e.getCode());
         }
+    }
+
+    protected void unauthorized(final WebContext context, final List<Client> currentClients) {
+        context.setResponseStatus(HttpConstants.UNAUTHORIZED);
     }
 
     public Config getConfig() {
