@@ -138,9 +138,9 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
                 forbidden(context, currentClients, profile);
             }
         } else {
-            if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
-                logger.debug("Starting authentication for client: {}", currentClients.get(0));
-                saveRequestedUrl(context);
+            if (startAuthentication(context, currentClients)) {
+                logger.debug("Starting authentication");
+                saveRequestedUrl(context, currentClients);
                 redirectToIdentityProvider(context, currentClients);
             } else {
                 logger.debug("unauthorized");
@@ -158,7 +158,11 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         context.setResponseStatus(HttpConstants.FORBIDDEN);
     }
 
-    protected void saveRequestedUrl(final WebContext context) {
+    protected boolean startAuthentication(final WebContext context, final List<Client> currentClients) {
+        return currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient;
+    }
+
+    protected void saveRequestedUrl(final WebContext context, final List<Client> currentClients) {
         final String requestedUrl = context.getFullRequestURL();
         logger.debug("requestedUrl: {}", requestedUrl);
         context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
