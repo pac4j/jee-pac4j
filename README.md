@@ -1,6 +1,6 @@
 ## What is the j2e-pac4j library? [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j)
 
-The `j2e-pac4j` project is an easy and powerful security library for simple J2E web applications which supports authentication and authorization, but also application logout. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `j2e-pac4j` project is an easy and powerful security library for simple J2E web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
 It supports stateful / indirect and stateless / direct [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows) using external identity providers or internal credentials authenticators and user profile creators:
 
@@ -177,8 +177,6 @@ The following parameters can be defined:
 - `authorizerName` (optional): the authorizer name (or a list of authorizer names separated by commas) which will protect the resource (they must exist in the authorizers configuration). By default (if blank), the user only requires to be authenticated to access the resource.
 
 This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
-
-Define the appropriate `org.pac4j.core.authorization.AuthorizationGenerator` and attach it to the client (using the `addAuthorizationGenerator` method) to compute the roles / permissions of the authenticated user.
 
 
 ### Get redirection urls
