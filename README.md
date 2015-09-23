@@ -101,7 +101,7 @@ For example:
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
-See all available [`Client` and `Authenticator`](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`](https://github.com/pac4j/pac4j/wiki/Authorizers).
+See all available [**clients and authenticators**](https://github.com/pac4j/pac4j/wiki/Clients) and all available [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
