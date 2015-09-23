@@ -52,7 +52,7 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
       </repository>
     </repositories>
 
-### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
+### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
 They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the authorizers which will be used by the application.
@@ -101,7 +101,7 @@ For example:
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
-See all available [`Client`s and `Authenticator`s](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`s](https://github.com/pac4j/pac4j/wiki/Authorizers).
+See all available [`Client` and `Authenticator`](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
