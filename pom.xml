@@ -28,7 +28,7 @@
     <packaging>jar</packaging>
     <name>pac4j implementation for J2E</name>
     <version>1.2.0-SNAPSHOT</version>
-    <description>Authentication/authorization library for J2E based on pac4j</description>
+    <description>Security library for J2E based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
     <licenses>
