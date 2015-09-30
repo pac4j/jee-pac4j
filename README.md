@@ -1,56 +1,40 @@
-## What is the j2e-pac4j library? [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j)
+<p align="center">
+  <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="50%" height="50%" />
+</p>
 
-The `j2e-pac4j` project is an easy and powerful security library for simple J2E web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
-It supports stateful / indirect and stateless / direct [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows) using external identity providers or internal credentials authenticators and user profile creators:
+It supports the main [authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Authentication-flows) (via stateful / indirect clients for UI based on external identity providers and stateless / direct clients for web services using internal credentials authenticators and user profile creators):
 
 1. **OAuth** (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... using the `pac4j-oauth` module
-2. **CAS** (1.0, 2.0, SAML, logout & proxy) + REST API support using the `pac4j-cas` module
-3. **HTTP** (form, basic auth, IP, header, GET/POST parameter authentications) using the `pac4j-http` module
+2. **CAS** (1.0, 2.0, 3.0, SAML, logout, proxy, REST) using the `pac4j-cas` module
+3. **HTTP** (form, basic auth, IP, header, cookie, GET/POST parameter) using the `pac4j-http` module
 4. **OpenID** using the `pac4j-openid` module
 5. **SAML** (2.0) using the `pac4j-saml` module
 6. **Google App Engine** UserService using the `pac4j-gae` module
-7. **OpenID Connect** 1.0 using the `pac4j-oidc` module
+7. **OpenID Connect** (1.0) using the `pac4j-oidc` module
 8. **JWT** using the `pac4j-jwt` module
 9. **LDAP** using the `pac4j-ldap` module
-10. **relational DB** using the `pac4j-sql` module
+10. **Relational DB** using the `pac4j-sql` module
 11. **MongoDB** using the `pac4j-mongo` module
 12. **Stormpath** using the `pac4j-stormpath` module.
 
 
-## Technical description
-
-This project has **only 4 classes**:
-
-1. the `AbstractConfigFilter` is an abstract J2E filter to manage the configuration
-2. the `RequiresAuthenticationFilter` is a J2E filter to protect urls and requires authentication / authorization
-3. the `CallbackFilter` is a J2E filter to handle the callback from an identity provider after login to finish the authentication process
-4. the `ApplicationLogoutFilter` is a J2E filter to manage the application logout
-
-and is based on the `pac4j-core` library. Learn more by browsing the [j2e-pac4j Javadoc](http://www.pac4j.org/apidocs/j2e-pac4j/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
-
-
 ## How to use it?
+
+First, you need to add a dependency on this library as well as on the appropriate `pac4j` modules. Then, you must define the authentication mechanisms = [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) and [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
+
+Define the `CallbackFilter` to finish authentication processes for indirect clients (like Facebook).
+
+Use the `RequiresAuthenticationFilter` to secure the urls of your web application (authentication + authorizations).
+
 
 ### Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
 
-You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *latest version*: **1.2.0-SNAPSHOT**) as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...  
+You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.2.0-SNAPSHOT**) as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-RC1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
-As snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), this repository must be added in the Maven *pom.xml* file for example:
+Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
 
-    <repositories>
-      <repository>
-        <id>sonatype-nexus-snapshots</id>
-        <name>Sonatype Nexus Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        <releases>
-          <enabled>false</enabled>
-        </releases>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-      </repository>
-    </repositories>
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
@@ -100,8 +84,6 @@ For example:
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
-
-See all available [**clients and authenticators**](https://github.com/pac4j/pac4j/wiki/Clients) and all available [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
@@ -242,3 +224,23 @@ If you have any question, please use the following mailing lists:
 
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
+
+## Development
+
+The current version 1.2.0-SNAPSHOT is under development.
+
+Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the Maven *pom.xml* file for example:
+
+    <repositories>
+      <repository>
+        <id>sonatype-nexus-snapshots</id>
+        <name>Sonatype Nexus Snapshots</name>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+          <enabled>false</enabled>
+        </releases>
+        <snapshots>
+          <enabled>true</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
