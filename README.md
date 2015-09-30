@@ -33,8 +33,6 @@ Use the `RequiresAuthenticationFilter` to secure the urls of your web applicatio
 
 You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.2.0-SNAPSHOT**) as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-RC1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
-Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
-
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
@@ -215,7 +213,7 @@ The demo webapp: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) is av
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes).
+See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
 
 
 ## Need help?
