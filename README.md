@@ -24,9 +24,11 @@ It supports the main [authentication mechanisms](https://github.com/pac4j/pac4j/
 
 First, you need to add a dependency on this library as well as on the appropriate `pac4j` modules. Then, you must define the authentication mechanisms = [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) and [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
 
-Define the `CallbackFilter` to finish authentication processes for indirect clients (like Facebook).
+Define the `CallbackFilter` to finish authentication processes if you use indirect clients (like Facebook).
 
-Use the `RequiresAuthenticationFilter` to secure the urls of your web application (authentication + authorizations).
+Use the `RequiresAuthenticationFilter` to secure the urls of your web application (using the `clientName` parameter for authentication and the `authorizerName` parameter for authorizations).
+
+Just follow these easy steps:
 
 
 ### Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
