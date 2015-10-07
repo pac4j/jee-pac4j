@@ -204,9 +204,13 @@ The following parameters can be defined:
 
 ## Migration guide
 
-The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
-The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead.
+Authorizations are now handled by the library so the `ClientFactory` can now longer be used and is replaced by a `ConfigFactory` which builds a `Config` which gathers clients (for authentication) and authorizers (for authorizations).
 
+The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
+
+The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead (with the `authorizerName` parameter).
+
+The application logout process can be managed with the `ApplicationLogoutFilter`.
 
 ## Demo
 
