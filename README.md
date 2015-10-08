@@ -11,7 +11,7 @@ It supports most authentication mechanisms, called ["clients"](https://github.co
 
 See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows).
 
-| The authentication mechanism you need | The `pac4j-*` submodule you must use
+| The authentication mechanism you want | The `pac4j-*` submodule you must use
 |---------------------------------------|-------------------------------------
 | OAuth (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... | `pac4j-oauth`
 | CAS (1.0, 2.0, 3.0, SAML, logout, proxy, REST) | `pac4j-cas`
@@ -26,7 +26,7 @@ See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authenticatio
 | MongoDB | `pac4j-mongo`
 | Stormpath | `pac4j-stormpath`
 
-It supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` and `pac4j-http` submodules: role / permission checks, CSRF token validation...
+It also supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` and `pac4j-http` submodules: role / permission checks, CSRF token validation...
 
 
 ## How to use it?
