@@ -4,7 +4,7 @@
 
 The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
-It supports most authentication mechanisms, called ["clients"](https://github.com/pac4j/pac4j/wiki/Clients):
+It supports most authentication mechanisms, called [**clients**](https://github.com/pac4j/pac4j/wiki/Clients):
 
 - **indirect / stateful clients** are for UI when the user authenticates once at an external provider (like Facebook, a CAS server...) or via a local form (or basic auth popup)  
 - **direct / stateless clients** are for web services when credentials (like basic auth, tokens...) are passed for each HTTP request.
