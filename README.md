@@ -31,7 +31,7 @@ It also supports many authorization checks, called [**authorizers**](https://git
 
 ## How to use it?
 
-First, you need to add a dependency on this library as well as on the appropriate `pac4j` submodules. Then, you must define the authentication mechanisms = [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) and [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
+First, you need to add a dependency on this library as well as on the appropriate `pac4j` submodules. Then, you must define the [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) for authentication and the [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
 
 Define the `CallbackFilter` to finish authentication processes if you use indirect clients (like Facebook).
 
