@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="50%" height="50%" />
+  <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="300" />
 </p>
 
-The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**.
 
 It supports most authentication mechanisms, called [**clients**](https://github.com/pac4j/pac4j/wiki/Clients):
 
@@ -163,9 +163,9 @@ You can protect an url and require the user to be authenticated by a client (and
 
 The following parameters can be defined:
 
-- `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively. If the user is still not authenticated and if the first client is an indirect one, it is used to start the authentication. If the *client_name* request parameter is provided, only the matching client is selected
+- `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively then if the user is still not authenticated and if the first client is an indirect one, this client is used to start the authentication. Otherwise, a 401 HTTP error is returned. If the *client_name* request parameter is provided, only the matching client is selected
 - `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
-- `authorizerName` (optional): the authorizer name (or a list of authorizer names separated by commas) which will protect the resource (they must exist in the authorizers configuration). By default (if blank), the user only requires to be authenticated to access the resource.
+- `authorizerName` (optional): the list of authorizer names (separated by commas) used to check authorizations. If the user is not authorized, a 403 HTTP error is returned. By default (if blank), the user only requires to be authenticated to access the resource.
 
 This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
 
