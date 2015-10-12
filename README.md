@@ -211,7 +211,7 @@ The following parameters can be defined:
 - `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
 
 
-## Migration guide
+## Migration guide (1.1 -> 1.2)
 
 Authorizations are now handled by the library so the `ClientFactory` can now longer be used and is replaced by a `ConfigFactory` which builds a `Config` which gathers clients (for authentication) and authorizers (for authorizations).
 

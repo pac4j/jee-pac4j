@@ -131,7 +131,7 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         if (profile != null) {
             logger.debug("authorizerName: {}", authorizerName);
             if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
-                logger.debug("grant access");
+                logger.debug("authenticated and authorized -> grant access");
                 chain.doFilter(request, response);
             } else {
                 logger.debug("forbidden");
