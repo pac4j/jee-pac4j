@@ -48,7 +48,8 @@ All artifacts are available in the [Maven central repository](http://search.mave
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
-Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
+Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.
+
 They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the authorizers which will be used by the application.
 For example:
 
@@ -91,14 +92,14 @@ For example:
         }
     }
 
-"http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
+"http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support / direct clients only.
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
 
-Some authentication mechanisms rely on external identity providers (like Facebook) and thus require to define a callback endpoint where the user will be redirected after login at the identity provider. For REST support only, this callback endpoint is not necessary.  
+Indirect clients rely on external identity providers (like Facebook) and thus require to define a callback endpoint where the user will be redirected after login at the identity provider. For REST support / direct clients only, this callback endpoint is not necessary.  
 It must be defined in the *web.xml* file by the `CallbackFilter`:
 
     <filter>
