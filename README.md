@@ -168,6 +168,7 @@ The following parameters can be defined:
 - `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively then if the user is still not authenticated and if the first client is an indirect one, this client is used to start the authentication. Otherwise, a 401 HTTP error is returned. If the *client_name* request parameter is provided, only the matching client is selected
 - `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
 - `authorizerName` (optional): the list of authorizer names (separated by commas) used to check authorizations. If the user is not authorized, a 403 HTTP error is returned. By default (if blank), the user only requires to be authenticated to access the resource.
+- `excludePath` (optional): the regular expression (starting by ^ and ending by $) which defines the full path(s) excluded from the authentication / authorization process. Excluding paths is an advanced feature: be careful when defining your regular expression to avoid any security issue!
 
 This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
 

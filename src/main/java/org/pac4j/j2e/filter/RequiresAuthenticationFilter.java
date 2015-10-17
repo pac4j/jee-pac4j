@@ -30,10 +30,7 @@ import org.pac4j.core.client.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
 import org.pac4j.core.config.ConfigSingleton;
-import org.pac4j.core.context.HttpConstants;
-import org.pac4j.core.context.J2EContext;
-import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.*;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
@@ -49,8 +46,8 @@ import org.pac4j.core.util.CommonHelper;
  * </ul>
  * <p>Then, authorizations are checked before accessing the resource.</p>
  * <p>Forbidden or unauthorized errors can be returned. An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
- * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code> and <code>authorizerName</code>.</p>
- * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClientName(String)} and {@link #setAuthorizerName(String)}.</p>
+ * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>authorizerName</code> and <code>excludePath</code>.</p>
+ * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClientName(String)}, {@link #setAuthorizerName(String)} and {@link #setExcludePath(String)}.</p> *
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
@@ -62,9 +59,13 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
 
+    protected PathMatcher pathMatcher = new ExcludePathMatcher();
+
     protected String clientName;
 
     protected String authorizerName;
+
+    protected String excludePath;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -75,6 +76,7 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         }
         this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
         this.authorizerName = getStringParam(filterConfig, Pac4jConstants.AUTHORIZER_NAME, this.authorizerName);
+        setExcludePath(getStringParam(filterConfig, Pac4jConstants.EXCLUDE_PATH, this.excludePath));
 
         // to help with backward compatibility
         checkUselessParameter(filterConfig, "clientsFactory");
@@ -91,61 +93,69 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         final WebContext context = new J2EContext(request, response);
         logger.debug("url: {}", context.getFullRequestURL());
 
-        final Config config = ConfigSingleton.getConfig();
-        CommonHelper.assertNotNull("config", config);
-        final Clients configClients = config.getClients();
-        CommonHelper.assertNotNull("configClients", configClients);
-        logger.debug("clientName: {}", clientName);
-        final List<Client> currentClients = clientFinder.find(configClients, context, this.clientName);
-        logger.debug("currentClients: {}", currentClients);
+        if (pathMatcher.matches(context)) {
 
-        final boolean useSession = useSession(context, currentClients);
-        logger.debug("useSession: {}", useSession);
-        final ProfileManager manager = new ProfileManager(context);
-        UserProfile profile = manager.get(useSession);
-        logger.debug("profile: {}", profile);
+            logger.debug("excluded path -> grant access");
+            chain.doFilter(request, response);
 
-        // no profile and some current clients
-        if (profile == null && currentClients != null && currentClients.size() > 0) {
-            // loop on all clients searching direct ones to perform authentication
-            for (final Client currentClient: currentClients) {
-                if (currentClient instanceof DirectClient) {
-                    logger.debug("Performing authentication for client: {}", currentClient);
-                    final Credentials credentials;
-                    try {
-                        credentials = currentClient.getCredentials(context);
-                        logger.debug("credentials: {}", credentials);
-                    } catch (final RequiresHttpAction e) {
-                        throw new TechnicalException("Unexpected HTTP action", e);
-                    }
-                    profile = currentClient.getUserProfile(credentials, context);
-                    logger.debug("profile: {}", profile);
-                    if (profile != null) {
-                        manager.save(useSession, profile);
-                        break;
+        } else {
+
+            final Config config = ConfigSingleton.getConfig();
+            CommonHelper.assertNotNull("config", config);
+            final Clients configClients = config.getClients();
+            CommonHelper.assertNotNull("configClients", configClients);
+            logger.debug("clientName: {}", clientName);
+            final List<Client> currentClients = clientFinder.find(configClients, context, this.clientName);
+            logger.debug("currentClients: {}", currentClients);
+
+            final boolean useSession = useSession(context, currentClients);
+            logger.debug("useSession: {}", useSession);
+            final ProfileManager manager = new ProfileManager(context);
+            UserProfile profile = manager.get(useSession);
+            logger.debug("profile: {}", profile);
+
+            // no profile and some current clients
+            if (profile == null && currentClients != null && currentClients.size() > 0) {
+                // loop on all clients searching direct ones to perform authentication
+                for (final Client currentClient : currentClients) {
+                    if (currentClient instanceof DirectClient) {
+                        logger.debug("Performing authentication for client: {}", currentClient);
+                        final Credentials credentials;
+                        try {
+                            credentials = currentClient.getCredentials(context);
+                            logger.debug("credentials: {}", credentials);
+                        } catch (final RequiresHttpAction e) {
+                            throw new TechnicalException("Unexpected HTTP action", e);
+                        }
+                        profile = currentClient.getUserProfile(credentials, context);
+                        logger.debug("profile: {}", profile);
+                        if (profile != null) {
+                            manager.save(useSession, profile);
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        if (profile != null) {
-            logger.debug("authorizerName: {}", authorizerName);
-            if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
-                logger.debug("authenticated and authorized -> grant access");
-                chain.doFilter(request, response);
+            if (profile != null) {
+                logger.debug("authorizerName: {}", authorizerName);
+                if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+                    logger.debug("authenticated and authorized -> grant access");
+                    chain.doFilter(request, response);
+                } else {
+                    logger.debug("forbidden");
+                    forbidden(context, currentClients, profile);
+                }
             } else {
-                logger.debug("forbidden");
-                forbidden(context, currentClients, profile);
-            }
-        } else {
-            if (startAuthentication(context, currentClients)) {
-                logger.debug("Starting authentication");
-                saveRequestedUrl(context, currentClients);
-                redirectToIdentityProvider(context, currentClients);
-            } else {
-                logger.debug("unauthorized");
-                unauthorized(context, currentClients);
+                if (startAuthentication(context, currentClients)) {
+                    logger.debug("Starting authentication");
+                    saveRequestedUrl(context, currentClients);
+                    redirectToIdentityProvider(context, currentClients);
+                } else {
+                    logger.debug("unauthorized");
+                    unauthorized(context, currentClients);
 
+                }
             }
         }
     }
@@ -203,5 +213,15 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     public void setAuthorizerName(final String authorizerName) {
         this.authorizerName = authorizerName;
+    }
+
+
+    public String getExcludePath() {
+        return excludePath;
+    }
+
+    public void setExcludePath(String excludePath) {
+        this.excludePath = excludePath;
+        pathMatcher = new ExcludePathMatcher(excludePath);
     }
 }

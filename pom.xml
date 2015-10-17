@@ -53,17 +53,22 @@
         </developer>
     </developers>
 
+    <properties>
+        <servlet.version>3.0.1</servlet.version>
+        <pac4j.version>1.8.1-SNAPSHOT</pac4j.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.0.1</version>
+            <version>${servlet.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
-            <version>1.8.0</version>
+            <version>${pac4j.version}</version>
         </dependency>
 
     </dependencies>
