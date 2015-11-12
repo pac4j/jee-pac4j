@@ -34,6 +34,8 @@ import org.pac4j.core.context.*;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.matching.DefaultMatchingChecker;
+import org.pac4j.core.matching.MatchingChecker;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
@@ -46,8 +48,8 @@ import org.pac4j.core.util.CommonHelper;
  * </ul>
  * <p>Then, authorizations are checked before accessing the resource.</p>
  * <p>Forbidden or unauthorized errors can be returned. An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
- * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>authorizerName</code> and <code>excludePath</code>.</p>
- * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClientName(String)}, {@link #setAuthorizerName(String)} and {@link #setExcludePath(String)}.</p> *
+ * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>authorizerName</code> and <code>matcherName</code>.</p>
+ * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClientName(String)}, {@link #setAuthorizerName(String)} and {@link #setMatcherName(String)} .</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
@@ -59,13 +61,13 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
 
-    protected PathMatcher pathMatcher = new ExcludePathMatcher();
+    protected MatchingChecker matchingChecker = new DefaultMatchingChecker();
 
     protected String clientName;
 
     protected String authorizerName;
 
-    protected String excludePath;
+    protected String matcherName;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -76,7 +78,7 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         }
         this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
         this.authorizerName = getStringParam(filterConfig, Pac4jConstants.AUTHORIZER_NAME, this.authorizerName);
-        setExcludePath(getStringParam(filterConfig, Pac4jConstants.EXCLUDE_PATH, this.excludePath));
+        this.matcherName = getStringParam(filterConfig, Pac4jConstants.MATCHER_NAME, this.matcherName);
 
         // to help with backward compatibility
         checkUselessParameter(filterConfig, "clientsFactory");
@@ -92,16 +94,12 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
         final WebContext context = new J2EContext(request, response);
         logger.debug("url: {}", context.getFullRequestURL());
+        final Config config = ConfigSingleton.getConfig();
+        CommonHelper.assertNotNull("config", config);
 
-        if (pathMatcher.matches(context)) {
+        logger.debug("matcherName: {}", matcherName);
+        if (matchingChecker.matches(context, this.matcherName, getConfig().getMatchers())) {
 
-            logger.debug("excluded path -> grant access");
-            chain.doFilter(request, response);
-
-        } else {
-
-            final Config config = ConfigSingleton.getConfig();
-            CommonHelper.assertNotNull("config", config);
             final Clients configClients = config.getClients();
             CommonHelper.assertNotNull("configClients", configClients);
             logger.debug("clientName: {}", clientName);
@@ -157,6 +155,11 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
                 }
             }
+
+        } else {
+
+            logger.debug("no matching for this request -> grant access");
+            chain.doFilter(request, response);
         }
     }
 
@@ -215,13 +218,11 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         this.authorizerName = authorizerName;
     }
 
-
-    public String getExcludePath() {
-        return excludePath;
+    public String getMatcherName() {
+        return matcherName;
     }
 
-    public void setExcludePath(String excludePath) {
-        this.excludePath = excludePath;
-        pathMatcher = new ExcludePathMatcher(excludePath);
+    public void setMatcherName(String matcherName) {
+        this.matcherName = matcherName;
     }
 }
