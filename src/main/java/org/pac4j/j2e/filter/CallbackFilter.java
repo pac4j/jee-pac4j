@@ -62,10 +62,10 @@ public class CallbackFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        final WebContext context = new J2EContext(request, response);
-
         final Config config = ConfigSingleton.getConfig();
         CommonHelper.assertNotNull("config", config);
+        final WebContext context = new J2EContext(request, response, config.getSessionStore());
+
         final Clients clients = config.getClients();
         CommonHelper.assertNotNull("clients", clients);
         final Client client = clients.findClient(context);

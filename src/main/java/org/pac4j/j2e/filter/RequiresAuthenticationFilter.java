@@ -92,11 +92,11 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain chain) throws IOException, ServletException {
 
-        final WebContext context = new J2EContext(request, response);
-        logger.debug("url: {}", context.getFullRequestURL());
         final Config config = ConfigSingleton.getConfig();
         CommonHelper.assertNotNull("config", config);
+        final WebContext context = new J2EContext(request, response, config.getSessionStore());
 
+        logger.debug("url: {}", context.getFullRequestURL());
         logger.debug("matcherName: {}", matcherName);
         if (matchingChecker.matches(context, this.matcherName, getConfig().getMatchers())) {
 
