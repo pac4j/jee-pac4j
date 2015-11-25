@@ -15,6 +15,8 @@
  */
 package org.pac4j.j2e.filter;
 
+import org.pac4j.core.config.Config;
+import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
@@ -56,7 +58,9 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        final WebContext context = new J2EContext(request, response);
+        final Config config = ConfigSingleton.getConfig();
+        CommonHelper.assertNotNull("config", config);
+        final WebContext context = new J2EContext(request, response, config.getSessionStore());
         final ProfileManager manager = new ProfileManager(context);
         manager.logout();
 

@@ -89,6 +89,8 @@ For example:
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support / direct clients only.
 
+Notice that you can also use a specific `SessionStore` by defining it via the `Config.setSessionStore(sessionStore)` method.
+
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
 
