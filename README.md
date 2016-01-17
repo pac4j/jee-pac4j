@@ -37,7 +37,7 @@ Just follow these easy steps:
 
 ### Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
 
-You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.2.1**) as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.2.2-SNAPSHOT**) as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.5-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -172,19 +172,13 @@ The following parameters can be defined:
 This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
 
 
-### Get redirection urls
-
-You can also explicitly compute a redirection url to a provider by using the `getRedirectAction` method of the client, in order to create an explicit link for login. For example with Facebook:
-
-	Clients client = ConfigSingleton.getConfig().getClients();
-	FacebookClient fbClient = (FacebookClient) client.findClient("FacebookClient");
-	WebContext context = new J2EContext(request, response);
-	String fbLoginUrl = fbClient.getRedirectAction(context, false).getLocation();
-
-
 ### Get the user profile
 
-You can test if the user is authenticated using the `ProfileManager.isAuthenticated()` method or get the user profile using the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request).
+You can test if the user is authenticated using the `ProfileManager.isAuthenticated()` method or get the user profile using the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request):
+
+    WebContext context = new J2EContext(request, response);
+    ProfileManager manager = new ProfileManager(context);
+    UserProfile profile = manager.get(true);
 
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common properties that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
  
@@ -230,7 +224,7 @@ The demo webapp: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) is av
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/1.2.1) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.1/index.html).
+See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/1.2.2) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.5/index.html).
 
 
 ## Need help?
