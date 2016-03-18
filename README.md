@@ -19,7 +19,10 @@ Just follow these easy steps to secure your J2E web application:
 
 ### 1) Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
 
-You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.3.0-SNAPSHOT**) as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+You need to add a dependency on:
+ 
+- the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.3.0-SNAPSHOT**)
+- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support (Facebook, Twitter...), the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -99,7 +102,7 @@ You can protect the urls of your J2E application by using the `SecurityFilter` a
 
 5) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
 
-Example:
+In the `web.xml` file:
 
 ```xml
 <filter>
@@ -126,7 +129,7 @@ This filter can be defined via dependency injection as well. In that case, these
 ### 4) Define the callback endpoint (only for indirect clients)
 
 For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
-Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter` with the following parameters:
+Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter`. The following parameters can be defined:
 
 1) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
@@ -196,14 +199,13 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 You can log out the current authenticated user using the `ApplicationLogoutFilter`. When called without an `url` parameter, a blank page is displayed.
 If an `url` parameter is provided, the user is redirected after logout to this url if it matches the `logoutPatternUrl` or to the default url otherwise.
-
 The following parameters can be defined:
 
 1) `defaultUrl` (optional): the default logout url if the provided `url` parameter does not match the `logoutUrlPattern` (`/` by default)
 
 2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default).
 
-Example:
+In the `web.xml` file:
 
 ```xml
 <filter>
@@ -256,7 +258,7 @@ If you have any question, please use the following mailing lists:
 
 The version 1.3.0-SNAPSHOT is under development.
 
-Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the Maven *pom.xml* file for example:
+Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the Maven `pom.xml` file for example:
 
 ```xml
 <repositories>
