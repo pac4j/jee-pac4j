@@ -77,9 +77,9 @@ Notice that you can also use a specific `SessionStore` by defining it via the `C
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
 
-### 3) Protect urls (authentication + authorizations)
+### 3) Protect urls (`SecurityFilter`)
 
-You can protect the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters can be defined:
+You can protect (authentication + authorizations) the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters can be defined:
 
 1) `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
 
@@ -126,7 +126,7 @@ In the `web.xml` file:
 This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
 
 
-### 4) Define the callback endpoint (only for indirect clients)
+### 4) Define the callback endpoint only for indirect clients (`CallbackFilter`)
 
 For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
 Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter`. The following parameters can be defined:
@@ -174,7 +174,7 @@ and the specific bean in the `application-context.xml` file:
 ```
 
 
-### 5) Get the user profile
+### 5) Get the user profile (`ProfileManager`)
 
 You can get the profile of the authenticated user using `profileManager.get(true)` (`false` not to use the session, but only the current HTTP request).
 You can test if the user is authenticated using `profileManager.isAuthenticated()`.
@@ -195,7 +195,7 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 ```
 
 
-### 6) Logout
+### 6) Logout (`ApplicationLogoutFilter`)
 
 You can log out the current authenticated user using the `ApplicationLogoutFilter`. When called without an `url` parameter, a blank page is displayed.
 If an `url` parameter is provided, the user is redirected after logout to this url if it matches the `logoutPatternUrl` or to the default url otherwise.
