@@ -22,7 +22,7 @@ Just follow these easy steps to secure your J2E web application:
 You need to add a dependency on:
  
 - the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.3.0-SNAPSHOT**)
-- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support (Facebook, Twitter...), the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, etc.
+- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0-SNAPSHOT**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -72,7 +72,7 @@ public class DemoConfigFactory implements ConfigFactory {
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
-Notice that you can also use a specific `SessionStore` by defining it via the `Config.setSessionStore(sessionStore)` method.
+Notice that you can also use a specific [`SessionStore`](https://github.com/pac4j/pac4j/wiki/SessionStore) by defining it via the `setSessionStore(sessionStore)` method as well as specific [matchers](https://github.com/pac4j/pac4j/wiki/Matchers) via the `addMatcher(name, Matcher)` method.
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
