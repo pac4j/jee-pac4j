@@ -2,212 +2,228 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="300" />
 </p>
 
-The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**.
+The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's based on Java 8 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
-It supports most authentication mechanisms, called [**clients**](https://github.com/pac4j/pac4j/wiki/Clients):
+**Main concepts:**
 
-- **indirect / stateful clients** are for UI when the user authenticates once at an external provider (like Facebook, a CAS server...) or via a local form (or basic auth popup)  
-- **direct / stateless clients** are for web services when credentials (like basic auth, tokens...) are passed for each HTTP request.
+1) A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism (CAS, OAuth, SAML, OpenID Connect, LDAP, JWT...) It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication
 
-See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows).
+2) An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile (role / permission, ...) or on the current web context (IP check, CSRF...)
 
-| The authentication mechanism you want | The `pac4j-*` submodule(s) you must use
-|---------------------------------------|----------------------------------------
-| OAuth (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... | `pac4j-oauth`
-| CAS (1.0, 2.0, 3.0, SAML, logout, proxy) | `pac4j-cas`
-| SAML (2.0) | `pac4j-saml`
-| OpenID Connect (1.0) | `pac4j-oidc`
-| HTTP (form, basic auth, IP, header, cookie, GET/POST parameter)<br />+<br />JWT<br />or LDAP<br />or Relational DB<br />or MongoDB<br />or Stormpath<br />or CAS REST API| `pac4j-http`<br />+<br />`pac4j-jwt`<br />or `pac4j-ldap`<br />or `pac4j-sql`<br />or `pac4j-mongo`<br />or `pac4j-stormpath`<br />or `pac4j-cas`
-| Google App Engine UserService | `pac4j-gae`
-| OpenID | `pac4j-openid`
+3) The `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
 
-It also supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` (and `pac4j-http`) submodules: role / permission checks, IP check, profile type verification, HTTP method verification... as well as regular security protections for CSRF, XSS, cache control, Xframe...
+4) The `CallbackFilter` finishes the login process for an indirect client.
+
+Just follow these easy steps to secure your J2E web application:
 
 
-## How to use it?
+### 1) Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
 
-First, you need to add a dependency on this library as well as on the appropriate `pac4j` submodules. Then, you must define the [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) for authentication and the [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
-
-Define the `CallbackFilter` to finish authentication processes if you use indirect clients (like Facebook).
-
-Use the `RequiresAuthenticationFilter` to secure the urls of your web application (using the `clientName` parameter for authentication and the `authorizerName` parameter for authorizations).
-
-Just follow these easy steps:
-
-
-### Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
-
-You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.2.2**) as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.5**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+You need to add a dependency on the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **1.3.0-SNAPSHOT**) as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
-### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
-Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.
+### 2) Define the configuration (`Config` + `Client` + `Authorizer`)
 
-They can be defined in a specific class implementing the `org.pac4j.core.config.ConfigFactory` interface to build a `org.pac4j.core.config.Config` which contains the `Clients` as well as the authorizers which will be used by the application.
-For example:
+The configuration (`org.pac4j.core.config.Config`) contains all clients and authorizers required by the application to handle security.
 
-    public class DemoConfigFactory implements ConfigFactory {
-    
-        @Override
-        public Config build() {
-            final OidcClient oidcClient = new OidcClient();
-            oidcClient.setClientID("id");
-            oidcClient.setSecret("secret");
-            oidcClient.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration");
-            oidcClient.addCustomParam("prompt", "consent");
-    
-            final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
-                    "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:testshib-providers.xml");
-            cfg.setMaximumAuthenticationLifetime(3600);
-            cfg.setServiceProviderEntityId("urn:mace:saml:pac4j.org");
-            cfg.setServiceProviderMetadataPath(new File("target", "sp-metadata.xml").getAbsolutePath());
-            final SAML2Client saml2Client = new SAML2Client(cfg);
-    
-            final FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
-            final TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
-    
-            final FormClient formClient = new FormClient("http://localhost:8080/theForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
-            final IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
-    
-            final CasClient casClient = new CasClient();
-            casClient.setCasLoginUrl("http://mycasserver/login");
-    
-            ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"));
-    
-            final Clients clients = new Clients("http://localhost:8080/callback", oidcClient, saml2Client, facebookClient,
-                    twitterClient, formClient, basicAuthClient, casClient, parameterClient);
-    
-            final Config config = new Config(clients);
-            config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
-            config.addAuthorizer("custom", new CustomAuthorizer());
-    
-            return config;
-        }
-    }
+It must be built via a configuration factory (`org.pac4j.core.config.ConfigFactory`):
 
-"http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support / direct clients only.
+```java
+public class DemoConfigFactory implements ConfigFactory {
+
+  public Config build() {
+    GoogleOidcClient oidcClient = new GoogleOidcClient();
+    oidcClient.setClientID("id");
+    oidcClient.setSecret("secret");
+    oidcClient.addCustomParam("prompt", "consent");
+
+    SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
+                "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:testshib-providers.xml");
+    cfg.setMaximumAuthenticationLifetime(3600);
+    cfg.setServiceProviderEntityId("urn:mace:saml:pac4j.org");
+    cfg.setServiceProviderMetadataPath("sp-metadata.xml");
+    SAML2Client saml2Client = new SAML2Client(cfg);
+
+    FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
+    TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
+
+    FormClient formClient = new FormClient("http://localhost:8080/theForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
+    IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
+
+    CasClient casClient = new CasClient("http://mycasserver/login");
+
+    ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"));
+
+    Config config = new Config("http://localhost:8080/callback", oidcClient, saml2Client, facebookClient,
+                                  twitterClient, formClient, basicAuthClient, casClient, parameterClient);
+
+    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
+    config.addAuthorizer("custom", new CustomAuthorizer());
+
+    return config;
+  }
+}
+```
+
+`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
 Notice that you can also use a specific `SessionStore` by defining it via the `Config.setSessionStore(sessionStore)` method.
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
 
-### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
+### 3) Protect urls (authentication + authorizations)
 
-Indirect clients rely on external identity providers (like Facebook) and thus require to define a callback endpoint in the application where the user will be redirected after login at the identity provider. For REST support / direct clients only, this callback endpoint is not necessary.  
-It must be defined in the *web.xml* file by the `CallbackFilter`:
+You can protect the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters can be defined:
 
-    <filter>
-        <filter-name>callbackFilter</filter-name>
-        <filter-class>org.pac4j.j2e.filter.CallbackFilter</filter-class>
-        <init-param>
-        	<param-name>defaultUrl</param-name>
-        	<param-value>/</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>callbackFilter</filter-name>
-        <url-pattern>/callback</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-    </filter-mapping>
+1) `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
 
-The `defaultUrl` parameter defines where the user will be redirected after login if no url was originally requested.
+2) `clients` (optional): the list of client names (separated by commas) used for authentication:
+- in all cases, the user must be authenticated. If the `clients` is blank or not defined, the user must have been previously authenticated
+- if the user is not authenticated, the defined direct clients are tried successively to login the user
+- then if the user is still not authenticated and if the first defined client is indirect, this client is used to redirect the user to the appropriate identity provider for login
+- otherwise, a 401 HTTP error is returned
+- if the `client_name` request parameter is provided, only this client (if it exists in the `clients`) is selected.
 
-Using dependency injection via Spring for example, you can define the callback filter as a `DelegatingFilterProxy` in the *web.xml* file:
-
-    <filter>
-        <filter-name>callbackFilter</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>callbackFilter</filter-name>
-        <url-pattern>/callback</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-    </filter-mapping>
-    
-and the specific bean in the *application-context.xml* file:
-
-    <bean id="callbackFilter" class="org.pac4j.j2e.filter.CallbackFilter">
-        <property name="defaultUrl" value="/" />
-    </bean>
-
-
-### Protect an url (authentication + authorization)
-
-You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate authorizations) by using the `RequiresAuthenticationFilter`:
-
-    <filter>
-        <filter-name>FacebookAdminFilter</filter-name>
-        <filter-class>org.pac4j.j2e.filter.RequiresAuthenticationFilter</filter-class>
-        <init-param>
-            <param-name>configFactory</param-name>
-            <param-value>org.pac4j.demo.j2e.config.DemoConfigFactory</param-value>
-        </init-param>
-        <init-param>
-            <param-name>clientName</param-name>
-            <param-value>FacebookClient</param-value>
-        </init-param>
-        <init-param>
-            <param-name>authorizerName</param-name>
-            <param-value>admin</param-value>
-        </init-param>
-    </filter>
-    <filter-mapping>
-        <filter-name>FacebookAdminFilter</filter-name>
-        <url-pattern>/facebookadmin/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-    </filter-mapping>
-
-The following parameters can be defined:
-
-- `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively then if the user is still not authenticated and if the first client is an indirect one, this client is used to start the authentication. Otherwise, a 401 HTTP error is returned. If the *client_name* request parameter is provided, only the matching client is selected
-- `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
-- `authorizerName` (optional): the list of authorizer names (separated by commas) used to check authorizations. If the user is not authorized, a 403 HTTP error is returned. By default (if blank), the user only requires to be authenticated to access the resource. The following authorizers are available by default:
+3) `authorizers` (optional): the list of authorizer names (separated by commas) used to check authorizations:
+- if the `authorizers` is blank or not defined, no authorization is checked
+- if the authorization checks fail, a 403 HTTP error is returned
+- the following authorizers are available by default (without defining them in the configuration):
   * `hsts` to use the `StrictTransportSecurityHeader` authorizer, `nosniff` for `XContentTypeOptionsHeader`, `noframe` for `XFrameOptionsHeader `, `xssprotection` for `XSSProtectionHeader `, `nocache` for `CacheControlHeader ` or `securityHeaders` for the five previous authorizers
-  * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and adds it to the request and save it in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
-- `matcherName` (optional): the list of matcher names (separated by commas) that the request must satisfy to apply authentication / authorization. By default, all requests are checked
+  * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and saves it as the `pac4jCsrfToken` attribute request and in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
+
+4) `matchers` (optional): the list of matcher names (separated by commas) that the request must satisfy to check authentication / authorizations:
+- if the `matchers` is blank or not defined, all requests are checked.
+
+5) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+
+Example:
+
+```xml
+<filter>
+  <filter-name>FacebookAdminFilter</filter-name>
+  <filter-class>org.pac4j.j2e.filter.SecurityFilter</filter-class>
+  <init-param>
+    <param-name>configFactory</param-name>
+    <param-value>org.pac4j.demo.j2e.DemoConfigFactory</param-value>
+  </init-param>
+  <init-param>
+    <param-name>clients</param-name>
+    <param-value>FacebookClient</param-value>
+  </init-param>
+</filter>
+<filter-mapping>
+  <filter-name>FacebookAdminFilter</filter-name>
+  <url-pattern>/facebook/*</url-pattern>
+</filter-mapping>
+```
 
 This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
 
 
-### Get the user profile
+### 4) Define the callback endpoint (only for indirect clients)
 
-You can test if the user is authenticated using the `ProfileManager.isAuthenticated()` method or get the user profile using the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request):
+For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
+Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter` with the following parameters:
 
-    WebContext context = new J2EContext(request, response);
-    ProfileManager manager = new ProfileManager(context);
-    UserProfile profile = manager.get(true);
+1) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
+
+2) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+
+In the `web.xml` file:
+
+```xml
+<filter>
+  <filter-name>callbackFilter</filter-name>
+  <filter-class>org.pac4j.j2e.filter.CallbackFilter</filter-class>
+  <init-param>
+    <param-name>defaultUrl</param-name>
+    <param-value>/</param-value>
+  </init-param>
+</filter>
+<filter-mapping>
+  <filter-name>callbackFilter</filter-name>
+  <url-pattern>/callback</url-pattern>
+</filter-mapping>
+```
+
+Using dependency injection via Spring, you can define the callback filter as a `DelegatingFilterProxy` in the `web.xml` file:
+
+```xml
+<filter>
+  <filter-name>callbackFilter</filter-name>
+  <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+</filter>
+<filter-mapping>
+  <filter-name>callbackFilter</filter-name>
+  <url-pattern>/callback</url-pattern>
+</filter-mapping>
+```
+    
+and the specific bean in the `application-context.xml` file:
+
+```xml
+<bean id="callbackFilter" class="org.pac4j.j2e.filter.CallbackFilter">
+  <property name="defaultUrl" value="/" />
+</bean>
+```
+
+
+### 5) Get the user profile
+
+You can get the profile of the authenticated user using `profileManager.get(true)` (`false` not to use the session, but only the current HTTP request).
+You can test if the user is authenticated using `profileManager.isAuthenticated()`.
+You can get all the profiles of the authenticated user (if ever multiple ones are kept) using `profileManager.getAll(true)`.
+
+Example:
+
+```java
+WebContext context = new J2EContext(request, response);
+ProfileManager manager = new ProfileManager(context);
+Optional<UserProfile> profile = manager.get(true);
+```
 
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common properties that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
- 
-    FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
+
+```java
+FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
+```
 
 
-### Logout
+### 6) Logout
 
-You can log out the current authenticated user using the `ApplicationLogoutFilter`:
-
-    <filter>
-        <filter-name>logoutFilter</filter-name>
-        <filter-class>org.pac4j.j2e.filter.ApplicationLogoutFilter</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>logoutFilter</filter-name>
-        <url-pattern>/logout</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-    </filter-mapping>
-
-To perfom the logout, you must call the /logout url. A blank page is displayed by default unless an *url* request parameter is provided. In that case, the user will be redirected to this specified url (if it matches the logout url pattern defined) or to the default logout url otherwise.
+You can log out the current authenticated user using the `ApplicationLogoutFilter`. When called without an `url` parameter, a blank page is displayed.
+If an `url` parameter is provided, the user is redirected after logout to this url if it matches the `logoutPatternUrl` or to the default url otherwise.
 
 The following parameters can be defined:
 
-- `defaultUrl` (optional): the default logout url if the provided *url* parameter does not match the `logoutUrlPattern` (by default: /)
-- `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
+1) `defaultUrl` (optional): the default logout url if the provided `url` parameter does not match the `logoutUrlPattern` (`/` by default)
+
+2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default).
+
+Example:
+
+```xml
+<filter>
+  <filter-name>logoutFilter</filter-name>
+  <filter-class>org.pac4j.j2e.filter.ApplicationLogoutFilter</filter-class>
+</filter>
+<filter-mapping>
+  <filter-name>logoutFilter</filter-name>
+  <url-pattern>/logout</url-pattern>
+</filter-mapping>
+```
 
 
-## Migration guide (1.1 -> 1.2)
+## Migration guide
+
+### 1.2 - > 1.3
+
+The `RequiresAuthenticationFilter` is now named `SecurityFilter` with the `clients`, `authorizers` and `matchers` parameters instead of the previous `clientName`, `authorizerName` and `matcherName`.
+
+### 1.1 -> 1.2
 
 Authorizations are now handled by the library so the `ClientFactory` can now longer be used and is replaced by a `ConfigFactory` which builds a `Config` which gathers clients (for authentication) and authorizers (for authorizations).
 
@@ -217,6 +233,7 @@ The `requireAnyRole` and `requieAllRoles` parameters are no longer available and
 
 The application logout process can be managed with the `ApplicationLogoutFilter`.
 
+
 ## Demo
 
 The demo webapp: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) is available for tests and implement many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
@@ -224,7 +241,7 @@ The demo webapp: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) is av
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/1.2.2) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.5/index.html).
+See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/1.3.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.9.0/index.html).
 
 
 ## Need help?
@@ -234,22 +251,25 @@ If you have any question, please use the following mailing lists:
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
 
+
 ## Development
 
-The version 1.2.3-SNAPSHOT is under development.
+The version 1.3.0-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the Maven *pom.xml* file for example:
 
-    <repositories>
-      <repository>
-        <id>sonatype-nexus-snapshots</id>
-        <name>Sonatype Nexus Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        <releases>
-          <enabled>false</enabled>
-        </releases>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-      </repository>
-    </repositories>
+```xml
+<repositories>
+  <repository>
+    <id>sonatype-nexus-snapshots</id>
+    <name>Sonatype Nexus Snapshots</name>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    <releases>
+      <enabled>false</enabled>
+    </releases>
+    <snapshots>
+      <enabled>true</enabled>
+    </snapshots>
+  </repository>
+</repositories>
+```

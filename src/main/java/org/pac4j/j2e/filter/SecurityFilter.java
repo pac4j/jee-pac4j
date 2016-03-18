@@ -1,18 +1,3 @@
-/*
-  Copyright 2013 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.j2e.filter;
 
 import java.io.IOException;
@@ -24,38 +9,41 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.pac4j.core.authorization.AuthorizationChecker;
-import org.pac4j.core.authorization.DefaultAuthorizationChecker;
+import org.pac4j.core.authorization.checker.AuthorizationChecker;
+import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker;
 import org.pac4j.core.client.*;
+import org.pac4j.core.client.finder.ClientFinder;
+import org.pac4j.core.client.finder.DefaultClientFinder;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.*;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
-import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.matching.DefaultMatchingChecker;
 import org.pac4j.core.matching.MatchingChecker;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
-import org.pac4j.core.util.CommonHelper;
+
+import static org.pac4j.core.util.CommonHelper.*;
 
 /**
- * <p>This filter protects a resource (authentication + authorization).</p>
+ * <p>This filter protects a resource (authentication + authorizations):</p>
  * <ul>
- *  <li>If a stateful / indirect client is used, it relies on the session to get the user profile (after the {@link CallbackFilter} has terminated the authentication process)</li>
- *  <li>If a stateless / direct client is used, it validates the provided credentials from the request and retrieves the user profile if the authentication succeeds.</li>
+ *  <li>If an indirect client is used, it relies on the session to get the user profile(s) (after the {@link CallbackFilter} has terminated the authentication process)</li>
+ *  <li>If a direct client is used, it validates the provided credentials from the request and retrieves the user profile(s) if the authentication succeeds.</li>
  * </ul>
- * <p>Then, authorizations are checked before accessing the resource.</p>
- * <p>Forbidden or unauthorized errors can be returned. An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
- * <p>The configuration can be provided via servlet parameters: <code>configFactory</code>, <code>clientName</code>, <code>authorizerName</code> and <code>matcherName</code>.</p>
- * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClientName(String)}, {@link #setAuthorizerName(String)} and {@link #setMatcherName(String)} .</p>
+ * <p>Then, authorizations are checked before accessing the resource. Forbidden or unauthorized errors can be returned.</p>
+ * <p>An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
+ * <p>The configuration can be provided via servlet parameters: <code>configFactory</code> (configuration factory), <code>clients</code> (list of clients for authentication),
+ * <code>authorizers</code> (list of authorizers), <code>matchers</code> (list of matchers) and <code>multiProfile</code>  (whether multiple profiles should be kept).</p>
+ * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClients(String)}, {@link #setAuthorizers(String)}, {@link #setMatchers(String)} and {@link #setMultiProfile(boolean)}.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
  */
 @SuppressWarnings("unchecked")
-public class RequiresAuthenticationFilter extends AbstractConfigFilter {
+public class SecurityFilter extends AbstractConfigFilter {
 
     protected ClientFinder clientFinder = new DefaultClientFinder();
 
@@ -63,11 +51,13 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
 
     protected MatchingChecker matchingChecker = new DefaultMatchingChecker();
 
-    protected String clientName;
+    protected String clients;
 
-    protected String authorizerName;
+    protected String authorizers;
 
-    protected String matcherName;
+    protected String matchers;
+
+    protected boolean multiProfile;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -76,16 +66,20 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
             final Config config = ConfigBuilder.build(configFactoryParam);
             ConfigSingleton.setConfig(config);
         }
-        this.clientName = getStringParam(filterConfig, Pac4jConstants.CLIENT_NAME, this.clientName);
-        this.authorizerName = getStringParam(filterConfig, Pac4jConstants.AUTHORIZER_NAME, this.authorizerName);
-        this.matcherName = getStringParam(filterConfig, Pac4jConstants.MATCHER_NAME, this.matcherName);
+        this.clients = getStringParam(filterConfig, Pac4jConstants.CLIENTS, this.clients);
+        this.authorizers = getStringParam(filterConfig, Pac4jConstants.AUTHORIZERS, this.authorizers);
+        this.matchers = getStringParam(filterConfig, Pac4jConstants.MATCHERS, this.matchers);
+        this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
 
         // to help with backward compatibility
-        checkUselessParameter(filterConfig, "clientsFactory");
-        checkUselessParameter(filterConfig, Pac4jConstants.IS_AJAX);
-        checkUselessParameter(filterConfig, Pac4jConstants.STATELESS);
-        checkForbiddenParameter(filterConfig, Pac4jConstants.REQUIRE_ANY_ROLE);
-        checkForbiddenParameter(filterConfig, Pac4jConstants.REQUIRE_ALL_ROLES);
+        checkForbiddenParameter(filterConfig, "clientsFactory");
+        checkForbiddenParameter(filterConfig, "isAjax");
+        checkForbiddenParameter(filterConfig, "stateless");
+        checkForbiddenParameter(filterConfig, "requireAnyRole");
+        checkForbiddenParameter(filterConfig, "requireAllRoles");
+        checkForbiddenParameter(filterConfig, "clientName");
+        checkForbiddenParameter(filterConfig, "authorizerName");
+        checkForbiddenParameter(filterConfig, "matcherName");
     }
 
     @Override
@@ -93,27 +87,27 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
                                         final FilterChain chain) throws IOException, ServletException {
 
         final Config config = ConfigSingleton.getConfig();
-        CommonHelper.assertNotNull("config", config);
+        assertNotNull("config", config);
         final WebContext context = new J2EContext(request, response, config.getSessionStore());
 
         logger.debug("url: {}", context.getFullRequestURL());
-        logger.debug("matcherName: {}", matcherName);
-        if (matchingChecker.matches(context, this.matcherName, getConfig().getMatchers())) {
+        logger.debug("matchers: {}", matchers);
+        if (matchingChecker.matches(context, this.matchers, getConfig().getMatchers())) {
 
             final Clients configClients = config.getClients();
-            CommonHelper.assertNotNull("configClients", configClients);
-            logger.debug("clientName: {}", clientName);
-            final List<Client> currentClients = clientFinder.find(configClients, context, this.clientName);
+            assertNotNull("configClients", configClients);
+            logger.debug("clients: {}", clients);
+            final List<Client> currentClients = clientFinder.find(configClients, context, this.clients);
             logger.debug("currentClients: {}", currentClients);
 
             final boolean useSession = useSession(context, currentClients);
             logger.debug("useSession: {}", useSession);
             final ProfileManager manager = new ProfileManager(context);
-            UserProfile profile = manager.get(useSession);
-            logger.debug("profile: {}", profile);
+            List<UserProfile> profiles = manager.getAll(useSession);
+            logger.debug("profiles: {}", profiles);
 
             // no profile and some current clients
-            if (profile == null && currentClients != null && currentClients.size() > 0) {
+            if (isEmpty(profiles) && isNotEmpty(currentClients)) {
                 // loop on all clients searching direct ones to perform authentication
                 for (final Client currentClient : currentClients) {
                     if (currentClient instanceof DirectClient) {
@@ -123,26 +117,31 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
                             credentials = currentClient.getCredentials(context);
                             logger.debug("credentials: {}", credentials);
                         } catch (final RequiresHttpAction e) {
-                            throw new TechnicalException("Unexpected HTTP action", e);
+                            logger.debug("extra HTTP action required: {}", e.getCode());
+                            return;
                         }
-                        profile = currentClient.getUserProfile(credentials, context);
+                        final UserProfile profile = currentClient.getUserProfile(credentials, context);
                         logger.debug("profile: {}", profile);
                         if (profile != null) {
-                            manager.save(useSession, profile);
-                            break;
+                            manager.save(useSession, profile, this.multiProfile);
+                            if (!this.multiProfile) {
+                                break;
+                            }
                         }
                     }
                 }
+                profiles = manager.getAll(useSession);
+                logger.debug("new profiles: {}", profiles);
             }
 
-            if (profile != null) {
-                logger.debug("authorizerName: {}", authorizerName);
-                if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+            if (isNotEmpty(profiles)) {
+                logger.debug("authorizers: {}", authorizers);
+                if (authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers())) {
                     logger.debug("authenticated and authorized -> grant access");
                     chain.doFilter(request, response);
                 } else {
                     logger.debug("forbidden");
-                    forbidden(context, currentClients, profile);
+                    forbidden(context, currentClients, profiles);
                 }
             } else {
                 if (startAuthentication(context, currentClients)) {
@@ -164,15 +163,15 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
     }
 
     protected boolean useSession(final WebContext context, final List<Client> currentClients) {
-        return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
+        return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient;
     }
 
-    protected void forbidden(final WebContext context, final List<Client> currentClients, final UserProfile profile) {
+    protected void forbidden(final WebContext context, final List<Client> currentClients, final List<UserProfile> profile) {
         context.setResponseStatus(HttpConstants.FORBIDDEN);
     }
 
     protected boolean startAuthentication(final WebContext context, final List<Client> currentClients) {
-        return currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient;
+        return isNotEmpty(currentClients) && currentClients.get(0) instanceof IndirectClient;
     }
 
     protected void saveRequestedUrl(final WebContext context, final List<Client> currentClients) {
@@ -184,7 +183,7 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
     protected void redirectToIdentityProvider(final WebContext context, final List<Client> currentClients) {
         try {
             final IndirectClient currentClient = (IndirectClient) currentClients.get(0);
-            currentClient.redirect(context, true);
+            currentClient.redirect(context);
         } catch (final RequiresHttpAction e) {
             logger.debug("extra HTTP action required: {}", e.getCode());
         }
@@ -202,27 +201,35 @@ public class RequiresAuthenticationFilter extends AbstractConfigFilter {
         ConfigSingleton.setConfig(config);
     }
 
-    public String getClientName() {
-        return clientName;
+    public String getClients() {
+        return clients;
     }
 
-    public void setClientName(final String clientName) {
-        this.clientName = clientName;
+    public void setClients(String clients) {
+        this.clients = clients;
     }
 
-    public String getAuthorizerName() {
-        return authorizerName;
+    public String getAuthorizers() {
+        return authorizers;
     }
 
-    public void setAuthorizerName(final String authorizerName) {
-        this.authorizerName = authorizerName;
+    public void setAuthorizers(String authorizers) {
+        this.authorizers = authorizers;
     }
 
-    public String getMatcherName() {
-        return matcherName;
+    public String getMatchers() {
+        return matchers;
     }
 
-    public void setMatcherName(String matcherName) {
-        this.matcherName = matcherName;
+    public void setMatchers(String matchers) {
+        this.matchers = matchers;
+    }
+
+    public boolean isMultiProfile() {
+        return multiProfile;
+    }
+
+    public void setMultiProfile(boolean multiProfile) {
+        this.multiProfile = multiProfile;
     }
 }
