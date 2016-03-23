@@ -2,7 +2,7 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="300" />
 </p>
 
-The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection.
+The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like session fixation and CSRF protection.
 It's based on Java 8, servlet 3 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
 **Main concepts:**
@@ -80,12 +80,12 @@ If your application is configured via dependency injection, no factory is requir
 
 ### 3) Protect urls (`SecurityFilter`)
 
-You can protect (authentication + authorizations) the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters can be defined:
+You can protect (authentication + authorizations) the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters are available:
 
 1) `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
 
 2) `clients` (optional): the list of client names (separated by commas) used for authentication:
-- in all cases, the user must be authenticated. If the `clients` is blank or not defined, the user must have been previously authenticated
+- in all cases, this filter requires the user to be authenticated. Thus, if the `clients` is blank or not defined, the user must have been previously authenticated
 - if the user is not authenticated, the defined direct clients are tried successively to login the user
 - then if the user is still not authenticated and if the first defined client is indirect, this client is used to redirect the user to the appropriate identity provider for login
 - otherwise, a 401 HTTP error is returned
@@ -102,6 +102,8 @@ You can protect (authentication + authorizations) the urls of your J2E applicati
 - if the `matchers` is blank or not defined, all requests are checked.
 
 5) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+
+6) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default).
 
 In the `web.xml` file:
 
@@ -130,7 +132,7 @@ This filter can be defined via dependency injection as well. In that case, these
 ### 4) Define the callback endpoint only for indirect clients (`CallbackFilter`)
 
 For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
-Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter`. The following parameters can be defined:
+Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter`. The following parameters are available:
 
 1) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
@@ -198,9 +200,8 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 ### 6) Logout (`ApplicationLogoutFilter`)
 
-You can log out the current authenticated user using the `ApplicationLogoutFilter`. When called without an `url` parameter, a blank page is displayed.
-If an `url` parameter is provided, the user is redirected after logout to this url if it matches the `logoutPatternUrl` or to the default url otherwise.
-The following parameters can be defined:
+You can log out the current authenticated user using the `ApplicationLogoutFilter`. After logout, the user is redirected to the url defined by the `url` request parameter.
+If no `url` is provided, a blank page is displayed. If the `url` does not match the `logoutUrlPattern`, the `defaultUrl` is used. The following parameters are available:
 
 1) `defaultUrl` (optional): the default logout url if the provided `url` parameter does not match the `logoutUrlPattern` (`/` by default)
 

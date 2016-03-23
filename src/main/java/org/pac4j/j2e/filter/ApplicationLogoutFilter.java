@@ -19,9 +19,11 @@ import static org.pac4j.core.util.CommonHelper.*;
 
 /**
  * <p>This filter handles the application logout process.</p>
- * <p>After logout, the user is redirected to the url defined by the <i>url</i> parameter. If no url is provided, a blank page is displayed. If the url does not match the pattern, the default url is used.</p>
- * <p>The default url can be defined via the servlet parameter: <code>defaultUrl</code> or via the {@link #setDefaultUrl(String)} method.</p>
- * <p>The logout url pattern can be defined via the servlet parameter: <code>logoutUrlPattern</code> or via the {@link #setLogoutUrlPattern(String)} method.</p>
+ * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter. If no url is provided, a blank page is displayed.
+ * If the <code>url</code> does not match the <code>logoutUrlPattern</code>, the <code>defaultUrl</code> is used.</p>
+ *
+ * <p>The configuration can be provided via servlet parameters: <code>defaultUrl</code> (default logourl url) and <code>logoutUrlPattern</code> (logout url pattern).</p>
+ * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)} and {@link #setLogoutUrlPattern(String)}.</p>
  *
  * @author Jerome Leleu
  * @since 1.2.0
