@@ -101,6 +101,7 @@ public class SecurityFilter extends AbstractConfigFilter {
             final ProfileManager manager = new ProfileManager(context);
             List<UserProfile> profiles = manager.getAll(useSession);
             logger.debug("profiles: {}", profiles);
+            logger.debug("multiProfile: {}", multiProfile);
 
             try {
 
