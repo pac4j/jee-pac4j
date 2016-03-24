@@ -14,13 +14,17 @@ import org.pac4j.core.profile.CommonProfile;
  */
 public final class MockDirectClient extends DirectClient<Credentials, CommonProfile> {
 
-    private final Credentials credentials;
+    private final ReturnCredentials returnCredentials;
 
     private final CommonProfile profile;
 
     public MockDirectClient(final String name, final Credentials credentials, final CommonProfile profile) {
+        this(name, () -> credentials, profile);
+    }
+
+    public MockDirectClient(final String name, final ReturnCredentials returnCredentials, final CommonProfile profile) {
         setName(name);
-        this.credentials = credentials;
+        this.returnCredentials = returnCredentials;
         this.profile = profile;
     }
 
@@ -29,7 +33,7 @@ public final class MockDirectClient extends DirectClient<Credentials, CommonProf
 
     @Override
     public Credentials getCredentials(WebContext context) throws RequiresHttpAction {
-        return credentials;
+        return returnCredentials.get();
     }
 
     @Override

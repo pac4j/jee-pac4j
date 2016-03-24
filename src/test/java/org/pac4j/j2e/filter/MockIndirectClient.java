@@ -17,14 +17,18 @@ public final class MockIndirectClient extends IndirectClient<Credentials, Common
 
     private final RedirectAction redirectAction;
 
-    private final Credentials credentials;
+    private final ReturnCredentials returnCredentials;
 
     private final CommonProfile profile;
 
     public MockIndirectClient(final String name, final RedirectAction redirectAction, final Credentials credentials, final CommonProfile profile) {
+        this(name, redirectAction, () -> credentials, profile);
+    }
+
+    public MockIndirectClient(final String name, final RedirectAction redirectAction, final ReturnCredentials returnCredentials, final CommonProfile profile) {
         setName(name);
         this.redirectAction = redirectAction;
-        this.credentials = credentials;
+        this.returnCredentials = returnCredentials;
         this.profile = profile;
     }
 
@@ -35,7 +39,7 @@ public final class MockIndirectClient extends IndirectClient<Credentials, Common
 
     @Override
     protected Credentials retrieveCredentials(final WebContext context) throws RequiresHttpAction {
-        return credentials;
+        return returnCredentials.get();
     }
 
     @Override

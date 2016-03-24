@@ -5,10 +5,10 @@ import org.junit.Test;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.UserProfile;
+import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockFilterConfig;
@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
  * @author Jerome Leleu
  * @since 1.3.0
  */
-public final class ApplicationLogoutFilterTests {
+public final class ApplicationLogoutFilterTests implements TestsConstants {
 
     private final static String POST_LOGOUT_URL = "/postLogoutUrl";
     private final static String NEW_DEFAULT_URL = "/newDefaultUrl";
@@ -35,8 +35,6 @@ public final class ApplicationLogoutFilterTests {
     private MockFilterConfig filterConfig;
 
     private Config config;
-
-    private SessionStore sessionStore;
 
     private MockHttpServletRequest request;
 
@@ -49,8 +47,6 @@ public final class ApplicationLogoutFilterTests {
         filter = new ApplicationLogoutFilter();
         filterConfig = new MockFilterConfig();
         config = new Config();
-        sessionStore = new MockSessionStore();
-        config.setSessionStore(sessionStore);
         ConfigSingleton.setConfig(config);
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
@@ -82,15 +78,15 @@ public final class ApplicationLogoutFilterTests {
     @Test
     public void testLogout() throws Exception {
         final LinkedHashMap<String, UserProfile> profiles = new LinkedHashMap<>();
-        profiles.put("client", new CommonProfile());
+        profiles.put(NAME, new CommonProfile());
         request.setAttribute(Pac4jConstants.USER_PROFILES, profiles);
-        sessionStore.set(null, Pac4jConstants.USER_PROFILES, profiles);
+        request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
         call();
         assertEquals(200, response.getStatus());
         assertEquals("", response.getContentAsString());
         final LinkedHashMap<String, UserProfile> profiles2 = (LinkedHashMap<String, UserProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(0, profiles2.size());
-        final LinkedHashMap<String, UserProfile> profiles3 = (LinkedHashMap<String, UserProfile>) sessionStore.get(null, Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, UserProfile> profiles3 = (LinkedHashMap<String, UserProfile>) request.getSession().getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(0, profiles3.size());
     }
 
