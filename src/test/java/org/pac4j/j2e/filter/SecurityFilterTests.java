@@ -2,14 +2,12 @@ package org.pac4j.j2e.filter;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.client.DirectClient;
-import org.pac4j.core.client.IndirectClient;
-import org.pac4j.core.client.RedirectAction;
+import org.pac4j.core.client.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.credentials.MockCredentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
