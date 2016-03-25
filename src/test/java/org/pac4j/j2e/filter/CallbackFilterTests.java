@@ -7,14 +7,17 @@ import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.TestsConstants;
+import org.pac4j.core.util.TestsHelper;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockFilterConfig;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import javax.servlet.http.HttpSession;
 import java.util.LinkedHashMap;
 
 import static org.junit.Assert.*;
@@ -51,7 +54,40 @@ public final class CallbackFilterTests implements TestsConstants {
     }
 
     private void call() throws Exception {
+        filter.init(filterConfig);
         filter.internalFilter(request, response, filterChain);
+    }
+
+    @Test
+    public void testMissingConfig() throws Exception {
+        ConfigSingleton.setConfig(null);
+        TestsHelper.expectException(() -> call(), TechnicalException.class, "config cannot be null");
+    }
+
+    @Test
+    public void testMissingClients() throws Exception {
+        config.setClients(null);
+        TestsHelper.expectException(() -> call(), TechnicalException.class, "clients cannot be null");
+    }
+
+    @Test
+    public void testBlankDefaultUrl() throws Exception {
+        filter.setDefaultUrl("");
+        TestsHelper.expectException(() -> filter.init(filterConfig), TechnicalException.class, "defaultUrl cannot be blank");
+    }
+
+    @Test
+    public void testOldClientsFactory() throws Exception {
+        filterConfig.addInitParameter("clientsFactory", VALUE);
+        TestsHelper.expectException(() -> filter.init(filterConfig), TechnicalException.class, "the clientsFactory servlet parameter is no longer supported");
+    }
+
+    @Test
+    public void testDirectClient() throws Exception {
+        request.setParameter(Clients.DEFAULT_CLIENT_NAME_PARAMETER, NAME);
+        final MockDirectClient directClient = new MockDirectClient(NAME, new MockCredentials(), new CommonProfile());
+        config.setClients(new Clients(directClient));
+        TestsHelper.expectException(() -> call(), TechnicalException.class, "only indirect clients are allowed on the callback url");
     }
 
     @Test
@@ -62,10 +98,51 @@ public final class CallbackFilterTests implements TestsConstants {
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), profile);
         config.setClients(new Clients(CALLBACK_URL, indirectClient));
         call();
-        final String newSessionId = request.getSession().getId();
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) request.getSession().getAttribute(Pac4jConstants.USER_PROFILES);
+        final HttpSession session = request.getSession();
+        final String newSessionId = session.getId();
+        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
         assertTrue(profiles.containsValue(profile));
+        assertEquals(1, profiles.size());
         assertNotEquals(newSessionId, originalSessionId);
+        assertEquals(302, response.getStatus());
+        assertEquals(Pac4jConstants.DEFAULT_URL_VALUE, response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testCallbackWithOriginallyRequestedUrl() throws Exception {
+        HttpSession session = request.getSession();
+        final String originalSessionId = session.getId();
+        session.setAttribute(Pac4jConstants.REQUESTED_URL, PAC4J_URL);
+        request.setParameter(Clients.DEFAULT_CLIENT_NAME_PARAMETER, NAME);
+        final CommonProfile profile = new CommonProfile();
+        final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), profile);
+        config.setClients(new Clients(CALLBACK_URL, indirectClient));
+        call();
+        session = request.getSession();
+        final String newSessionId = session.getId();
+        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
+        assertTrue(profiles.containsValue(profile));
+        assertEquals(1, profiles.size());
+        assertNotEquals(newSessionId, originalSessionId);
+        assertEquals(302, response.getStatus());
+        assertEquals(PAC4J_URL, response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testCallbackNoRenew() throws Exception {
+        final String originalSessionId = request.getSession().getId();
+        request.setParameter(Clients.DEFAULT_CLIENT_NAME_PARAMETER, NAME);
+        final CommonProfile profile = new CommonProfile();
+        final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), profile);
+        config.setClients(new Clients(CALLBACK_URL, indirectClient));
+        filter.setRenewSession(false);
+        call();
+        final HttpSession session = request.getSession();
+        final String newSessionId = session.getId();
+        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
+        assertTrue(profiles.containsValue(profile));
+        assertEquals(1, profiles.size());
+        assertEquals(newSessionId, originalSessionId);
         assertEquals(302, response.getStatus());
         assertEquals(Pac4jConstants.DEFAULT_URL_VALUE, response.getRedirectedUrl());
     }

@@ -54,6 +54,7 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     }
 
     private void call() throws Exception {
+        filter.init(filterConfig);
         filter.internalFilter(request, response, filterChain);
     }
 
@@ -101,7 +102,7 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     @Test
     public void testLogoutWithBadUrl() throws Exception {
         request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
-        filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, "pattern");
+        filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, VALUE);
         filter.init(filterConfig);
         call();
         assertEquals(302, response.getStatus());
@@ -111,7 +112,7 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     @Test
     public void testLogoutWithBadUrlAndSpecificDefaultUrl() throws Exception {
         request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
-        filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, "pattern");
+        filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, VALUE);
         filterConfig.addInitParameter(Pac4jConstants.DEFAULT_URL, NEW_DEFAULT_URL);
         filter.init(filterConfig);
         call();
