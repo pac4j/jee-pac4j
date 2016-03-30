@@ -19,8 +19,8 @@ import static org.pac4j.core.util.CommonHelper.*;
 
 /**
  * <p>This filter handles the application logout process.</p>
- * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter. If no url is provided, a blank page is displayed.
- * If the <code>url</code> does not match the <code>logoutUrlPattern</code>, the <code>defaultUrl</code> is used.</p>
+ * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter if it matches the <code>logoutUrlPattern</code>.
+ * Or the user is redirected to the <code>defaultUrl</code> if it is defined. Otherwise, a blank page is displayed.</p>
  *
  * <p>The configuration can be provided via servlet parameters: <code>defaultUrl</code> (default logourl url) and <code>logoutUrlPattern</code> (logout url pattern).</p>
  * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)} and {@link #setLogoutUrlPattern(String)}.</p>
@@ -30,14 +30,13 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class ApplicationLogoutFilter extends AbstractConfigFilter {
 
-    protected String defaultUrl = Pac4jConstants.DEFAULT_URL_VALUE;
+    protected String defaultUrl;
 
     protected String logoutUrlPattern = Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
-        assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         this.logoutUrlPattern = getStringParam(filterConfig, Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
         assertNotBlank(Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
     }
@@ -53,12 +52,12 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
         manager.logout();
 
         final String url = context.getRequestParameter(Pac4jConstants.URL);
-        if (url != null) {
-            if (Pattern.matches(this.logoutUrlPattern, url)) {
-                response.sendRedirect(url);
-            } else {
-                response.sendRedirect(this.defaultUrl);
-            }
+        String redirectUrl = this.defaultUrl;
+        if (url != null && Pattern.matches(this.logoutUrlPattern, url)) {
+            redirectUrl = url;
+        }
+        if (redirectUrl != null) {
+            response.sendRedirect(redirectUrl);
         }
     }
 

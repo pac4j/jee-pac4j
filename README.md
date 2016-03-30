@@ -200,10 +200,12 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 ### 6) Logout (`ApplicationLogoutFilter`)
 
-You can log out the current authenticated user using the `ApplicationLogoutFilter`. After logout, the user is redirected to the url defined by the `url` request parameter.
-If no `url` is provided, a blank page is displayed. If the `url` does not match the `logoutUrlPattern`, the `defaultUrl` is used. The following parameters are available:
+You can log out the current authenticated user using the `ApplicationLogoutFilter`.
+After logout, the user is redirected to the url defined by the `url` request parameter if it matches the `logoutUrlPattern`.
+Or the user is redirected to the `defaultUrl` if it is defined. Otherwise, a blank page is displayed.
+The following parameters are available:
 
-1) `defaultUrl` (optional): the default logout url if the provided `url` parameter does not match the `logoutUrlPattern` (`/` by default)
+1) `defaultUrl` (optional): the default logout url if no `url` request parameter is provided or if the `url` does not match the `logoutUrlPattern` (not defined by default)
 
 2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default).
 
@@ -226,6 +228,8 @@ In the `web.xml` file:
 ### 1.2 - > 1.3
 
 The `RequiresAuthenticationFilter` is now named `SecurityFilter` with the `clients`, `authorizers` and `matchers` parameters instead of the previous `clientName`, `authorizerName` and `matcherName`.
+
+The `ApplicationLogoutFilter` behaviour has slightly changed: even without any `url` request parameter, the user will be redirect to the `defaultUrl` if it has been defined.
 
 ### 1.1 -> 1.2
 

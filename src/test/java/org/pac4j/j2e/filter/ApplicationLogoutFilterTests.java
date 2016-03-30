@@ -65,12 +65,6 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     }
 
     @Test
-    public void testBlankDefaultUrl() throws Exception {
-        filter.setDefaultUrl("");
-        TestsHelper.expectException(() -> filter.init(filterConfig), TechnicalException.class, "defaultUrl cannot be blank");
-    }
-
-    @Test
     public void testBlankLogoutUrlPattern() throws Exception {
         filter.setLogoutUrlPattern("");
         TestsHelper.expectException(() -> filter.init(filterConfig), TechnicalException.class, "logoutUrlPattern cannot be blank");
@@ -92,7 +86,15 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     }
 
     @Test
-    public void testLogoutWithUrl() throws Exception {
+    public void testLogoutWithDefaultUrl() throws Exception {
+        filter.setDefaultUrl(NEW_DEFAULT_URL);
+        call();
+        assertEquals(302, response.getStatus());
+        assertEquals(NEW_DEFAULT_URL, response.getRedirectedUrl());
+    }
+
+    @Test
+    public void testLogoutWithGoodUrl() throws Exception {
         request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
         call();
         assertEquals(302, response.getStatus());
@@ -100,17 +102,17 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     }
 
     @Test
-    public void testLogoutWithBadUrl() throws Exception {
+    public void testLogoutWithBadUrlNoDefaultUrl() throws Exception {
         request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
         filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, VALUE);
         filter.init(filterConfig);
         call();
-        assertEquals(302, response.getStatus());
-        assertEquals(Pac4jConstants.DEFAULT_URL_VALUE, response.getRedirectedUrl());
+        assertEquals(200, response.getStatus());
+        assertEquals("", response.getContentAsString());
     }
 
     @Test
-    public void testLogoutWithBadUrlAndSpecificDefaultUrl() throws Exception {
+    public void testLogoutWithBadUrlButDefaultUrl() throws Exception {
         request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
         filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, VALUE);
         filterConfig.addInitParameter(Pac4jConstants.DEFAULT_URL, NEW_DEFAULT_URL);
