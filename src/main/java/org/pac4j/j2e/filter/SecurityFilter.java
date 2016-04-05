@@ -22,8 +22,8 @@ import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.matching.DefaultMatchingChecker;
 import org.pac4j.core.matching.MatchingChecker;
+import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.core.profile.UserProfile;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -99,7 +99,7 @@ public class SecurityFilter extends AbstractConfigFilter {
             final boolean useSession = useSession(context, currentClients);
             logger.debug("useSession: {}", useSession);
             final ProfileManager manager = new ProfileManager(context);
-            List<UserProfile> profiles = manager.getAll(useSession);
+            List<CommonProfile> profiles = manager.getAll(useSession);
             logger.debug("profiles: {}", profiles);
             logger.debug("multiProfile: {}", multiProfile);
 
@@ -113,7 +113,7 @@ public class SecurityFilter extends AbstractConfigFilter {
                             logger.debug("Performing authentication for client: {}", currentClient);
 
                             final Credentials credentials = currentClient.getCredentials(context);
-                            final UserProfile profile = currentClient.getUserProfile(credentials, context);
+                            final CommonProfile profile = currentClient.getUserProfile(credentials, context);
                             logger.debug("profile: {}", profile);
                             if (profile != null) {
                                 manager.save(useSession, profile, this.multiProfile);
@@ -163,7 +163,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient;
     }
 
-    protected void forbidden(final WebContext context, final List<Client> currentClients, final List<UserProfile> profile, final String authorizers) {
+    protected void forbidden(final WebContext context, final List<Client> currentClients, final List<CommonProfile> profile, final String authorizers) {
         context.setResponseStatus(HttpConstants.FORBIDDEN);
     }
 

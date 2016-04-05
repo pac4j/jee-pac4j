@@ -7,7 +7,6 @@ import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
 import org.springframework.mock.web.MockFilterChain;
@@ -72,16 +71,16 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
 
     @Test
     public void testLogout() throws Exception {
-        final LinkedHashMap<String, UserProfile> profiles = new LinkedHashMap<>();
+        final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, new CommonProfile());
         request.setAttribute(Pac4jConstants.USER_PROFILES, profiles);
         request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
         call();
         assertEquals(200, response.getStatus());
         assertEquals("", response.getContentAsString());
-        final LinkedHashMap<String, UserProfile> profiles2 = (LinkedHashMap<String, UserProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles2 = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(0, profiles2.size());
-        final LinkedHashMap<String, UserProfile> profiles3 = (LinkedHashMap<String, UserProfile>) request.getSession().getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles3 = (LinkedHashMap<String, CommonProfile>) request.getSession().getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(0, profiles3.size());
     }
 

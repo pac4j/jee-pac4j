@@ -12,7 +12,6 @@ import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.credentials.MockCredentials;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
 import org.springframework.mock.web.MockFilterChain;
@@ -103,7 +102,7 @@ public final class CallbackFilterTests implements TestsConstants {
         call();
         final HttpSession session = request.getSession();
         final String newSessionId = session.getId();
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
         assertTrue(profiles.containsValue(profile));
         assertEquals(1, profiles.size());
         assertNotEquals(newSessionId, originalSessionId);
@@ -123,7 +122,7 @@ public final class CallbackFilterTests implements TestsConstants {
         call();
         session = request.getSession();
         final String newSessionId = session.getId();
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
         assertTrue(profiles.containsValue(profile));
         assertEquals(1, profiles.size());
         assertNotEquals(newSessionId, originalSessionId);
@@ -142,7 +141,7 @@ public final class CallbackFilterTests implements TestsConstants {
         call();
         final HttpSession session = request.getSession();
         final String newSessionId = session.getId();
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) session.getAttribute(Pac4jConstants.USER_PROFILES);
         assertTrue(profiles.containsValue(profile));
         assertEquals(1, profiles.size());
         assertEquals(newSessionId, originalSessionId);

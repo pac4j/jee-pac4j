@@ -22,8 +22,8 @@ import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
+import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.core.profile.UserProfile;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -76,7 +76,7 @@ public class CallbackFilter extends AbstractConfigFilter {
             final Credentials credentials = client.getCredentials(context);
             logger.debug("credentials: {}", credentials);
 
-            final UserProfile profile = client.getUserProfile(credentials, context);
+            final CommonProfile profile = client.getUserProfile(credentials, context);
             logger.debug("profile: {}", profile);
             saveUserProfile(context, profile);
             redirectToOriginallyRequestedUrl(context, response);
@@ -86,7 +86,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         }
     }
 
-    protected void saveUserProfile(final J2EContext context, final UserProfile profile) {
+    protected void saveUserProfile(final J2EContext context, final CommonProfile profile) {
         final ProfileManager manager = new ProfileManager(context);
         if (profile != null) {
             manager.save(true, profile, this.multiProfile);

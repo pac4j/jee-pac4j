@@ -11,7 +11,6 @@ import org.pac4j.core.credentials.MockCredentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
 import org.springframework.mock.web.MockFilterConfig;
@@ -102,7 +101,7 @@ public final class SecurityFilterTests implements TestsConstants {
     public void testAlreadyAuthenticatedAndAuthorized() throws Exception {
         final CommonProfile profile = new CommonProfile();
         profile.setId(ID);
-        final LinkedHashMap<String, UserProfile> profiles = new LinkedHashMap<>();
+        final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, profile);
         request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), new CommonProfile());
@@ -117,7 +116,7 @@ public final class SecurityFilterTests implements TestsConstants {
     @Test
     public void testAlreadyAuthenticatedNotAuthorized() throws Exception {
         final CommonProfile profile = new CommonProfile();
-        final LinkedHashMap<String, UserProfile> profiles = new LinkedHashMap<>();
+        final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, profile);
         request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), new CommonProfile());
@@ -131,7 +130,7 @@ public final class SecurityFilterTests implements TestsConstants {
     @Test
     public void testAuthorizerThrowsRequiresHttpAction() throws Exception {
         final CommonProfile profile = new CommonProfile();
-        final LinkedHashMap<String, UserProfile> profiles = new LinkedHashMap<>();
+        final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, profile);
         request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), new CommonProfile());
@@ -156,7 +155,7 @@ public final class SecurityFilterTests implements TestsConstants {
         call();
         assertEquals(200, response.getStatus());
         verify(filterChain, times(1)).doFilter(request, response);
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(1, profiles.size());
         assertTrue(profiles.containsValue(profile));
     }
@@ -187,7 +186,7 @@ public final class SecurityFilterTests implements TestsConstants {
         call();
         assertEquals(200, response.getStatus());
         verify(filterChain, times(1)).doFilter(request, response);
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(2, profiles.size());
         assertTrue(profiles.containsValue(profile));
         assertTrue(profiles.containsValue(profile2));
@@ -208,7 +207,7 @@ public final class SecurityFilterTests implements TestsConstants {
         call();
         assertEquals(200, response.getStatus());
         verify(filterChain, times(1)).doFilter(request, response);
-        final LinkedHashMap<String, UserProfile> profiles = (LinkedHashMap<String, UserProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(1, profiles.size());
         assertTrue(profiles.containsValue(profile2));
     }
