@@ -95,6 +95,7 @@ You can protect (authentication + authorizations) the urls of your J2E applicati
 - if the `authorizers` is blank or not defined, no authorization is checked
 - if the authorization checks fail, a 403 HTTP error is returned
 - the following authorizers are available by default (without defining them in the configuration):
+  * `isAnonymous` to ensure the user is not authenticated, `isAuthenticated` to ensure the user is authenticated (not necessary by default unless you use the `AnonymousClient`), `isFullyAuthenticated` to check it's not a remembered user and `isRemembered` for a remembered user
   * `hsts` to use the `StrictTransportSecurityHeader` authorizer, `nosniff` for `XContentTypeOptionsHeader`, `noframe` for `XFrameOptionsHeader `, `xssprotection` for `XSSProtectionHeader `, `nocache` for `CacheControlHeader ` or `securityHeaders` for the five previous authorizers
   * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and saves it as the `pac4jCsrfToken` request attribute and in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
 
@@ -188,10 +189,10 @@ Example:
 ```java
 WebContext context = new J2EContext(request, response);
 ProfileManager manager = new ProfileManager(context);
-Optional<UserProfile> profile = manager.get(true);
+Optional<CommonProfile> profile = manager.get(true);
 ```
 
-The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common properties that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
+The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common attributes that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
 
 ```java
 FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
@@ -215,6 +216,10 @@ In the `web.xml` file:
 <filter>
   <filter-name>logoutFilter</filter-name>
   <filter-class>org.pac4j.j2e.filter.ApplicationLogoutFilter</filter-class>
+  <init-param>
+    <param-name>defaultUrl</param-name>
+    <param-value>/urlAfterLogout</param-value>
+  </init-param>
 </filter>
 <filter-mapping>
   <filter-name>logoutFilter</filter-name>
