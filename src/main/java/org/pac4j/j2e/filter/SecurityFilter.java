@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.authorization.checker.AuthorizationChecker;
 import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker;
 import org.pac4j.core.client.*;
+import org.pac4j.core.client.direct.AnonymousClient;
 import org.pac4j.core.client.finder.ClientFinder;
 import org.pac4j.core.client.finder.DefaultClientFinder;
 import org.pac4j.core.config.Config;
@@ -96,10 +97,10 @@ public class SecurityFilter extends AbstractConfigFilter {
             final List<Client> currentClients = clientFinder.find(configClients, context, this.clients);
             logger.debug("currentClients: {}", currentClients);
 
-            final boolean useSession = useSession(context, currentClients);
-            logger.debug("useSession: {}", useSession);
+            final boolean loadProfilesFromSession = loadProfilesFromSession(context, currentClients);
+            logger.debug("loadProfilesFromSession: {}", loadProfilesFromSession);
             final ProfileManager manager = new ProfileManager(context);
-            List<CommonProfile> profiles = manager.getAll(useSession);
+            List<CommonProfile> profiles = manager.getAll(loadProfilesFromSession);
             logger.debug("profiles: {}", profiles);
             logger.debug("multiProfile: {}", multiProfile);
 
@@ -116,14 +117,14 @@ public class SecurityFilter extends AbstractConfigFilter {
                             final CommonProfile profile = currentClient.getUserProfile(credentials, context);
                             logger.debug("profile: {}", profile);
                             if (profile != null) {
-                                manager.save(useSession, profile, this.multiProfile);
+                                manager.save(false, profile, this.multiProfile);
                                 if (!this.multiProfile) {
                                     break;
                                 }
                             }
                         }
                     }
-                    profiles = manager.getAll(useSession);
+                    profiles = manager.getAll(loadProfilesFromSession);
                     logger.debug("new profiles: {}", profiles);
                 }
 
@@ -159,8 +160,8 @@ public class SecurityFilter extends AbstractConfigFilter {
         }
     }
 
-    protected boolean useSession(final WebContext context, final List<Client> currentClients) {
-        return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient;
+    protected boolean loadProfilesFromSession(final WebContext context, final List<Client> currentClients) {
+        return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient || currentClients.get(0) instanceof AnonymousClient;
     }
 
     protected void forbidden(final WebContext context, final List<Client> currentClients, final List<CommonProfile> profile, final String authorizers) {
