@@ -102,7 +102,6 @@ public class SecurityFilter extends AbstractConfigFilter {
             final ProfileManager manager = new ProfileManager(context);
             List<CommonProfile> profiles = manager.getAll(loadProfilesFromSession);
             logger.debug("profiles: {}", profiles);
-            logger.debug("multiProfile: {}", multiProfile);
 
             try {
 
@@ -117,7 +116,10 @@ public class SecurityFilter extends AbstractConfigFilter {
                             final CommonProfile profile = currentClient.getUserProfile(credentials, context);
                             logger.debug("profile: {}", profile);
                             if (profile != null) {
-                                manager.save(false, profile, this.multiProfile);
+                                final boolean saveProfileInSession = saveProfileInSession(context, currentClients, (DirectClient) currentClient, profile);
+                                logger.debug("saveProfileInSession: {}", saveProfileInSession);
+                                logger.debug("multiProfile: {}", multiProfile);
+                                manager.save(saveProfileInSession, profile, this.multiProfile);
                                 if (!this.multiProfile) {
                                     break;
                                 }
@@ -128,6 +130,7 @@ public class SecurityFilter extends AbstractConfigFilter {
                     logger.debug("new profiles: {}", profiles);
                 }
 
+                // we have profile(s) -> check authorizations
                 if (isNotEmpty(profiles)) {
                     logger.debug("authorizers: {}", authorizers);
                     if (authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers())) {
@@ -162,6 +165,10 @@ public class SecurityFilter extends AbstractConfigFilter {
 
     protected boolean loadProfilesFromSession(final WebContext context, final List<Client> currentClients) {
         return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient || currentClients.get(0) instanceof AnonymousClient;
+    }
+
+    protected boolean saveProfileInSession(final WebContext context, final List<Client> currentClients, final DirectClient directClient, final CommonProfile profile) {
+        return false;
     }
 
     protected void forbidden(final WebContext context, final List<Client> currentClients, final List<CommonProfile> profile, final String authorizers) {
