@@ -11,6 +11,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pac4j.core.config.Config;
+import org.pac4j.core.config.ConfigBuilder;
+import org.pac4j.core.config.ConfigSingleton;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
@@ -25,6 +29,16 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractConfigFilter implements Filter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    protected Config config;
+
+    public void init(final FilterConfig filterConfig) throws ServletException {
+        final String configFactoryParam = filterConfig.getInitParameter(Pac4jConstants.CONFIG_FACTORY);
+        if (configFactoryParam != null) {
+            final Config config = ConfigBuilder.build(configFactoryParam);
+            setConfig(config);
+        }
+    }
 
     protected String getStringParam(final FilterConfig filterConfig, final String name, final String defaultValue) {
         final String param = filterConfig.getInitParameter(name);
@@ -71,4 +85,17 @@ public abstract class AbstractConfigFilter implements Filter {
             final FilterChain chain) throws IOException, ServletException;
 
     public void destroy() {}
+
+    public Config getConfig() {
+        if (this.config == null) {
+            return ConfigSingleton.getConfig();
+        }
+        return this.config;
+    }
+
+    public void setConfig(final Config config) {
+        CommonHelper.assertNotNull("config", config);
+        this.config = config;
+        ConfigSingleton.setConfig(config);
+    }
 }

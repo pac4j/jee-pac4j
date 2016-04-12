@@ -16,7 +16,6 @@ import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
@@ -47,6 +46,8 @@ public class CallbackFilter extends AbstractConfigFilter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
+        super.init(filterConfig);
+
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
@@ -61,7 +62,7 @@ public class CallbackFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        final Config config = ConfigSingleton.getConfig();
+        final Config config = getConfig();
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 

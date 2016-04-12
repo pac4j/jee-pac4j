@@ -16,7 +16,6 @@ import org.pac4j.core.client.direct.AnonymousClient;
 import org.pac4j.core.client.finder.ClientFinder;
 import org.pac4j.core.client.finder.DefaultClientFinder;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.config.ConfigBuilder;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.*;
 import org.pac4j.core.credentials.Credentials;
@@ -57,11 +56,8 @@ public class SecurityFilter extends AbstractConfigFilter {
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
-        final String configFactoryParam = filterConfig.getInitParameter(Pac4jConstants.CONFIG_FACTORY);
-        if (configFactoryParam != null) {
-            final Config config = ConfigBuilder.build(configFactoryParam);
-            ConfigSingleton.setConfig(config);
-        }
+        super.init(filterConfig);
+
         this.clients = getStringParam(filterConfig, Pac4jConstants.CLIENTS, this.clients);
         this.authorizers = getStringParam(filterConfig, Pac4jConstants.AUTHORIZERS, this.authorizers);
         this.matchers = getStringParam(filterConfig, Pac4jConstants.MATCHERS, this.matchers);
@@ -83,7 +79,7 @@ public class SecurityFilter extends AbstractConfigFilter {
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain chain) throws IOException, ServletException {
 
-        final Config config = ConfigSingleton.getConfig();
+        final Config config = getConfig();
         assertNotNull("config", config);
         final WebContext context = new J2EContext(request, response, config.getSessionStore());
 
@@ -117,8 +113,7 @@ public class SecurityFilter extends AbstractConfigFilter {
                             logger.debug("profile: {}", profile);
                             if (profile != null) {
                                 final boolean saveProfileInSession = saveProfileInSession(context, currentClients, (DirectClient) currentClient, profile);
-                                logger.debug("saveProfileInSession: {}", saveProfileInSession);
-                                logger.debug("multiProfile: {}", multiProfile);
+                                logger.debug("saveProfileInSession: {} / multiProfile: {}", saveProfileInSession, this.multiProfile);
                                 manager.save(saveProfileInSession, profile, this.multiProfile);
                                 if (!this.multiProfile) {
                                     break;

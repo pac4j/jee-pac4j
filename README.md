@@ -82,7 +82,7 @@ If your application is configured via dependency injection, no factory is requir
 
 You can protect (authentication + authorizations) the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters are available:
 
-1) `configFactory`: the factory to initialize the configuration: clients and authorizers (only one filter needs to define it as the configuration is shared)
+1) `configFactory`: the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specificied only once, but each filter can defined its own configuration if necessary
 
 2) `clients` (optional): the list of client names (separated by commas) used for authentication:
 - in all cases, this filter requires the user to be authenticated. Thus, if the `clients` is blank or not defined, the user must have been previously authenticated
@@ -95,7 +95,7 @@ You can protect (authentication + authorizations) the urls of your J2E applicati
 - if the `authorizers` is blank or not defined, no authorization is checked
 - if the authorization checks fail, a 403 HTTP error is returned
 - the following authorizers are available by default (without defining them in the configuration):
-  * `isAnonymous` to ensure the user is not authenticated, `isAuthenticated` to ensure the user is authenticated (not necessary by default unless you use the `AnonymousClient`), `isFullyAuthenticated` to check it's not a remembered user and `isRemembered` for a remembered user
+  * `isFullyAuthenticated` to check if the user is authenticated but not remembered, `isRemembered` for a remembered user, `isAnonymous` to ensure the user is not authenticated, `isAuthenticated` to ensure the user is authenticated (not necessary by default unless you use the `AnonymousClient`)
   * `hsts` to use the `StrictTransportSecurityHeader` authorizer, `nosniff` for `XContentTypeOptionsHeader`, `noframe` for `XFrameOptionsHeader `, `xssprotection` for `XSSProtectionHeader `, `nocache` for `CacheControlHeader ` or `securityHeaders` for the five previous authorizers
   * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and saves it as the `pac4jCsrfToken` request attribute and in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
 
@@ -135,9 +135,11 @@ This filter can be defined via dependency injection as well. In that case, these
 For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
 Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter`. The following parameters are available:
 
-1) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
+1) `configFactory` (optional): the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specificied only once, but each filter can defined its own configuration if necessary
 
-2) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+2) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
+
+3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
 
 In the `web.xml` file:
 

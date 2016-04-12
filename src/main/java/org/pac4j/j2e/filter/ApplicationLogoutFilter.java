@@ -56,6 +56,7 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
         if (url != null && Pattern.matches(this.logoutUrlPattern, url)) {
             redirectUrl = url;
         }
+        logger.debug("redirectUrl: {}", redirectUrl);
         if (redirectUrl != null) {
             response.sendRedirect(redirectUrl);
         }
