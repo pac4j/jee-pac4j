@@ -3,7 +3,6 @@ package org.pac4j.j2e.filter;
 import org.junit.Before;
 import org.junit.Test;
 import org.pac4j.core.client.*;
-import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
@@ -11,11 +10,7 @@ import org.pac4j.core.credentials.MockCredentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import javax.servlet.FilterChain;
 import java.util.LinkedHashMap;
@@ -30,28 +25,16 @@ import static org.mockito.Mockito.*;
  * @author Jerome Leleu
  * @since 1.3.0
  */
-public final class SecurityFilterTests implements TestsConstants {
-
-    private SecurityFilter filter;
-
-    private MockFilterConfig filterConfig;
-
-    private Config config;
-
-    private MockHttpServletRequest request;
-
-    private MockHttpServletResponse response;
+public final class SecurityFilterTests extends AbstractWebTests {
 
     private FilterChain filterChain;
+
+    private SecurityFilter filter;
 
     @Before
     public void setUp() {
         filter = new SecurityFilter();
-        filterConfig = new MockFilterConfig();
-        config = new Config();
-        ConfigSingleton.setConfig(config);
-        request = new MockHttpServletRequest();
-        response = new MockHttpServletResponse();
+        super.setUp();
         filterChain = mock(FilterChain.class);
     }
 

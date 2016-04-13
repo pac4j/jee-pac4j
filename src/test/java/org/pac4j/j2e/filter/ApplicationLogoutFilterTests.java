@@ -2,17 +2,11 @@ package org.pac4j.j2e.filter;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
-import org.springframework.mock.web.MockFilterChain;
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.LinkedHashMap;
 
@@ -24,32 +18,14 @@ import static org.junit.Assert.*;
  * @author Jerome Leleu
  * @since 1.3.0
  */
-public final class ApplicationLogoutFilterTests implements TestsConstants {
-
-    private final static String POST_LOGOUT_URL = "/postLogoutUrl";
-    private final static String NEW_DEFAULT_URL = "/newDefaultUrl";
+public final class ApplicationLogoutFilterTests extends AbstractWebTests {
 
     private ApplicationLogoutFilter filter;
-
-    private MockFilterConfig filterConfig;
-
-    private Config config;
-
-    private MockHttpServletRequest request;
-
-    private MockHttpServletResponse response;
-
-    private MockFilterChain filterChain;
 
     @Before
     public void setUp() {
         filter = new ApplicationLogoutFilter();
-        filterConfig = new MockFilterConfig();
-        config = new Config();
-        ConfigSingleton.setConfig(config);
-        request = new MockHttpServletRequest();
-        response = new MockHttpServletResponse();
-        filterChain = new MockFilterChain();
+        super.setUp();
     }
 
     private void call() throws Exception {
@@ -73,38 +49,37 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
     public void testLogout() throws Exception {
         final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, new CommonProfile());
-        request.setAttribute(Pac4jConstants.USER_PROFILES, profiles);
-        request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
+        webContext.setRequestAttribute(Pac4jConstants.USER_PROFILES, profiles);
+        webContext.setSessionAttribute(Pac4jConstants.USER_PROFILES, profiles);
         call();
         assertEquals(200, response.getStatus());
         assertEquals("", response.getContentAsString());
-        final LinkedHashMap<String, CommonProfile> profiles2 = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles2 = (LinkedHashMap<String, CommonProfile>) webContext.getRequestAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(0, profiles2.size());
-        final LinkedHashMap<String, CommonProfile> profiles3 = (LinkedHashMap<String, CommonProfile>) request.getSession().getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles3 = (LinkedHashMap<String, CommonProfile>) webContext.getSessionAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(0, profiles3.size());
     }
 
     @Test
     public void testLogoutWithDefaultUrl() throws Exception {
-        filter.setDefaultUrl(NEW_DEFAULT_URL);
+        filter.setDefaultUrl(CALLBACK_URL);
         call();
         assertEquals(302, response.getStatus());
-        assertEquals(NEW_DEFAULT_URL, response.getRedirectedUrl());
+        assertEquals(CALLBACK_URL, response.getRedirectedUrl());
     }
 
     @Test
     public void testLogoutWithGoodUrl() throws Exception {
-        request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
+        request.addParameter(Pac4jConstants.URL, PATH);
         call();
         assertEquals(302, response.getStatus());
-        assertEquals(POST_LOGOUT_URL, response.getRedirectedUrl());
+        assertEquals(PATH, response.getRedirectedUrl());
     }
 
     @Test
     public void testLogoutWithBadUrlNoDefaultUrl() throws Exception {
-        request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
+        request.addParameter(Pac4jConstants.URL, PATH);
         filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, VALUE);
-        filter.init(filterConfig);
         call();
         assertEquals(200, response.getStatus());
         assertEquals("", response.getContentAsString());
@@ -112,12 +87,11 @@ public final class ApplicationLogoutFilterTests implements TestsConstants {
 
     @Test
     public void testLogoutWithBadUrlButDefaultUrl() throws Exception {
-        request.addParameter(Pac4jConstants.URL, POST_LOGOUT_URL);
+        request.addParameter(Pac4jConstants.URL, PATH);
         filterConfig.addInitParameter(Pac4jConstants.LOGOUT_URL_PATTERN, VALUE);
-        filterConfig.addInitParameter(Pac4jConstants.DEFAULT_URL, NEW_DEFAULT_URL);
-        filter.init(filterConfig);
+        filterConfig.addInitParameter(Pac4jConstants.DEFAULT_URL, CALLBACK_URL);
         call();
         assertEquals(302, response.getStatus());
-        assertEquals(NEW_DEFAULT_URL, response.getRedirectedUrl());
+        assertEquals(CALLBACK_URL, response.getRedirectedUrl());
     }
 }

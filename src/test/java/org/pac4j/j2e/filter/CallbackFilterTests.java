@@ -6,18 +6,12 @@ import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.client.MockDirectClient;
 import org.pac4j.core.client.MockIndirectClient;
-import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.credentials.MockCredentials;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
-import org.springframework.mock.web.MockFilterChain;
-import org.springframework.mock.web.MockFilterConfig;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
 
 import javax.servlet.http.HttpSession;
 import java.util.LinkedHashMap;
@@ -30,29 +24,14 @@ import static org.junit.Assert.*;
  * @author Jerome Leleu
  * @since 1.3.0
  */
-public final class CallbackFilterTests implements TestsConstants {
+public final class CallbackFilterTests extends AbstractWebTests {
 
     private CallbackFilter filter;
-
-    private MockFilterConfig filterConfig;
-
-    private Config config;
-
-    private MockHttpServletRequest request;
-
-    private MockHttpServletResponse response;
-
-    private MockFilterChain filterChain;
 
     @Before
     public void setUp() {
         filter = new CallbackFilter();
-        filterConfig = new MockFilterConfig();
-        config = new Config();
-        ConfigSingleton.setConfig(config);
-        request = new MockHttpServletRequest();
-        response = new MockHttpServletResponse();
-        filterChain = new MockFilterChain();
+        super.setUp();
     }
 
     private void call() throws Exception {
@@ -75,13 +54,13 @@ public final class CallbackFilterTests implements TestsConstants {
     @Test
     public void testBlankDefaultUrl() throws Exception {
         filter.setDefaultUrl("");
-        TestsHelper.expectException(() -> filter.init(filterConfig), TechnicalException.class, "defaultUrl cannot be blank");
+        TestsHelper.expectException(() -> call(), TechnicalException.class, "defaultUrl cannot be blank");
     }
 
     @Test
     public void testOldClientsFactory() throws Exception {
         filterConfig.addInitParameter("clientsFactory", VALUE);
-        TestsHelper.expectException(() -> filter.init(filterConfig), TechnicalException.class, "the clientsFactory servlet parameter is no longer supported");
+        TestsHelper.expectException(() -> call(), TechnicalException.class, "the clientsFactory servlet parameter is no longer supported");
     }
 
     @Test
