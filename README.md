@@ -30,7 +30,7 @@ All released artifacts are available in the [Maven central repository](http://se
 
 ### 2) Define the configuration (`Config` + `Client` + `Authorizer`)
 
-The configuration (`org.pac4j.core.config.Config`) contains all clients and authorizers required by the application to handle security.
+The configuration (`org.pac4j.core.config.Config`) contains all the clients and authorizers required by the application to handle security.
 
 It must be built via a configuration factory (`org.pac4j.core.config.ConfigFactory`):
 
@@ -73,7 +73,11 @@ public class DemoConfigFactory implements ConfigFactory {
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
-Notice that you can also use a specific [`SessionStore`](https://github.com/pac4j/pac4j/wiki/SessionStore) by defining it via the `setSessionStore(sessionStore)` method as well as specific [matchers](https://github.com/pac4j/pac4j/wiki/Matchers) via the `addMatcher(name, Matcher)` method.
+Notice that you can define:
+
+1) a specific [`SessionStore`](https://github.com/pac4j/pac4j/wiki/SessionStore) using the `setSessionStore(sessionStore)` method (by default, the `J2ESessionStore` uses the HTTP session)
+
+2) specific [matchers](https://github.com/pac4j/pac4j/wiki/Matchers) via the `addMatcher(name, Matcher)` method.
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
