@@ -86,7 +86,7 @@ public final class SecurityFilterTests extends AbstractWebTests {
         profile.setId(ID);
         final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, profile);
-        request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
+        webContext.setSessionAttribute(Pac4jConstants.USER_PROFILES, profiles);
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), new CommonProfile());
         filter.setAuthorizers(NAME);
         config.setClients(new Clients(CALLBACK_URL, indirectClient));
@@ -101,7 +101,7 @@ public final class SecurityFilterTests extends AbstractWebTests {
         final CommonProfile profile = new CommonProfile();
         final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, profile);
-        request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
+        webContext.setSessionAttribute(Pac4jConstants.USER_PROFILES, profiles);
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), new CommonProfile());
         filter.setAuthorizers(NAME);
         config.setClients(new Clients(CALLBACK_URL, indirectClient));
@@ -115,7 +115,7 @@ public final class SecurityFilterTests extends AbstractWebTests {
         final CommonProfile profile = new CommonProfile();
         final LinkedHashMap<String, CommonProfile> profiles = new LinkedHashMap<>();
         profiles.put(NAME, profile);
-        request.getSession().setAttribute(Pac4jConstants.USER_PROFILES, profiles);
+        webContext.setSessionAttribute(Pac4jConstants.USER_PROFILES, profiles);
         final IndirectClient indirectClient = new MockIndirectClient(NAME, null, new MockCredentials(), new CommonProfile());
         filter.setAuthorizers(NAME);
         config.setClients(new Clients(CALLBACK_URL, indirectClient));
@@ -138,7 +138,7 @@ public final class SecurityFilterTests extends AbstractWebTests {
         call();
         assertEquals(200, response.getStatus());
         verify(filterChain, times(1)).doFilter(request, response);
-        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) webContext.getRequestAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(1, profiles.size());
         assertTrue(profiles.containsValue(profile));
     }
@@ -169,7 +169,7 @@ public final class SecurityFilterTests extends AbstractWebTests {
         call();
         assertEquals(200, response.getStatus());
         verify(filterChain, times(1)).doFilter(request, response);
-        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) webContext.getRequestAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(2, profiles.size());
         assertTrue(profiles.containsValue(profile));
         assertTrue(profiles.containsValue(profile2));
@@ -190,7 +190,7 @@ public final class SecurityFilterTests extends AbstractWebTests {
         call();
         assertEquals(200, response.getStatus());
         verify(filterChain, times(1)).doFilter(request, response);
-        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) request.getAttribute(Pac4jConstants.USER_PROFILES);
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) webContext.getRequestAttribute(Pac4jConstants.USER_PROFILES);
         assertEquals(1, profiles.size());
         assertTrue(profiles.containsValue(profile2));
     }
