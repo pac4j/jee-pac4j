@@ -1,18 +1,3 @@
-/*
-  Copyright 2013 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.j2e.filter;
 
 import java.io.IOException;
@@ -26,6 +11,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.pac4j.core.config.Config;
+import org.pac4j.core.config.ConfigBuilder;
+import org.pac4j.core.config.ConfigSingleton;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
@@ -41,6 +30,16 @@ public abstract class AbstractConfigFilter implements Filter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    protected Config config;
+
+    public void init(final FilterConfig filterConfig) throws ServletException {
+        final String configFactoryParam = filterConfig.getInitParameter(Pac4jConstants.CONFIG_FACTORY);
+        if (configFactoryParam != null) {
+            final Config config = ConfigBuilder.build(configFactoryParam);
+            setConfig(config);
+        }
+    }
+
     protected String getStringParam(final FilterConfig filterConfig, final String name, final String defaultValue) {
         final String param = filterConfig.getInitParameter(name);
         final String value;
@@ -53,13 +52,16 @@ public abstract class AbstractConfigFilter implements Filter {
         return value;
     }
 
-    protected void checkUselessParameter(final FilterConfig filterConfig, final String name) {
-        final String parameter = getStringParam(filterConfig, name, null);
-        if (CommonHelper.isNotBlank(parameter)) {
-            final String message = "the " + name + " servlet parameter is no longer available and will be ignored";
-            logger.error(message);
-            throw new TechnicalException(message);
+    protected boolean getBooleanParam(final FilterConfig filterConfig, final String name, final boolean defaultValue) {
+        final String param = filterConfig.getInitParameter(name);
+        final boolean value;
+        if (param != null) {
+            value = Boolean.parseBoolean(param);
+        } else {
+            value = defaultValue;
         }
+        logger.debug("Boolean param: {}: {}", name, value);
+        return value;
     }
 
     protected void checkForbiddenParameter(final FilterConfig filterConfig, final String name) {
@@ -70,7 +72,6 @@ public abstract class AbstractConfigFilter implements Filter {
             throw new TechnicalException(message);
         }
     }
-
 
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
@@ -83,6 +84,18 @@ public abstract class AbstractConfigFilter implements Filter {
     protected abstract void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
             final FilterChain chain) throws IOException, ServletException;
 
-    public void destroy() {
+    public void destroy() {}
+
+    public Config getConfig() {
+        if (this.config == null) {
+            return ConfigSingleton.getConfig();
+        }
+        return this.config;
+    }
+
+    public void setConfig(final Config config) {
+        CommonHelper.assertNotNull("config", config);
+        this.config = config;
+        ConfigSingleton.setConfig(config);
     }
 }
