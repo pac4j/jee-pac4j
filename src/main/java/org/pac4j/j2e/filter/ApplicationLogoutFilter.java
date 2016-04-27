@@ -1,11 +1,11 @@
 package org.pac4j.j2e.filter;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.engine.ApplicationLogoutLogic;
+import org.pac4j.core.engine.DefaultApplicationLogoutLogic;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -13,14 +13,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
 /**
- * <p>This filter handles the application logout process.</p>
- * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter if it matches the <code>logoutUrlPattern</code>.
- * Or the user is redirected to the <code>defaultUrl</code> if it is defined. Otherwise, a blank page is displayed.</p>
+ * <p>This filter handles the application logout process, based on the {@link #applicationLogoutLogic}.</p>
  *
  * <p>The configuration can be provided via servlet parameters: <code>defaultUrl</code> (default logourl url) and <code>logoutUrlPattern</code> (logout url pattern).</p>
  * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)} and {@link #setLogoutUrlPattern(String)}.</p>
@@ -30,36 +27,27 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class ApplicationLogoutFilter extends AbstractConfigFilter {
 
-    protected String defaultUrl;
+    private ApplicationLogoutLogic<Object> applicationLogoutLogic = new DefaultApplicationLogoutLogic<>();
 
-    protected String logoutUrlPattern = Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE;
+    private String defaultUrl;
+
+    private String logoutUrlPattern;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         this.logoutUrlPattern = getStringParam(filterConfig, Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
-        assertNotBlank(Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
     }
 
     @Override
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        final Config config = ConfigSingleton.getConfig();
+        final Config config = getConfig();
         assertNotNull("config", config);
         final WebContext context = new J2EContext(request, response, config.getSessionStore());
-        final ProfileManager manager = new ProfileManager(context);
-        manager.logout();
 
-        final String url = context.getRequestParameter(Pac4jConstants.URL);
-        String redirectUrl = this.defaultUrl;
-        if (url != null && Pattern.matches(this.logoutUrlPattern, url)) {
-            redirectUrl = url;
-        }
-        logger.debug("redirectUrl: {}", redirectUrl);
-        if (redirectUrl != null) {
-            response.sendRedirect(redirectUrl);
-        }
+        applicationLogoutLogic.perform(context, config, (code, ctx) -> null, this.defaultUrl, this.logoutUrlPattern);
     }
 
     public String getDefaultUrl() {
@@ -76,5 +64,13 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
 
     public void setLogoutUrlPattern(String logoutUrlPattern) {
         this.logoutUrlPattern = logoutUrlPattern;
+    }
+
+    public ApplicationLogoutLogic<Object> getApplicationLogoutLogic() {
+        return applicationLogoutLogic;
+    }
+
+    public void setApplicationLogoutLogic(ApplicationLogoutLogic<Object> applicationLogoutLogic) {
+        this.applicationLogoutLogic = applicationLogoutLogic;
     }
 }

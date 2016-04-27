@@ -1,7 +1,6 @@
 package org.pac4j.j2e.filter;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -9,50 +8,34 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.pac4j.core.authorization.checker.AuthorizationChecker;
-import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker;
-import org.pac4j.core.client.*;
-import org.pac4j.core.client.direct.AnonymousClient;
-import org.pac4j.core.client.finder.ClientFinder;
-import org.pac4j.core.client.finder.DefaultClientFinder;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.*;
-import org.pac4j.core.credentials.Credentials;
-import org.pac4j.core.exception.RequiresHttpAction;
-import org.pac4j.core.matching.DefaultMatchingChecker;
-import org.pac4j.core.matching.MatchingChecker;
-import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.engine.DefaultSecurityLogic;
+import org.pac4j.core.engine.SecurityLogic;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
 /**
- * <p>This filter protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration.
- * If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients.</p>
+ * <p>This filter protects an url, based on the {@link #securityLogic}.</p>
  *
  * <p>The configuration can be provided via servlet parameters: <code>configFactory</code> (configuration factory), <code>clients</code> (list of clients for authentication),
  * <code>authorizers</code> (list of authorizers), <code>matchers</code> (list of matchers) and <code>multiProfile</code>  (whether multiple profiles should be kept).</p>
- * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClients(String)}, {@link #setAuthorizers(String)}, {@link #setMatchers(String)} and {@link #setMultiProfile(boolean)}.</p>
+ * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClients(String)}, {@link #setAuthorizers(String)}, {@link #setMatchers(String)} and {@link #setMultiProfile(Boolean)}.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
  */
 public class SecurityFilter extends AbstractConfigFilter {
 
-    protected ClientFinder clientFinder = new DefaultClientFinder();
+    private SecurityLogic securityLogic = new DefaultSecurityLogic();
 
-    protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
+    private String clients;
 
-    protected MatchingChecker matchingChecker = new DefaultMatchingChecker();
+    private String authorizers;
 
-    protected String clients;
+    private String matchers;
 
-    protected String authorizers;
-
-    protected String matchers;
-
-    protected boolean multiProfile;
+    private Boolean multiProfile;
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
@@ -63,7 +46,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.matchers = getStringParam(filterConfig, Pac4jConstants.MATCHERS, this.matchers);
         this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
 
-        // to help with backward compatibility
+        // check backward incompatibility
         checkForbiddenParameter(filterConfig, "clientsFactory");
         checkForbiddenParameter(filterConfig, "isAjax");
         checkForbiddenParameter(filterConfig, "stateless");
@@ -75,7 +58,6 @@ public class SecurityFilter extends AbstractConfigFilter {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain chain) throws IOException, ServletException {
 
@@ -83,118 +65,14 @@ public class SecurityFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final WebContext context = new J2EContext(request, response, config.getSessionStore());
 
-        logger.debug("url: {}", context.getFullRequestURL());
-        logger.debug("matchers: {}", matchers);
-        if (matchingChecker.matches(context, this.matchers, getConfig().getMatchers())) {
-
-            final Clients configClients = config.getClients();
-            assertNotNull("configClients", configClients);
-            logger.debug("clients: {}", clients);
-            final List<Client> currentClients = clientFinder.find(configClients, context, this.clients);
-            logger.debug("currentClients: {}", currentClients);
-
-            final boolean loadProfilesFromSession = loadProfilesFromSession(context, currentClients);
-            logger.debug("loadProfilesFromSession: {}", loadProfilesFromSession);
-            final ProfileManager manager = new ProfileManager(context);
-            List<CommonProfile> profiles = manager.getAll(loadProfilesFromSession);
-            logger.debug("profiles: {}", profiles);
-
-            try {
-
-                // no profile and some current clients
-                if (isEmpty(profiles) && isNotEmpty(currentClients)) {
-                    // loop on all clients searching direct ones to perform authentication
-                    for (final Client currentClient : currentClients) {
-                        if (currentClient instanceof DirectClient) {
-                            logger.debug("Performing authentication for client: {}", currentClient);
-
-                            final Credentials credentials = currentClient.getCredentials(context);
-                            final CommonProfile profile = currentClient.getUserProfile(credentials, context);
-                            logger.debug("profile: {}", profile);
-                            if (profile != null) {
-                                final boolean saveProfileInSession = saveProfileInSession(context, currentClients, (DirectClient) currentClient, profile);
-                                logger.debug("saveProfileInSession: {} / multiProfile: {}", saveProfileInSession, this.multiProfile);
-                                manager.save(saveProfileInSession, profile, this.multiProfile);
-                                if (!this.multiProfile) {
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    profiles = manager.getAll(loadProfilesFromSession);
-                    logger.debug("new profiles: {}", profiles);
-                }
-
-                // we have profile(s) -> check authorizations
-                if (isNotEmpty(profiles)) {
-                    logger.debug("authorizers: {}", authorizers);
-                    if (authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers())) {
-                        logger.debug("authenticated and authorized -> grant access");
-                        chain.doFilter(request, response);
-                    } else {
-                        logger.debug("forbidden");
-                        forbidden(context, currentClients, profiles, authorizers);
-                    }
-                } else {
-                    if (startAuthentication(context, currentClients)) {
-                        logger.debug("Starting authentication");
-                        saveRequestedUrl(context, currentClients);
-                        redirectToIdentityProvider(context, currentClients);
-                    } else {
-                        logger.debug("unauthorized");
-                        unauthorized(context, currentClients);
-                    }
-                }
-
-            } catch (final RequiresHttpAction e) {
-                logger.debug("extra HTTP action required in security filter: {}", e.getCode());
-                return;
-            }
-
-        } else {
-
-            logger.debug("no matching for this request -> grant access");
-            chain.doFilter(request, response);
-        }
-    }
-
-    protected boolean loadProfilesFromSession(final WebContext context, final List<Client> currentClients) {
-        return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient || currentClients.get(0) instanceof AnonymousClient;
-    }
-
-    protected boolean saveProfileInSession(final WebContext context, final List<Client> currentClients, final DirectClient directClient, final CommonProfile profile) {
-        return false;
-    }
-
-    protected void forbidden(final WebContext context, final List<Client> currentClients, final List<CommonProfile> profile, final String authorizers) {
-        context.setResponseStatus(HttpConstants.FORBIDDEN);
-    }
-
-    protected boolean startAuthentication(final WebContext context, final List<Client> currentClients) {
-        return isNotEmpty(currentClients) && currentClients.get(0) instanceof IndirectClient;
-    }
-
-    protected void saveRequestedUrl(final WebContext context, final List<Client> currentClients) {
-        final String requestedUrl = context.getFullRequestURL();
-        logger.debug("requestedUrl: {}", requestedUrl);
-        context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
-    }
-
-    protected void redirectToIdentityProvider(final WebContext context, final List<Client> currentClients) throws RequiresHttpAction {
-        final IndirectClient currentClient = (IndirectClient) currentClients.get(0);
-        currentClient.redirect(context);
-    }
-
-    protected void unauthorized(final WebContext context, final List<Client> currentClients) {
-        context.setResponseStatus(HttpConstants.UNAUTHORIZED);
-    }
-
-    public Config getConfig() {
-        return ConfigSingleton.getConfig();
-    }
-
-    public void setConfig(final Config config) {
-        ConfigSingleton.setConfig(config);
+        securityLogic.perform(context, config, (ctx, parameters) -> {
+            final J2EContext j2EContext = (J2EContext) ctx;
+            final HttpServletRequest req = j2EContext.getRequest();
+            final HttpServletResponse resp = j2EContext.getResponse();
+            final FilterChain filterChain = (FilterChain) parameters[0];
+            filterChain.doFilter(req, resp);
+            return null;
+        }, (code, ctx) -> null, clients, authorizers, matchers, multiProfile, chain);
     }
 
     public String getClients() {
@@ -221,11 +99,19 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.matchers = matchers;
     }
 
-    public boolean isMultiProfile() {
+    public Boolean getMultiProfile() {
         return multiProfile;
     }
 
-    public void setMultiProfile(boolean multiProfile) {
+    public void setMultiProfile(Boolean multiProfile) {
         this.multiProfile = multiProfile;
+    }
+
+    public SecurityLogic getSecurityLogic() {
+        return securityLogic;
+    }
+
+    public void setSecurityLogic(SecurityLogic securityLogic) {
+        this.securityLogic = securityLogic;
     }
 }

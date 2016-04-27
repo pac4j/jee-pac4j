@@ -52,9 +52,9 @@ public abstract class AbstractConfigFilter implements Filter {
         return value;
     }
 
-    protected boolean getBooleanParam(final FilterConfig filterConfig, final String name, final boolean defaultValue) {
+    protected Boolean getBooleanParam(final FilterConfig filterConfig, final String name, final Boolean defaultValue) {
         final String param = filterConfig.getInitParameter(name);
-        final boolean value;
+        final Boolean value;
         if (param != null) {
             value = Boolean.parseBoolean(param);
         } else {
