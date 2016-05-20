@@ -13,6 +13,7 @@ import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.J2ERenewSessionCallbackLogic;
+import org.pac4j.core.http.NopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -28,7 +29,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class CallbackFilter extends AbstractConfigFilter {
 
-    private CallbackLogic<Object> callbackLogic = new J2ERenewSessionCallbackLogic();
+    private CallbackLogic<Object, J2EContext> callbackLogic = new J2ERenewSessionCallbackLogic();
 
     private String defaultUrl;
 
@@ -56,7 +57,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        callbackLogic.perform(context, config, (code, ctx) -> null, this.defaultUrl, this.multiProfile, this.renewSession);
+        callbackLogic.perform(context, config, NopHttpActionAdapter.INSTANCE, this.defaultUrl, this.multiProfile, this.renewSession);
     }
 
     public String getDefaultUrl() {
@@ -83,11 +84,11 @@ public class CallbackFilter extends AbstractConfigFilter {
         this.renewSession = renewSession;
     }
 
-    public CallbackLogic<Object> getCallbackLogic() {
+    public CallbackLogic<Object, J2EContext> getCallbackLogic() {
         return callbackLogic;
     }
 
-    public void setCallbackLogic(CallbackLogic<Object> callbackLogic) {
+    public void setCallbackLogic(CallbackLogic<Object, J2EContext> callbackLogic) {
         this.callbackLogic = callbackLogic;
     }
 }

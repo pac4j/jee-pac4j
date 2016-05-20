@@ -3,9 +3,9 @@ package org.pac4j.j2e.filter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.engine.ApplicationLogoutLogic;
 import org.pac4j.core.engine.DefaultApplicationLogoutLogic;
+import org.pac4j.core.http.NopHttpActionAdapter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -27,7 +27,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class ApplicationLogoutFilter extends AbstractConfigFilter {
 
-    private ApplicationLogoutLogic<Object> applicationLogoutLogic = new DefaultApplicationLogoutLogic<>();
+    private ApplicationLogoutLogic<Object, J2EContext> applicationLogoutLogic = new DefaultApplicationLogoutLogic<>();
 
     private String defaultUrl;
 
@@ -45,9 +45,9 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
 
         final Config config = getConfig();
         assertNotNull("config", config);
-        final WebContext context = new J2EContext(request, response, config.getSessionStore());
+        final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        applicationLogoutLogic.perform(context, config, (code, ctx) -> null, this.defaultUrl, this.logoutUrlPattern);
+        applicationLogoutLogic.perform(context, config, NopHttpActionAdapter.INSTANCE, this.defaultUrl, this.logoutUrlPattern);
     }
 
     public String getDefaultUrl() {
@@ -66,11 +66,11 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
         this.logoutUrlPattern = logoutUrlPattern;
     }
 
-    public ApplicationLogoutLogic<Object> getApplicationLogoutLogic() {
+    public ApplicationLogoutLogic<Object, J2EContext> getApplicationLogoutLogic() {
         return applicationLogoutLogic;
     }
 
-    public void setApplicationLogoutLogic(ApplicationLogoutLogic<Object> applicationLogoutLogic) {
+    public void setApplicationLogoutLogic(ApplicationLogoutLogic<Object, J2EContext> applicationLogoutLogic) {
         this.applicationLogoutLogic = applicationLogoutLogic;
     }
 }

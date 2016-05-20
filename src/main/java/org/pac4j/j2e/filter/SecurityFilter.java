@@ -12,6 +12,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.*;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
+import org.pac4j.core.http.NopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -27,7 +28,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class SecurityFilter extends AbstractConfigFilter {
 
-    private SecurityLogic securityLogic = new DefaultSecurityLogic();
+    private SecurityLogic<Object, J2EContext> securityLogic = new DefaultSecurityLogic<>();
 
     private String clients;
 
@@ -63,16 +64,15 @@ public class SecurityFilter extends AbstractConfigFilter {
 
         final Config config = getConfig();
         assertNotNull("config", config);
-        final WebContext context = new J2EContext(request, response, config.getSessionStore());
+        final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
         securityLogic.perform(context, config, (ctx, parameters) -> {
-            final J2EContext j2EContext = (J2EContext) ctx;
-            final HttpServletRequest req = j2EContext.getRequest();
-            final HttpServletResponse resp = j2EContext.getResponse();
+            final HttpServletRequest req = context.getRequest();
+            final HttpServletResponse resp = context.getResponse();
             final FilterChain filterChain = (FilterChain) parameters[0];
             filterChain.doFilter(req, resp);
             return null;
-        }, (code, ctx) -> null, clients, authorizers, matchers, multiProfile, chain);
+        }, NopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile, chain);
     }
 
     public String getClients() {
@@ -107,11 +107,11 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.multiProfile = multiProfile;
     }
 
-    public SecurityLogic getSecurityLogic() {
+    public SecurityLogic<Object, J2EContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic securityLogic) {
+    public void setSecurityLogic(SecurityLogic<Object, J2EContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }
