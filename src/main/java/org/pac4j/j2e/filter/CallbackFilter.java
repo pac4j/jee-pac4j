@@ -13,7 +13,7 @@ import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.J2ERenewSessionCallbackLogic;
-import org.pac4j.core.http.NopHttpActionAdapter;
+import org.pac4j.core.http.J2ENopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -57,7 +57,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        callbackLogic.perform(context, config, NopHttpActionAdapter.INSTANCE, this.defaultUrl, this.multiProfile, this.renewSession);
+        callbackLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.multiProfile, this.renewSession);
     }
 
     public String getDefaultUrl() {

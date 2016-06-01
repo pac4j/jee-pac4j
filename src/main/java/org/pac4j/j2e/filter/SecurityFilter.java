@@ -12,7 +12,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.*;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
-import org.pac4j.core.http.NopHttpActionAdapter;
+import org.pac4j.core.http.J2ENopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -72,7 +72,7 @@ public class SecurityFilter extends AbstractConfigFilter {
             final FilterChain filterChain = (FilterChain) parameters[0];
             filterChain.doFilter(req, resp);
             return null;
-        }, NopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile, chain);
+        }, J2ENopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile, chain);
     }
 
     public String getClients() {
