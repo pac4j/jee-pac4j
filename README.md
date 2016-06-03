@@ -84,27 +84,33 @@ If your application is configured via dependency injection, no factory is requir
 
 ### 3) Protect urls (`SecurityFilter`)
 
-You can protect (authentication + authorizations) the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. The following parameters are available:
+You can protect (authentication + authorizations) the urls of your J2E application by using the `SecurityFilter` and defining the appropriate mapping. It has the following behaviour:
 
-1) `configFactory`: the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specificied only once, but each filter can defined its own configuration if necessary
+1) If the HTTP request matches the `matchers` configuration (or no `matchers` are defined), the security is applied. Otherwise, the user is automatically granted access.
+
+2) First, if the user is not authenticated (no profile) and if some clients have been defined in the `clients` parameter, a login is tried for the direct clients.
+
+3) Then, if the user has a profile, authorizations are checked according to the `authorizers` configuration. If the authorizations are valid, the user is granted access. Otherwise, a 403 error page is displayed.
+
+4) Finally, if the user is still not authenticated (no profile), he is redirected to the appropriate identity provider if the first defined client is an indirect one in the `clients` configuration. Otherwise, a 401 error page is displayed.
+
+
+The following parameters are available:
+
+1) `configFactory`: the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary
 
 2) `clients` (optional): the list of client names (separated by commas) used for authentication:
 - in all cases, this filter requires the user to be authenticated. Thus, if the `clients` is blank or not defined, the user must have been previously authenticated
-- if the user is not authenticated, the defined direct clients are tried successively to login the user
-- then if the user is still not authenticated and if the first defined client is indirect, this client is used to redirect the user to the appropriate identity provider for login
-- otherwise, a 401 HTTP error is returned
 - if the `client_name` request parameter is provided, only this client (if it exists in the `clients`) is selected.
 
 3) `authorizers` (optional): the list of authorizer names (separated by commas) used to check authorizations:
 - if the `authorizers` is blank or not defined, no authorization is checked
-- if the authorization checks fail, a 403 HTTP error is returned
 - the following authorizers are available by default (without defining them in the configuration):
   * `isFullyAuthenticated` to check if the user is authenticated but not remembered, `isRemembered` for a remembered user, `isAnonymous` to ensure the user is not authenticated, `isAuthenticated` to ensure the user is authenticated (not necessary by default unless you use the `AnonymousClient`)
   * `hsts` to use the `StrictTransportSecurityHeader` authorizer, `nosniff` for `XContentTypeOptionsHeader`, `noframe` for `XFrameOptionsHeader `, `xssprotection` for `XSSProtectionHeader `, `nocache` for `CacheControlHeader ` or `securityHeaders` for the five previous authorizers
   * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and saves it as the `pac4jCsrfToken` request attribute and in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
 
-4) `matchers` (optional): the list of matcher names (separated by commas) that the request must satisfy to check authentication / authorizations:
-- if the `matchers` is blank or not defined, all requests are checked.
+4) `matchers` (optional): the list of matcher names (separated by commas) that the request must satisfy to check authentication / authorizations
 
 5) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
 
@@ -137,9 +143,16 @@ This filter can be defined via dependency injection as well. In that case, these
 ### 4) Define the callback endpoint only for indirect clients (`CallbackFilter`)
 
 For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
-Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter`. The following parameters are available:
+Thus, a callback endpoint is required in the application. It is managed by the `CallbackFilter` which has the following behaviour:
 
-1) `configFactory` (optional): the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specificied only once, but each filter can defined its own configuration if necessary
+1) the credentials are extracted from the current request to fetch the user profile (from the identity provider) which is then saved in the web session
+
+2) finally, the user is redirected back to the originally requested url (or to the `defaultUrl`).
+
+
+The following parameters are available:
+
+1) `configFactory` (optional): the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary
 
 2) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
@@ -207,9 +220,15 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 ### 6) Logout (`ApplicationLogoutFilter`)
 
-You can log out the current authenticated user using the `ApplicationLogoutFilter`.
-After logout, the user is redirected to the url defined by the `url` request parameter if it matches the `logoutUrlPattern`.
-Or the user is redirected to the `defaultUrl` if it is defined. Otherwise, a blank page is displayed.
+You can log out the current authenticated user using the `ApplicationLogoutFilter`. It has the following behaviour:
+
+1) after logout, the user is redirected to the url defined by the `url` request parameter if it matches the `logoutUrlPattern`
+
+2) or the user is redirected to the `defaultUrl` if it is defined
+
+3) otherwise, a blank page is displayed.
+
+
 The following parameters are available:
 
 1) `defaultUrl` (optional): the default logout url if no `url` request parameter is provided or if the `url` does not match the `logoutUrlPattern` (not defined by default)
