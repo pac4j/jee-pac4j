@@ -5,15 +5,21 @@
 The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like session fixation and CSRF protection.
 It's based on Java 8, servlet 3 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
-**Main concepts:**
+**Main concepts and components:**
 
 1) A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism (CAS, OAuth, SAML, OpenID Connect, LDAP, JWT...) It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication
 
 2) An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile(s) (role / permission, ...) or on the current web context (IP check, CSRF...)
 
-3) The `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+3) A [**matcher**](https://github.com/pac4j/pac4j/wiki/Matchers) defines whether the security must apply on a specific url
 
-4) The `CallbackFilter` finishes the login process for an indirect client.
+4) A [**config**](https://github.com/pac4j/pac4j/blob/master/pac4j-core/src/main/java/org/pac4j/core/config/Config.java) defines the security configuration via clients, authorizers and matchers
+
+5) The `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+
+6) The `CallbackFilter` finishes the login process for an indirect client
+
+7) The `ApplicationLogoutFilter` logs out the user from the application.
 
 Just follow these easy steps to secure your J2E web application:
 
@@ -259,7 +265,7 @@ In the `web.xml` file:
 
 The `RequiresAuthenticationFilter` is now named `SecurityFilter` with the `clients`, `authorizers` and `matchers` parameters instead of the previous `clientName`, `authorizerName` and `matcherName`.
 
-The `ApplicationLogoutFilter` behaviour has slightly changed: even without any `url` request parameter, the user will be redirect to the `defaultUrl` if it has been defined.
+The `ApplicationLogoutFilter` behaviour has slightly changed: even without any `url` request parameter, the user will be redirected to the `defaultUrl` if it has been defined.
 
 ### 1.1 -> 1.2
 
