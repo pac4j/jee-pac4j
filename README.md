@@ -59,7 +59,7 @@ public class DemoConfigFactory implements ConfigFactory {
     FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
     TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
 
-    FormClient formClient = new FormClient("http://localhost:8080/theForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
+    FormClient formClient = new FormClient("http://localhost:8080/loginForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
     IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
     CasClient casClient = new CasClient("http://mycasserver/login");
