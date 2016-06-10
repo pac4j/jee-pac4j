@@ -120,8 +120,6 @@ The following parameters are available:
 
 5) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
 
-6) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default).
-
 In the `web.xml` file:
 
 ```xml
@@ -162,7 +160,9 @@ The following parameters are available:
 
 2) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
-3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default)
+
+4) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default).
 
 In the `web.xml` file:
 
