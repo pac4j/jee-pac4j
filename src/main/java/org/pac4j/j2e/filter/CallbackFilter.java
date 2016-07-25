@@ -29,7 +29,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class CallbackFilter extends AbstractConfigFilter {
 
-    private CallbackLogic<Object, J2EContext> callbackLogic = new J2ERenewSessionCallbackLogic();
+    private CallbackLogic<Object, J2EContext> callbackLogic = new J2ERenewSessionCallbackLogic<>();
 
     private String defaultUrl;
 
@@ -52,6 +52,8 @@ public class CallbackFilter extends AbstractConfigFilter {
     @Override
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
+
+        assertNotNull("callbackLogic", callbackLogic);
 
         final Config config = getConfig();
         assertNotNull("config", config);

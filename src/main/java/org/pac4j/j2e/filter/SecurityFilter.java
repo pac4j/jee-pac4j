@@ -60,19 +60,20 @@ public class SecurityFilter extends AbstractConfigFilter {
 
     @Override
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
-                                        final FilterChain chain) throws IOException, ServletException {
+                                        final FilterChain filterChain) throws IOException, ServletException {
+
+        assertNotNull("securityLogic", securityLogic);
 
         final Config config = getConfig();
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
         securityLogic.perform(context, config, (ctx, parameters) -> {
-            final HttpServletRequest req = context.getRequest();
-            final HttpServletResponse resp = context.getResponse();
-            final FilterChain filterChain = (FilterChain) parameters[0];
-            filterChain.doFilter(req, resp);
+
+            filterChain.doFilter(request, response);
             return null;
-        }, J2ENopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile, chain);
+
+        }, J2ENopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile);
     }
 
     public String getClients() {

@@ -43,6 +43,8 @@ public class ApplicationLogoutFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
+        assertNotNull("applicationLogoutLogic", applicationLogoutLogic);
+
         final Config config = getConfig();
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
