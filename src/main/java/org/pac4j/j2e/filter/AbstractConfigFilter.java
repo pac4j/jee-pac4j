@@ -98,4 +98,9 @@ public abstract class AbstractConfigFilter implements Filter {
         this.config = config;
         ConfigSingleton.setConfig(config);
     }
+
+    public void setConfigOnly(final Config config) {
+        CommonHelper.assertNotNull("config", config);
+        this.config = config;
+    }
 }
