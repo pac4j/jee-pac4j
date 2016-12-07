@@ -234,8 +234,8 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 The `LogoutFilter` can handle:
  
-- the local logout by removing the pac4j profiles from the session
-- the central logout by calling the identity provider logout. 
+- the local logout by removing the pac4j profiles from the session (it can be used for the front-channel logout from the identity provider in case of a central logout)
+- the central logout by calling the identity provider logout endpoint.
 
 
 It has the following behaviour:
@@ -244,7 +244,8 @@ It has the following behaviour:
 
 2) A post logout action is computed as the redirection to the `url` request parameter if it matches the `logoutUrlPattern` or to the `defaultUrl` if it is defined or as a blank page otherwise
 
-3) If the `centralLogout` property is `true`, the user is redirected to the identity provider for a central logout and optionally the post logout redirection will be called by the identity provider.
+3) If the `centralLogout` property is `true`, the user is redirected to the identity provider for a central logout and
+then optionally to the post logout redirection URL (if it's supported by the identity provider and if it's an absolute URL).
 If no central logout is defined, the post logout action is performed directly.
 
 
@@ -282,7 +283,7 @@ In the `web.xml` file:
 
 ### 1.3 - > 2.0
 
-The `ApplicationLogoutFilter` has been renamed as `LogoutFilter` and now handles both the application and identity provider logout.
+The `ApplicationLogoutFilter` has been renamed as `LogoutFilter` and now handles both the application and identity provider logouts.
 
 ### 1.2 - > 1.3
 
