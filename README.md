@@ -46,10 +46,13 @@ It must be built via a configuration factory (`org.pac4j.core.config.ConfigFacto
 public class DemoConfigFactory implements ConfigFactory {
 
   public Config build() {
-    GoogleOidcClient oidcClient = new GoogleOidcClient();
-    oidcClient.setClientID("id");
-    oidcClient.setSecret("secret");
-    oidcClient.addCustomParam("prompt", "consent");
+    OidcConfiguration oidcConfiguration = new OidcConfiguration();
+    oidcConfiguration.setClientId("167480702619-8e1lo80dnu8bpk3k0lvvj27noin97vu9.apps.googleusercontent.com");
+    oidcConfiguration.setSecret("MhMme_Ik6IH2JMnAT6MFIfee");
+    oidcConfiguration.setUseNonce(true);
+    oidcConfiguration.addCustomParam("prompt", "consent");
+    GoogleOidcClient oidcClient = new GoogleOidcClient(oidcConfiguration);
+    oidcClient.setAuthorizationGenerator(profile -> profile.addRole("ROLE_ADMIN"));
 
     SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
                 "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:testshib-providers.xml");
