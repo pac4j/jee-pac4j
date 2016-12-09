@@ -64,9 +64,12 @@ public class DemoConfigFactory implements ConfigFactory {
     FormClient formClient = new FormClient("http://localhost:8080/loginForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
     IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
-    CasClient casClient = new CasClient("http://mycasserver/login");
+    CasConfiguration casConfiguration = new CasConfiguration("https://casserverpac4j.herokuapp.com/login");
+    CasClient casClient = new CasClient(casConfiguration);
 
-    ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"));
+    List<SignatureConfiguration> signatures = new ArrayList<>();
+    signatures.add(new SecretSignatureConfiguration(Constants.JWT_SALT));
+    ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator(signatures));
 
     Config config = new Config("http://localhost:8080/callback", oidcClient, saml2Client, facebookClient,
                                   twitterClient, formClient, basicAuthClient, casClient, parameterClient);
