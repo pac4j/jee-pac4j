@@ -20,9 +20,10 @@ import static org.pac4j.core.util.CommonHelper.*;
  * <p>This filter handles the (application + identity provider) logout process, based on the {@link #logoutLogic}.</p>
  *
  * <p>The configuration can be provided via servlet parameters: <code>defaultUrl</code> (default logourl url),<code>logoutUrlPattern</code> (pattern that logout urls must match),
- * <code>localLogout</code> (whether the application logout must be performed) and <code>centralLogout</code> (whether the centralLogout must be performed).</p>
- * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)}, {@link #setLogoutUrlPattern(String)}, {@link #setLocalLogout(Boolean)} and
- * {@link #setCentralLogout(Boolean)}.</p>
+ * <code>localLogout</code> (whether the application logout must be performed), <code>killSession</code> (whether we must destroy the web session during the local logout)
+ * and <code>centralLogout</code> (whether the centralLogout must be performed).</p>
+ * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)}, {@link #setLogoutUrlPattern(String)}, {@link #setLocalLogout(Boolean)},
+ * {@link #setKillSession(Boolean)} and {@link #setCentralLogout(Boolean)}.</p>
  *
  * @author Jerome Leleu
  * @since 1.2.0
@@ -37,6 +38,8 @@ public class LogoutFilter extends AbstractConfigFilter {
 
     private Boolean localLogout;
 
+    private Boolean killSession;
+
     private Boolean centralLogout;
 
     @Override
@@ -44,6 +47,7 @@ public class LogoutFilter extends AbstractConfigFilter {
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         this.logoutUrlPattern = getStringParam(filterConfig, Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
         this.localLogout = getBooleanParam(filterConfig, Pac4jConstants.LOCAL_LOGOUT, this.localLogout);
+        this.killSession = getBooleanParam(filterConfig, Pac4jConstants.KILL_SESSION, this.killSession);
         this.centralLogout = getBooleanParam(filterConfig, Pac4jConstants.CENTRAL_LOGOUT, this.centralLogout);
     }
 
@@ -57,7 +61,7 @@ public class LogoutFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        logoutLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.centralLogout);
+        logoutLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.killSession, this.centralLogout);
     }
 
     public String getDefaultUrl() {
@@ -90,6 +94,14 @@ public class LogoutFilter extends AbstractConfigFilter {
 
     public void setLocalLogout(final Boolean localLogout) {
         this.localLogout = localLogout;
+    }
+
+    public Boolean getKillSession() {
+        return killSession;
+    }
+
+    public void setKillSession(final Boolean killSession) {
+        this.killSession = killSession;
     }
 
     public Boolean getCentralLogout() {
