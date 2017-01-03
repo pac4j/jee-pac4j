@@ -74,7 +74,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         return multiProfile;
     }
 
-    public void setMultiProfile(Boolean multiProfile) {
+    public void setMultiProfile(final Boolean multiProfile) {
         this.multiProfile = multiProfile;
     }
 
@@ -82,7 +82,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         return renewSession;
     }
 
-    public void setRenewSession(Boolean renewSession) {
+    public void setRenewSession(final Boolean renewSession) {
         this.renewSession = renewSession;
     }
 
@@ -90,7 +90,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         return callbackLogic;
     }
 
-    public void setCallbackLogic(CallbackLogic<Object, J2EContext> callbackLogic) {
+    public void setCallbackLogic(final CallbackLogic<Object, J2EContext> callbackLogic) {
         this.callbackLogic = callbackLogic;
     }
 }

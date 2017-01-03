@@ -80,7 +80,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         return clients;
     }
 
-    public void setClients(String clients) {
+    public void setClients(final String clients) {
         this.clients = clients;
     }
 
@@ -88,7 +88,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         return authorizers;
     }
 
-    public void setAuthorizers(String authorizers) {
+    public void setAuthorizers(final String authorizers) {
         this.authorizers = authorizers;
     }
 
@@ -96,7 +96,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         return matchers;
     }
 
-    public void setMatchers(String matchers) {
+    public void setMatchers(final String matchers) {
         this.matchers = matchers;
     }
 
@@ -104,7 +104,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         return multiProfile;
     }
 
-    public void setMultiProfile(Boolean multiProfile) {
+    public void setMultiProfile(final Boolean multiProfile) {
         this.multiProfile = multiProfile;
     }
 
@@ -112,7 +112,7 @@ public class SecurityFilter extends AbstractConfigFilter {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<Object, J2EContext> securityLogic) {
+    public void setSecurityLogic(final SecurityLogic<Object, J2EContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }
