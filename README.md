@@ -259,7 +259,7 @@ The following parameters are available:
 
 3) `localLogout` (optional): whether a local logout must be performed (`true` by default)
 
-4) `destroySession` (optional):  whether we must destroy the web session during the local logout
+4) `destroySession` (optional):  whether we must destroy the web session during the local logout (`false` by default)
 
 5) `centralLogout` (optional): whether a central logout must be performed (`false` by default).
 
