@@ -87,11 +87,7 @@ public class DemoConfigFactory implements ConfigFactory {
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
-Notice that you can define:
-
-1) a specific [`SessionStore`](http://www.pac4j.org/docs/session-store.html) using the `setSessionStore(sessionStore)` method (by default, it uses the `J2ESessionStore` which relies on the J2E HTTP session)
-
-2) specific [matchers](http://www.pac4j.org/docs/matchers.html) via the `addMatcher(name, Matcher)` method.
+Notice that you can define specific [matchers](http://www.pac4j.org/docs/matchers.html) via the `addMatcher(name, Matcher)` method.
 
 If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
@@ -246,7 +242,7 @@ The `LogoutFilter` can handle:
 
 It has the following behaviour:
 
-1) If the `localLogout` property is `true`, the pac4j profiles are removed from the web session (and the web session is destroyed if the `killSession` property is `true`)
+1) If the `localLogout` property is `true`, the pac4j profiles are removed from the web session (and the web session is destroyed if the `destroySession` property is `true`)
 
 2) A post logout action is computed as the redirection to the `url` request parameter if it matches the `logoutUrlPattern` or to the `defaultUrl` if it is defined or as a blank page otherwise
 
@@ -263,7 +259,9 @@ The following parameters are available:
 
 3) `localLogout` (optional): whether a local logout must be performed (`true` by default)
 
-4) `centralLogout` (optional): whether a central logout must be performed (`false` by default).
+4) `destroySession` (optional):  whether we must destroy the web session during the local logout (`false` by default)
+
+5) `centralLogout` (optional): whether a central logout must be performed (`false` by default).
 
 
 In the `web.xml` file:

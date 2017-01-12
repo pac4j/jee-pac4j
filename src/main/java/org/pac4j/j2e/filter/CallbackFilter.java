@@ -12,7 +12,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.CallbackLogic;
-import org.pac4j.core.engine.J2ERenewSessionCallbackLogic;
+import org.pac4j.core.engine.DefaultCallbackLogic;
 import org.pac4j.core.http.J2ENopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
@@ -29,7 +29,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class CallbackFilter extends AbstractConfigFilter {
 
-    private CallbackLogic<Object, J2EContext> callbackLogic = new J2ERenewSessionCallbackLogic<>();
+    private CallbackLogic<Object, J2EContext> callbackLogic = new DefaultCallbackLogic<>();
 
     private String defaultUrl;
 
@@ -74,7 +74,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         return multiProfile;
     }
 
-    public void setMultiProfile(Boolean multiProfile) {
+    public void setMultiProfile(final Boolean multiProfile) {
         this.multiProfile = multiProfile;
     }
 
@@ -82,7 +82,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         return renewSession;
     }
 
-    public void setRenewSession(Boolean renewSession) {
+    public void setRenewSession(final Boolean renewSession) {
         this.renewSession = renewSession;
     }
 
@@ -90,7 +90,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         return callbackLogic;
     }
 
-    public void setCallbackLogic(CallbackLogic<Object, J2EContext> callbackLogic) {
+    public void setCallbackLogic(final CallbackLogic<Object, J2EContext> callbackLogic) {
         this.callbackLogic = callbackLogic;
     }
 }
