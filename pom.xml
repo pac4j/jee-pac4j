@@ -12,7 +12,7 @@
     <artifactId>j2e-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>pac4j implementation for J2E</name>
-    <version>2.0.0-RC1</version>
+    <version>2.0.0-RC2-SNAPSHOT</version>
     <description>Security library for J2E based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
