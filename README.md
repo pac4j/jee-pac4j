@@ -29,8 +29,8 @@ Just follow these easy steps to secure your J2E web application:
 
 You need to add a dependency on:
  
-- the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-RC1**)
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-RC1**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-RC2-SNAPSHOT**)
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-RC2-SNAPSHOT**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -45,43 +45,52 @@ It must be built via a configuration factory (`org.pac4j.core.config.ConfigFacto
 ```java
 public class DemoConfigFactory implements ConfigFactory {
 
-  public Config build() {
-    OidcConfiguration oidcConfiguration = new OidcConfiguration();
-    oidcConfiguration.setClientId("167480702619-8e1lo80dnu8bpk3k0lvvj27noin97vu9.apps.googleusercontent.com");
-    oidcConfiguration.setSecret("MhMme_Ik6IH2JMnAT6MFIfee");
-    oidcConfiguration.setUseNonce(true);
-    oidcConfiguration.addCustomParam("prompt", "consent");
-    GoogleOidcClient oidcClient = new GoogleOidcClient(oidcConfiguration);
-    oidcClient.setAuthorizationGenerator(profile -> profile.addRole("ROLE_ADMIN"));
+    @Override
+    public Config build() {
+        final OidcConfiguration oidcConfiguration = new OidcConfiguration();
+        oidcConfiguration.setClientId("167480702619-8e1lo80dnu8bpk3k0lvvj27noin97vu9.apps.googleusercontent.com");
+        oidcConfiguration.setSecret("MhMme_Ik6IH2JMnAT6MFIfee");
+        oidcConfiguration.setUseNonce(true);
+        oidcConfiguration.addCustomParam("prompt", "consent");
+        final GoogleOidcClient oidcClient = new GoogleOidcClient(oidcConfiguration);
+        oidcClient.setAuthorizationGenerator((ctx, profile) -> { profile.addRole("ROLE_ADMIN"); return profile; });
 
-    SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
-                "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:testshib-providers.xml");
-    cfg.setMaximumAuthenticationLifetime(3600);
-    cfg.setServiceProviderEntityId("urn:mace:saml:pac4j.org");
-    cfg.setServiceProviderMetadataPath("sp-metadata.xml");
-    SAML2Client saml2Client = new SAML2Client(cfg);
+        final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks", "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:testshib-providers.xml");
+        cfg.setMaximumAuthenticationLifetime(3600);
+        cfg.setServiceProviderEntityId("http://localhost:8080/callback?client_name=SAML2Client");
+        cfg.setServiceProviderMetadataPath(new File("sp-metadata.xml").getAbsolutePath());
+        final SAML2Client saml2Client = new SAML2Client(cfg);
 
-    FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
-    TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
+        final FacebookClient facebookClient = new FacebookClient("145278422258960", "be21409ba8f39b5dae2a7de525484da8");
+        final TwitterClient twitterClient = new TwitterClient("CoxUiYwQOSFDReZYdjigBA", "2kAzunH5Btc4gRSaMr7D7MkyoJ5u1VzbOOzE8rBofs");
+        final FormClient formClient = new FormClient("http://localhost:8080/loginForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
+        final IndirectBasicAuthClient indirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
-    FormClient formClient = new FormClient("http://localhost:8080/loginForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
-    IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
+        final CasConfiguration configuration = new CasConfiguration("http://localhost:8888/cas/login");
+        final CasProxyReceptor casProxy = new CasProxyReceptor();
+        configuration.setProxyReceptor(casProxy);
+        final CasClient casClient = new CasClient(configuration);
 
-    CasConfiguration casConfiguration = new CasConfiguration("https://casserverpac4j.herokuapp.com/login");
-    CasClient casClient = new CasClient(casConfiguration);
+        final List<SignatureConfiguration> signatures = new ArrayList<>();
+        signatures.add(new SecretSignatureConfiguration(Constants.JWT_SALT));
+        ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator(signatures));
+        parameterClient.setSupportGetRequest(true);
+        parameterClient.setSupportPostRequest(false);
 
-    List<SignatureConfiguration> signatures = new ArrayList<>();
-    signatures.add(new SecretSignatureConfiguration(Constants.JWT_SALT));
-    ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator(signatures));
+        final DirectBasicAuthClient directBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
-    Config config = new Config("http://localhost:8080/callback", oidcClient, saml2Client, facebookClient,
-                                  twitterClient, formClient, basicAuthClient, casClient, parameterClient);
+        final Clients clients = new Clients("http://localhost:8080/callback", oidcClient, saml2Client, facebookClient,
+                twitterClient, formClient, indirectBasicAuthClient, casClient, parameterClient,
+                directBasicAuthClient, new AnonymousClient(), casProxy);
 
-    config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
-    config.addAuthorizer("custom", new CustomAuthorizer());
-
-    return config;
-  }
+        final Config config = new Config(clients);
+        config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
+        config.addAuthorizer("custom", new CustomAuthorizer());
+        config.addAuthorizer("mustBeAnon", new IsAnonymousAuthorizer<>("/?mustBeAnon"));
+        config.addAuthorizer("mustBeAuth", new IsAuthenticatedAuthorizer<>("/?mustBeAuth"));
+        config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.jsp$"));
+        return config;
+    }
 }
 ```
 
