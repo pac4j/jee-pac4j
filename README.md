@@ -2,7 +2,7 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="300" />
 </p>
 
-The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also application logout and advanced features like session fixation and CSRF protection.
+The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
 It's based on Java 8, servlet 3 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2.0**. It's available under the Apache 2 license.
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
