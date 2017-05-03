@@ -46,7 +46,7 @@ It must be built via a configuration factory (`org.pac4j.core.config.ConfigFacto
 public class DemoConfigFactory implements ConfigFactory {
 
     @Override
-    public Config build() {
+    public Config build(final Object... parameters) {
         final OidcConfiguration oidcConfiguration = new OidcConfiguration();
         oidcConfiguration.setClientId("167480702619-8e1lo80dnu8bpk3k0lvvj27noin97vu9.apps.googleusercontent.com");
         oidcConfiguration.setSecret("MhMme_Ik6IH2JMnAT6MFIfee");
