@@ -12,7 +12,7 @@
     <artifactId>j2e-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>pac4j implementation for J2E</name>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.1.0-SNAPSHOT</version>
     <description>Security library for J2E based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
@@ -56,6 +56,9 @@
         <servlet.version>3.1.0</servlet.version>
         <pac4j.version>2.0.0</pac4j.version>
         <java.version>1.8</java.version>
+        <javax.inject>1</javax.inject>
+        <cdi-api>2.0</cdi-api>
+        <jsf-api>2.1</jsf-api>
     </properties>
 
     <dependencies>
@@ -70,6 +73,24 @@
             <artifactId>pac4j-core</artifactId>
             <version>${pac4j.version}</version>
         </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>${javax.inject}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>${cdi-api}</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.faces</groupId>
+            <artifactId>jsf-api</artifactId>
+            <version>${jsf-api}</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -77,7 +98,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.1</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
@@ -87,7 +108,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.0.1</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -100,7 +121,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.10.3</version>
+                <version>2.10.4</version>
                 <configuration>
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
@@ -118,7 +139,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.4</version>
                 <configuration>
                     <effort>Low</effort>
                     <threshold>Max</threshold>
@@ -138,7 +159,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.6</version>
+                <version>3.8</version>
                 <configuration>
                     <includeTests>true</includeTests>
                     <printFailingErrors>true</printFailingErrors>

@@ -19,9 +19,15 @@ import static org.pac4j.core.util.CommonHelper.*;
 /**
  * <p>This filter protects an url, based on the {@link #securityLogic}.</p>
  *
- * <p>The configuration can be provided via servlet parameters: <code>configFactory</code> (configuration factory), <code>clients</code> (list of clients for authentication),
- * <code>authorizers</code> (list of authorizers), <code>matchers</code> (list of matchers) and <code>multiProfile</code>  (whether multiple profiles should be kept).</p>
- * <p>Or it can be defined via setter methods: {@link #setConfig(Config)}, {@link #setClients(String)}, {@link #setAuthorizers(String)}, {@link #setMatchers(String)} and {@link #setMultiProfile(Boolean)}.</p>
+ * <p>The configuration can be provided via servlet parameters, setters or constructors for the following options:</p>
+ * <ul>
+ *     <li><code>config</code> (configuration)</li>
+ *     <li><code>configFactory</code> (factory to build the configuration)</li>
+ *     <li><code>clients</code> (list of clients for authentication)</li>
+ *     <li><code>authorizers</code> (list of authorizers)</li>
+ *     <li><code>matchers</code> (list of matchers)</li>
+ *     <li><code>multiProfile</code>  (whether multiple profiles should be kept).</li>
+ * </ul>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
@@ -37,6 +43,20 @@ public class SecurityFilter extends AbstractConfigFilter {
     private String matchers;
 
     private Boolean multiProfile;
+
+    public SecurityFilter(final Config config) {
+        setConfig(config);
+    }
+
+    public SecurityFilter(final Config config, final String clients) {
+        this(config);
+        this.clients = clients;
+    }
+
+    public SecurityFilter(final Config config, final String clients, final String authorizers) {
+        this(config, clients);
+        this.authorizers = authorizers;
+    }
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
