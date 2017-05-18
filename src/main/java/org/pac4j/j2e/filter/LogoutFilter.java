@@ -19,11 +19,14 @@ import static org.pac4j.core.util.CommonHelper.*;
 /**
  * <p>This filter handles the (application + identity provider) logout process, based on the {@link #logoutLogic}.</p>
  *
- * <p>The configuration can be provided via servlet parameters: <code>defaultUrl</code> (default logourl url),<code>logoutUrlPattern</code> (pattern that logout urls must match),
- * <code>localLogout</code> (whether the application logout must be performed), <code>destroySession</code> (whether we must destroy the web session during the local logout)
- * and <code>centralLogout</code> (whether the centralLogout must be performed).</p>
- * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)}, {@link #setLogoutUrlPattern(String)}, {@link #setLocalLogout(Boolean)},
- * {@link #setDestroySession(Boolean)} and {@link #setCentralLogout(Boolean)}.</p>
+ * <p>The configuration can be provided via servlet parameters, setters or constructors for the following options:</p>
+ * <ul>
+ *     <li><code>defaultUrl</code> (default logourl url)</li>
+ *     <li><code>logoutUrlPattern</code> (pattern that logout urls must match)</li>
+ *     <li><code>localLogout</code> (whether the application logout must be performed)</li>
+ *     <li><code>destroySession</code> (whether we must destroy the web session during the local logout)</li>
+ *     <li><code>centralLogout</code> (whether the centralLogout must be performed)</li>
+ * </ul>
  *
  * @author Jerome Leleu
  * @since 1.2.0
@@ -41,6 +44,15 @@ public class LogoutFilter extends AbstractConfigFilter {
     private Boolean destroySession;
 
     private Boolean centralLogout;
+
+    public LogoutFilter(final Config config) {
+        setConfig(config);
+    }
+
+    public LogoutFilter(final Config config, final String defaultUrl) {
+        this(config);
+        this.defaultUrl = defaultUrl;
+    }
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
