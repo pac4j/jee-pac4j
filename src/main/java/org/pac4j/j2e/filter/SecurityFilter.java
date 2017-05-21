@@ -43,6 +43,8 @@ public class SecurityFilter extends AbstractConfigFilter {
 
     private Boolean multiProfile;
 
+    public SecurityFilter() {}
+
     public SecurityFilter(final Config config) {
         setConfig(config);
     }

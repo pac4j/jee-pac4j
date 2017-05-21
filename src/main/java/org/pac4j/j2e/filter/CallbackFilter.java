@@ -41,6 +41,8 @@ public class CallbackFilter extends AbstractConfigFilter {
 
     private Boolean renewSession;
 
+    public CallbackFilter() {}
+
     public CallbackFilter(final Config config) {
         setConfig(config);
     }

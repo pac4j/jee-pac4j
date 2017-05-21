@@ -46,6 +46,8 @@ public class LogoutFilter extends AbstractConfigFilter {
 
     private Boolean centralLogout;
 
+    public LogoutFilter() {}
+
     public LogoutFilter(final Config config) {
         setConfig(config);
     }
