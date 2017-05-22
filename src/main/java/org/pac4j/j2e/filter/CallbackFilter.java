@@ -20,9 +20,13 @@ import static org.pac4j.core.util.CommonHelper.*;
 /**
  * <p>This filter finishes the login process for an indirect client, based on the {@link #callbackLogic}.</p>
  *
- * <p>The configuration can be provided via servlet parameters: <code>defaultUrl</code> (default url after login if none was requested),
- * <code>multiProfile</code> (whether multiple profiles should be kept) and <code>renewSession</code> (whether the session must be renewed after login).</p>
- * <p>Or it can be defined via setter methods: {@link #setDefaultUrl(String)}, {@link #setMultiProfile(Boolean)} and ({@link #setRenewSession(Boolean)}.</p>
+ * <p>The configuration can be provided via servlet parameters, setters or constructors for the following options:</p>
+ * <ul>
+ *     <li><code>configFactory</code> (the class name of the factory to build the configuration) or <code>config</code> (the configuration itself)</li>
+ *     <li><code>defaultUrl</code> (default url after login if none was requested)</li>
+ *     <li><code>multiProfile</code> (whether multiple profiles should be kept)</li>
+ *     <li><code>renewSession</code> (whether the session must be renewed after login)</li>
+ * </ul>
  *
  * @author Jerome Leleu
  * @since 1.0.0
@@ -36,6 +40,17 @@ public class CallbackFilter extends AbstractConfigFilter {
     private Boolean multiProfile;
 
     private Boolean renewSession;
+
+    public CallbackFilter() {}
+
+    public CallbackFilter(final Config config) {
+        setConfig(config);
+    }
+
+    public CallbackFilter(final Config config, final String defaultUrl) {
+        this(config);
+        this.defaultUrl = defaultUrl;
+    }
 
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
