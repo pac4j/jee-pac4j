@@ -3,7 +3,7 @@
 </p>
 
 The `j2e-pac4j` project is an **easy and powerful security library for J2E** web applications which supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
-It's based on Java 8, servlet 3 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2.0**. It's available under the Apache 2 license.
+It's based on Java 8, JavaEE 7 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2.0**. It's available under the Apache 2 license.
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
@@ -22,13 +22,13 @@ It's based on Java 8, servlet 3 and on the **[pac4j security engine](https://git
 5) The `LogoutFilter` handles the logout process.
 
 
-Just follow these easy steps to secure your J2E web application:
+Just follow these easy steps to secure your JavaEE application:
 
 ### 1) Add the required dependencies (`j2e-pac4j` + `pac4j-*` libraries)
 
 You need to add a dependency on:
  
-- the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.1.0**)
+- the `j2e-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **3.0.0-SNAPSHOT**)
 - the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
@@ -39,7 +39,7 @@ All released artifacts are available in the [Maven central repository](http://se
 
 The configuration (`org.pac4j.core.config.Config`) contains all the clients and authorizers required by the application to handle security.
 
-It must be built via a configuration factory (`org.pac4j.core.config.ConfigFactory`):
+It can be built via a configuration factory (`org.pac4j.core.config.ConfigFactory`) if the `configFactory` servlet parameter is used:
 
 ```java
 public class DemoConfigFactory implements ConfigFactory {
@@ -93,11 +93,83 @@ public class DemoConfigFactory implements ConfigFactory {
 }
 ```
 
+Or produced via CDI:
+
+```java
+@Dependent
+public class SecurityConfig {
+
+    @Produces @ApplicationScoped
+    private Config buildConfiguration() {
+        logger.debug("building Security configuration...");
+
+        final OidcConfiguration oidcConfiguration = new OidcConfiguration();
+        oidcConfiguration.setClientId("167480702619-8e1lo80dnu8bpk3k0lvvj27noin97vu9.apps.googleusercontent.com");
+        oidcConfiguration.setSecret("MhMme_Ik6IH2JMnAT6MFIfee");
+        oidcConfiguration.setUseNonce(true);
+        oidcConfiguration.addCustomParam("prompt", "consent");
+        final GoogleOidcClient oidcClient = new GoogleOidcClient(oidcConfiguration);
+        oidcClient.setAuthorizationGenerator((ctx, profile) -> { profile.addRole("ROLE_ADMIN"); return profile; });
+
+        final FormClient formClient = new FormClient(
+                "http://localhost:8080/loginForm.action",
+                new SimpleTestUsernamePasswordAuthenticator()
+        );
+
+        final FormClient jsfFormClient = new FormClient(
+                "http://localhost:8080/jsfLoginForm.action",
+                new SimpleTestUsernamePasswordAuthenticator()
+        );
+        jsfFormClient.setName("jsfFormClient");
+
+        final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
+                "pac4j-demo-passwd",
+                "pac4j-demo-passwd",
+                "resource:testshib-providers.xml");
+        cfg.setMaximumAuthenticationLifetime(3600);
+        cfg.setServiceProviderEntityId("http://localhost:8080/callback?client_name=SAML2Client");
+        cfg.setServiceProviderMetadataPath(new File("sp-metadata.xml").getAbsolutePath());
+        final SAML2Client saml2Client = new SAML2Client(cfg);
+
+        final FacebookClient facebookClient = new FacebookClient("145278422258960", "be21409ba8f39b5dae2a7de525484da8");
+        final TwitterClient twitterClient = new TwitterClient("CoxUiYwQOSFDReZYdjigBA", "2kAzunH5Btc4gRSaMr7D7MkyoJ5u1VzbOOzE8rBofs");
+        final IndirectBasicAuthClient indirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
+
+        final CasConfiguration configuration = new CasConfiguration("http://localhost:8888/cas/login");
+        final CasClient casClient = new CasClient(configuration);
+
+        final List<SignatureConfiguration> signatures = new ArrayList<>();
+        signatures.add(new SecretSignatureConfiguration(Constants.JWT_SALT));
+        ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator(signatures));
+        parameterClient.setSupportGetRequest(true);
+        parameterClient.setSupportPostRequest(false);
+
+        final DirectBasicAuthClient directBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
+
+        final Clients clients = new Clients(
+                "http://localhost:8080/callback",
+                oidcClient,
+                formClient,
+                jsfFormClient,
+                saml2Client, facebookClient, twitterClient, indirectBasicAuthClient, casClient,
+                parameterClient, directBasicAuthClient, new AnonymousClient()
+        );
+
+        final Config config = new Config(clients);
+        config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
+        config.addAuthorizer("custom", new CustomAuthorizer());
+        config.addAuthorizer("mustBeAnon", new IsAnonymousAuthorizer<>("/?mustBeAnon"));
+        config.addAuthorizer("mustBeAuth", new IsAuthenticatedAuthorizer<>("/?mustBeAuth"));
+        config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.action$"));
+        return config;
+    }
+}
+```
+
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
 Notice that you can define specific [matchers](http://www.pac4j.org/docs/matchers.html) via the `addMatcher(name, Matcher)` method.
 
-If your application is configured via dependency injection, no factory is required to build the configuration, you can directly inject the `Config` via the appropriate setter.
 
 ---
 
@@ -114,9 +186,9 @@ You can protect (authentication + authorizations) the urls of your J2E applicati
 4) Finally, if the user is still not authenticated (no profile), he is redirected to the appropriate identity provider if the first defined client is an indirect one in the `clients` configuration. Otherwise, a 401 error page is displayed.
 
 
-The following parameters are available:
+The following options are available:
 
-1) `configFactory`: the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary
+1) `configFactory`: the class name of the factory to build the configuration (the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary) or `config`: the configuration itself
 
 2) `clients` (optional): the list of client names (separated by commas) used for authentication:
 - in all cases, this filter requires the user to be authenticated. Thus, if the `clients` is blank or not defined, the user must have been previously authenticated
@@ -133,7 +205,8 @@ The following parameters are available:
 
 5) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
 
-In the `web.xml` file:
+
+The filter can be defined in the `web.xml` file:
 
 ```xml
 <filter>
@@ -154,7 +227,30 @@ In the `web.xml` file:
 </filter-mapping>
 ```
 
-This filter can be defined via dependency injection as well. In that case, these parameters will be defined via setters.
+or via CDI:
+
+```java
+@Named
+@ApplicationScoped
+public class WebConfig {
+
+    @Inject
+    private Config config;
+
+    public void build(@Observes @Initialized(ApplicationScoped.class) ServletContext servletContext) {
+
+        final FilterHelper filterHelper = new FilterHelper(servletContext);
+
+        ...
+
+        final SecurityFilter facebookAdminFilter = new SecurityFilter(config, "FacebookClient", "admin,securityHeaders");
+        filterHelper.addFilterMapping("facebookAdminFilter", facebookAdminFilter, "/facebookadmin/*");
+
+        ...
+    }
+}
+```
+
 
 ---
 
@@ -168,9 +264,9 @@ Thus, a callback endpoint is required in the application. It is managed by the `
 2) finally, the user is redirected back to the originally requested url (or to the `defaultUrl`).
 
 
-The following parameters are available:
+The following options are available:
 
-1) `configFactory` (optional): the factory to initialize the configuration. By default, the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary
+1) `configFactory`: the class name of the factory to build the configuration (the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary) or `config`: the configuration itself
 
 2) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
@@ -178,7 +274,8 @@ The following parameters are available:
 
 4) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default).
 
-In the `web.xml` file:
+
+The filter can be defined in the `web.xml` file:
 
 ```xml
 <filter>
@@ -195,7 +292,33 @@ In the `web.xml` file:
 </filter-mapping>
 ```
 
-Using dependency injection via Spring, you can define the callback filter as a `DelegatingFilterProxy` in the `web.xml` file:
+or via CDI:
+
+```java
+@Named
+@ApplicationScoped
+public class WebConfig {
+
+    @Inject
+    private Config config;
+
+    public void build(@Observes @Initialized(ApplicationScoped.class) ServletContext servletContext) {
+        final FilterHelper filterHelper = new FilterHelper(servletContext);
+
+        ...
+
+        final CallbackFilter callbackFilter = new CallbackFilter(config, "/");
+        callbackFilter.setRenewSession(true);
+        callbackFilter.setMultiProfile(true);
+        filterHelper.addFilterMapping("callbackFilter", callbackFilter, "/callback");
+
+        ...
+    }
+}
+
+```
+
+or using dependency injection via Spring, you can define the callback filter as a `DelegatingFilterProxy` in the `web.xml` file:
 
 ```xml
 <filter>
@@ -232,6 +355,25 @@ ProfileManager manager = new ProfileManager(context);
 Optional<CommonProfile> profile = manager.get(true);
 ```
 
+or
+
+```java
+@Named
+@RequestScoped
+public class ProfileView {
+
+    @Inject
+    private WebContext webContext;
+
+    @Inject
+    private ProfileManager profileManager;
+
+    public Object getProfile() {
+        return profileManager.get(true).orElse(null);
+    }
+}
+```
+
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common attributes that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
 
 ```java
@@ -259,20 +401,22 @@ then optionally to the post logout redirection URL (if it's supported by the ide
 If no central logout is defined, the post logout action is performed directly.
 
 
-The following parameters are available:
+The following options are available:
 
-1) `defaultUrl` (optional): the default logout url if no `url` request parameter is provided or if the `url` does not match the `logoutUrlPattern` (not defined by default)
+1) `configFactory`: the class name of the factory to build the configuration (the configuration is shared across filters so it can be specified only once, but each filter can defined its own configuration if necessary) or `config`: the configuration itself
 
-2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default)
+2) `defaultUrl` (optional): the default logout url if no `url` request parameter is provided or if the `url` does not match the `logoutUrlPattern` (not defined by default)
 
-3) `localLogout` (optional): whether a local logout must be performed (`true` by default)
+3) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default)
 
-4) `destroySession` (optional):  whether we must destroy the web session during the local logout (`false` by default)
+4) `localLogout` (optional): whether a local logout must be performed (`true` by default)
 
-5) `centralLogout` (optional): whether a central logout must be performed (`false` by default).
+5) `destroySession` (optional):  whether we must destroy the web session during the local logout (`false` by default)
+
+6) `centralLogout` (optional): whether a central logout must be performed (`false` by default).
 
 
-In the `web.xml` file:
+It can be defined in the `web.xml` file:
 
 ```xml
 <filter>
@@ -289,9 +433,39 @@ In the `web.xml` file:
 </filter-mapping>
 ```
 
+or via CDI:
+
+```java
+@Named
+@ApplicationScoped
+public class WebConfig {
+
+    @Inject
+    private Config config;
+
+    public void build(@Observes @Initialized(ApplicationScoped.class) ServletContext servletContext) {
+        final FilterHelper filterHelper = new FilterHelper(servletContext);
+
+        ...
+
+        final LogoutFilter logoutFilter = new LogoutFilter(config, "/?defaulturlafterlogout");
+        logoutFilter.setDestroySession(true);
+        filterHelper.addFilterMapping("logoutFilter", logoutFilter, "/logout");
+
+        ...
+    }
+}
+```
+
 ---
 
 ## Migration guide
+
+### 2.0 -> 3.0
+
+The `FilterHelper` can be used to programmatically define filters, using an injected `Config`.
+
+The `WebContext` and the `ProfileManager` are automatically produced by the `Pac4jProducer` and the `HttpServletResponseProducer` (based on JSF) and can be injected wherever they are needed.
 
 ### 1.3 - > 2.0
 
@@ -316,12 +490,12 @@ The application logout process can be managed with the `ApplicationLogoutFilter`
 
 ## Demo
 
-The demo webapp: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) is available for tests and implements many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
+Two demo webapps: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) (a simple JSP/servlets demo) and [j2e-pac4j-cdi-demo](https://github.com/pac4j/j2e-pac4j-cdi-demo) (a more advanced demo using JSF and CDI) are available for tests and implements many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
 
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/2.1.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.0.0/index.html).
+See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/3.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.0.0/index.html).
 
 
 ## Need help?
@@ -334,7 +508,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 2.1.1-SNAPSHOT is under development.
+The version 3.0.0-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the Maven `pom.xml` file for example:
 
