@@ -227,7 +227,7 @@ The filter can be defined in the `web.xml` file:
 </filter-mapping>
 ```
 
-or via CDI:
+or using CDI and the `FilterHelper`:
 
 ```java
 @Named
@@ -292,7 +292,7 @@ The filter can be defined in the `web.xml` file:
 </filter-mapping>
 ```
 
-or via CDI:
+or using CDI and the `FilterHelper`:
 
 ```java
 @Named
@@ -433,7 +433,7 @@ It can be defined in the `web.xml` file:
 </filter-mapping>
 ```
 
-or via CDI:
+or using CDI and the `FilterHelper`:
 
 ```java
 @Named
