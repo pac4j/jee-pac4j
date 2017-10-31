@@ -6,3 +6,5 @@ test-output/
 bin/
 .idea
 j2e-pac4j.iml
+.pmd
+.pmdruleset.xml
