@@ -13,6 +13,7 @@ import org.pac4j.core.context.*;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.http.adapter.J2ENopHttpActionAdapter;
+import org.pac4j.j2e.util.Pac4JHttpServletRequestWrapper;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -90,7 +91,8 @@ public class SecurityFilter extends AbstractConfigFilter {
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
         securityLogic.perform(context, config, (ctx, profiles, parameters) -> {
-            filterChain.doFilter(request, response);
+            // if no profiles are loaded, pac4j is not concerned with this request
+            filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
             return null;
         }, J2ENopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile);
     }
