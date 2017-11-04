@@ -12,7 +12,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.*;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
-import org.pac4j.core.http.J2ENopHttpActionAdapter;
+import org.pac4j.core.http.adapter.J2ENopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -89,11 +89,9 @@ public class SecurityFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        securityLogic.perform(context, config, (ctx, parameters) -> {
-
+        securityLogic.perform(context, config, (ctx, profiles, parameters) -> {
             filterChain.doFilter(request, response);
             return null;
-
         }, J2ENopHttpActionAdapter.INSTANCE, clients, authorizers, matchers, multiProfile);
     }
 
