@@ -341,9 +341,12 @@ and the specific bean in the `application-context.xml` file:
 
 ---
 
-### 5) Get the user profile (`ProfileManager`)
+### 5) Get the user profile (via `HttpServletRequest` or `ProfileManager`)
 
-You can get the profile of the authenticated user using `profileManager.get(true)` (`false` not to use the session, but only the current HTTP request).
+PAC4J takes care of populating the `HttpServletRequest` with security information.
+In particular it is possible to retrieve a `Principal` via `getUserPrincipal()` (or simply its name, i.e., username or id, via `getRemoteUser()`) and checks the user's roles via `isUserInRole()`.
+
+Alternatively, you can get the profile of the authenticated user using `profileManager.get(true)` (`false` not to use the session, but only the current HTTP request).
 You can test if the user is authenticated using `profileManager.isAuthenticated()`.
 You can get all the profiles of the authenticated user (if ever multiple ones are kept) using `profileManager.getAll(true)`.
 
