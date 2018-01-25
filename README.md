@@ -46,14 +46,6 @@ public class DemoConfigFactory implements ConfigFactory {
 
     @Override
     public Config build(final Object... parameters) {
-        final OidcConfiguration oidcConfiguration = new OidcConfiguration();
-        oidcConfiguration.setClientId("167480702619-8e1lo80dnu8bpk3k0lvvj27noin97vu9.apps.googleusercontent.com");
-        oidcConfiguration.setSecret("MhMme_Ik6IH2JMnAT6MFIfee");
-        oidcConfiguration.setUseNonce(true);
-        oidcConfiguration.addCustomParam("prompt", "consent");
-        final GoogleOidcClient oidcClient = new GoogleOidcClient(oidcConfiguration);
-        oidcClient.setAuthorizationGenerator((ctx, profile) -> { profile.addRole("ROLE_ADMIN"); return profile; });
-
         final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks", "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:testshib-providers.xml");
         cfg.setMaximumAuthenticationLifetime(3600);
         cfg.setServiceProviderEntityId("http://localhost:8080/callback?client_name=SAML2Client");
@@ -63,20 +55,8 @@ public class DemoConfigFactory implements ConfigFactory {
         final FacebookClient facebookClient = new FacebookClient("145278422258960", "be21409ba8f39b5dae2a7de525484da8");
         final TwitterClient twitterClient = new TwitterClient("CoxUiYwQOSFDReZYdjigBA", "2kAzunH5Btc4gRSaMr7D7MkyoJ5u1VzbOOzE8rBofs");
         final FormClient formClient = new FormClient("http://localhost:8080/loginForm.jsp", new SimpleTestUsernamePasswordAuthenticator());
-        final IndirectBasicAuthClient indirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
-        final CasConfiguration configuration = new CasConfiguration("http://localhost:8888/cas/login");
-        final CasProxyReceptor casProxy = new CasProxyReceptor();
-        configuration.setProxyReceptor(casProxy);
-        final CasClient casClient = new CasClient(configuration);
-
-        final List<SignatureConfiguration> signatures = new ArrayList<>();
-        signatures.add(new SecretSignatureConfiguration(Constants.JWT_SALT));
-        ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator(signatures));
-        parameterClient.setSupportGetRequest(true);
-        parameterClient.setSupportPostRequest(false);
-
-        final DirectBasicAuthClient directBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
+        ...
 
         final Clients clients = new Clients("http://localhost:8080/callback", oidcClient, saml2Client, facebookClient,
                 twitterClient, formClient, indirectBasicAuthClient, casClient, parameterClient,
@@ -92,6 +72,8 @@ public class DemoConfigFactory implements ConfigFactory {
     }
 }
 ```
+
+See a [full example here](https://github.com/pac4j/j2e-pac4j-demo/blob/master/src/main/java/org/pac4j/demo/j2e/DemoConfigFactory.java).
 
 Or produced via CDI:
 
@@ -111,28 +93,12 @@ public class SecurityConfig {
         final GoogleOidcClient oidcClient = new GoogleOidcClient(oidcConfiguration);
         oidcClient.setAuthorizationGenerator((ctx, profile) -> { profile.addRole("ROLE_ADMIN"); return profile; });
 
-        final FormClient formClient = new FormClient(
-                "http://localhost:8080/loginForm.action",
-                new SimpleTestUsernamePasswordAuthenticator()
-        );
-
         final FormClient jsfFormClient = new FormClient(
                 "http://localhost:8080/jsfLoginForm.action",
                 new SimpleTestUsernamePasswordAuthenticator()
         );
         jsfFormClient.setName("jsfFormClient");
 
-        final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
-                "pac4j-demo-passwd",
-                "pac4j-demo-passwd",
-                "resource:testshib-providers.xml");
-        cfg.setMaximumAuthenticationLifetime(3600);
-        cfg.setServiceProviderEntityId("http://localhost:8080/callback?client_name=SAML2Client");
-        cfg.setServiceProviderMetadataPath(new File("sp-metadata.xml").getAbsolutePath());
-        final SAML2Client saml2Client = new SAML2Client(cfg);
-
-        final FacebookClient facebookClient = new FacebookClient("145278422258960", "be21409ba8f39b5dae2a7de525484da8");
-        final TwitterClient twitterClient = new TwitterClient("CoxUiYwQOSFDReZYdjigBA", "2kAzunH5Btc4gRSaMr7D7MkyoJ5u1VzbOOzE8rBofs");
         final IndirectBasicAuthClient indirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
         final CasConfiguration configuration = new CasConfiguration("http://localhost:8888/cas/login");
@@ -146,6 +112,8 @@ public class SecurityConfig {
 
         final DirectBasicAuthClient directBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
+        ...
+
         final Clients clients = new Clients(
                 "http://localhost:8080/callback",
                 oidcClient,
@@ -155,16 +123,12 @@ public class SecurityConfig {
                 parameterClient, directBasicAuthClient, new AnonymousClient()
         );
 
-        final Config config = new Config(clients);
-        config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
-        config.addAuthorizer("custom", new CustomAuthorizer());
-        config.addAuthorizer("mustBeAnon", new IsAnonymousAuthorizer<>("/?mustBeAnon"));
-        config.addAuthorizer("mustBeAuth", new IsAuthenticatedAuthorizer<>("/?mustBeAuth"));
-        config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.action$"));
-        return config;
+        return new Config(clients);
     }
 }
 ```
+
+See a [full example here](https://github.com/pac4j/j2e-pac4j-cdi-demo/blob/master/src/main/java/org/pac4j/demo/j2e/SecurityConfig.java).
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
@@ -272,7 +236,9 @@ The following options are available:
 
 3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default)
 
-4) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default).
+4) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default)
+
+5) `defaultClient` (optional): it defines the default client to use to finish the login process if none is provided on the URL (not defined by default)
 
 
 The filter can be defined in the `web.xml` file:

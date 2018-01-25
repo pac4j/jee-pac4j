@@ -26,6 +26,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  *     <li><code>defaultUrl</code> (default url after login if none was requested)</li>
  *     <li><code>multiProfile</code> (whether multiple profiles should be kept)</li>
  *     <li><code>renewSession</code> (whether the session must be renewed after login)</li>
+ *     <li><code>defaultClient</code> (the default client if none is provided on the URL)</li>
  * </ul>
  *
  * @author Jerome Leleu
@@ -40,6 +41,8 @@ public class CallbackFilter extends AbstractConfigFilter {
     private Boolean multiProfile;
 
     private Boolean renewSession;
+
+    private String defaultClient;
 
     public CallbackFilter() {}
 
@@ -59,6 +62,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
         this.renewSession = getBooleanParam(filterConfig, Pac4jConstants.RENEW_SESSION, this.renewSession);
+        this.defaultClient = getStringParam(filterConfig, Pac4jConstants.DEFAULT_CLIENT, this.defaultClient);
 
         // check backward incompatibility
         checkForbiddenParameter(filterConfig, "clientsFactory");
@@ -74,7 +78,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        callbackLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.multiProfile, this.renewSession);
+        callbackLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.multiProfile, this.renewSession, this.defaultClient);
     }
 
     public String getDefaultUrl() {
@@ -107,5 +111,13 @@ public class CallbackFilter extends AbstractConfigFilter {
 
     public void setCallbackLogic(final CallbackLogic<Object, J2EContext> callbackLogic) {
         this.callbackLogic = callbackLogic;
+    }
+
+    public String getDefaultClient() {
+        return defaultClient;
+    }
+
+    public void setDefaultClient(final String defaultClient) {
+        this.defaultClient = defaultClient;
     }
 }
