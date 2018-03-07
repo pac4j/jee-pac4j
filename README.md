@@ -234,7 +234,7 @@ The following options are available:
 
 2) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
-3) `saveInSession` (optional) : it indicates whether the profile should be saved into the web session (`true` by defualt)
+3) `saveInSession` (optional) : it indicates whether the profile should be saved into the web session (`true` by default)
 
 4) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default)
 
