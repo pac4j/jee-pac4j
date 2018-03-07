@@ -24,6 +24,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  * <ul>
  *     <li><code>configFactory</code> (the class name of the factory to build the configuration) or <code>config</code> (the configuration itself)</li>
  *     <li><code>defaultUrl</code> (default url after login if none was requested)</li>
+ *     <li><code>saveInSession</code> (whether the profile should be saved into the session)</li>
  *     <li><code>multiProfile</code> (whether multiple profiles should be kept)</li>
  *     <li><code>renewSession</code> (whether the session must be renewed after login)</li>
  *     <li><code>defaultClient</code> (the default client if none is provided on the URL)</li>
@@ -37,6 +38,8 @@ public class CallbackFilter extends AbstractConfigFilter {
     private CallbackLogic<Object, J2EContext> callbackLogic = new DefaultCallbackLogic<>();
 
     private String defaultUrl;
+
+    private Boolean saveInSession;
 
     private Boolean multiProfile;
 
@@ -60,6 +63,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         super.init(filterConfig);
 
         this.defaultUrl = getStringParam(filterConfig, Pac4jConstants.DEFAULT_URL, this.defaultUrl);
+        this.saveInSession = getBooleanParam(filterConfig, Pac4jConstants.SAVE_IN_SESSION, this.saveInSession);
         this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
         this.renewSession = getBooleanParam(filterConfig, Pac4jConstants.RENEW_SESSION, this.renewSession);
         this.defaultClient = getStringParam(filterConfig, Pac4jConstants.DEFAULT_CLIENT, this.defaultClient);
@@ -78,7 +82,7 @@ public class CallbackFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        callbackLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.multiProfile, this.renewSession, this.defaultClient);
+        callbackLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient);
     }
 
     public String getDefaultUrl() {
@@ -87,6 +91,14 @@ public class CallbackFilter extends AbstractConfigFilter {
 
     public void setDefaultUrl(final String defaultUrl) {
         this.defaultUrl = defaultUrl;
+    }
+
+    public Boolean getSaveInSession() {
+        return saveInSession;
+    }
+
+    public void setSaveInSession(final Boolean saveInSession) {
+        this.saveInSession = saveInSession;
     }
 
     public Boolean getMultiProfile() {

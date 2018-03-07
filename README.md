@@ -234,11 +234,13 @@ The following options are available:
 
 2) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
-3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default)
+3) `saveInSession` (optional) : it indicates whether the profile should be saved into the web session (`true` by defualt)
 
-4) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default)
+4) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default)
 
-5) `defaultClient` (optional): it defines the default client to use to finish the login process if none is provided on the URL (not defined by default)
+5) `renewSession` (optional): it indicates whether the web session must be renewed after login, to avoid session hijacking (`true` by default)
+
+6) `defaultClient` (optional): it defines the default client to use to finish the login process if none is provided on the URL (not defined by default)
 
 
 The filter can be defined in the `web.xml` file:
