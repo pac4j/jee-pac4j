@@ -13,7 +13,6 @@ import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
-import org.pac4j.core.http.adapter.J2ENopHttpActionAdapter;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -82,7 +81,17 @@ public class CallbackFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        callbackLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient);
+        retrieveCallbackLogic().perform(context, config, retrieveHttpActionAdapter(), this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient);
+    }
+
+    protected CallbackLogic<Object, J2EContext> retrieveCallbackLogic() {
+        if (getConfig() != null) {
+            final CallbackLogic<Object, J2EContext> configCallbackLogic = getConfig().getCallbackLogic();
+            if (configCallbackLogic != null) {
+                return configCallbackLogic;
+            }
+        }
+        return callbackLogic;
     }
 
     public String getDefaultUrl() {

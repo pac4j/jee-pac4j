@@ -5,7 +5,6 @@ import org.pac4j.core.context.J2EContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
-import org.pac4j.core.http.adapter.J2ENopHttpActionAdapter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -78,7 +77,17 @@ public class LogoutFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final J2EContext context = new J2EContext(request, response, config.getSessionStore());
 
-        logoutLogic.perform(context, config, J2ENopHttpActionAdapter.INSTANCE, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+        retrieveLogoutLogic().perform(context, config, retrieveHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+    }
+
+    protected LogoutLogic<Object, J2EContext> retrieveLogoutLogic() {
+        if (getConfig() != null) {
+            final LogoutLogic<Object, J2EContext> configLogoutLogic = getConfig().getLogoutLogic();
+            if (configLogoutLogic != null) {
+                return configLogoutLogic;
+            }
+        }
+        return logoutLogic;
     }
 
     public String getDefaultUrl() {

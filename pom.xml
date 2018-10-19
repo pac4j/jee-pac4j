@@ -12,7 +12,7 @@
     <artifactId>j2e-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>pac4j implementation for J2E</name>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
     <description>Security library for J2E based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
@@ -53,7 +53,7 @@
     </developers>
 
     <properties>
-        <pac4j.version>3.0.0</pac4j.version>
+        <pac4j.version>3.3.0</pac4j.version>
         <java.version>1.8</java.version>
         <javaee.version>7.0</javaee.version>
     </properties>
@@ -77,7 +77,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
