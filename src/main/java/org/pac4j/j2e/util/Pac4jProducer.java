@@ -36,7 +36,7 @@ public class Pac4jProducer {
      * @return a web context associated with the current servlet request
      */
     @Produces
-    WebContext getWebContext(final HttpServletRequest httpServletRequest,
+    J2EContext getWebContext(final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
         logger.trace("Producing a pac4j web context...");
         final Config config = ConfigSingleton.getConfig();

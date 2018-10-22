@@ -21,7 +21,9 @@ It's based on Java 8, JavaEE 7 and on the **[pac4j security engine](https://gith
 
 5) The `LogoutFilter` logs out the user from the application and triggers the logout at the identity provider level
 
-6) The `FilterHelper` defines the filters and their related mappings.
+6) The `J2EContext` and the `ProfileManager` components can be injected
+
+7) The `FilterHelper` handles the filters and their related mappings.
 
 
 ## Usage
