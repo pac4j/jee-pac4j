@@ -60,7 +60,7 @@ See the [migration guide](https://github.com/pac4j/j2e-pac4j/wiki/Migration-guid
 
 If you need commercial support (premium support or new/specific features), contact us at [info@pac4j.org](mailto:info@pac4j.org).
 
-If you have any question, want to contribute or be notified about the new releases, please use the following mailing lists:
+If you have any questions, want to contribute or be notified about the new releases, please subscribe to the following [mailing lists](http://www.pac4j.org/mailing-lists.html):
 
 - [pac4j-users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j-developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
