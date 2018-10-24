@@ -41,12 +41,15 @@ It's based on Java 8, JavaEE 7 and on the **[pac4j security engine](https://gith
 ### 4) [Get the authenticated user profiles](https://github.com/pac4j/j2e-pac4j/wiki/Get-the-authenticated-user-profiles)
 
 
-## Demo
+## Demos
 
 Two demo webapps: [j2e-pac4j-demo](https://github.com/pac4j/j2e-pac4j-demo) (a simple JSP/servlets demo) and [j2e-pac4j-cdi-demo](https://github.com/pac4j/j2e-pac4j-cdi-demo) (a more advanced demo using JSF and CDI) are available for tests and implements many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
 
 
-## Release notes
+## Versions
+
+The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/j2e-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/j2e-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
+The next version is [under development](https://github.com/pac4j/j2e-pac4j/wiki/Under-development).
 
 See the [release notes](https://github.com/pac4j/j2e-pac4j/wiki/Release-Notes). Learn more by browsing the [j2e-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/j2e-pac4j/4.1.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/3.3.0/index.html).
 
@@ -55,30 +58,9 @@ See the [migration guide](https://github.com/pac4j/j2e-pac4j/wiki/Migration-guid
 
 ## Need help?
 
+If you need commercial support (premium support or new/specific features), contact us at [info@pac4j.org](mailto:info@pac4j.org).
+
 If you have any question, please use the following mailing lists:
 
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
-
-
-## Development
-
-The version 4.1.0-SNAPSHOT is under development.
-
-Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/j2e-pac4j.png?branch=master)](https://travis-ci.org/pac4j/j2e-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the Maven `pom.xml` file for example:
-
-```xml
-<repositories>
-  <repository>
-    <id>sonatype-nexus-snapshots</id>
-    <name>Sonatype Nexus Snapshots</name>
-    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    <releases>
-      <enabled>false</enabled>
-    </releases>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-  </repository>
-</repositories>
-```
