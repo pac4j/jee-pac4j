@@ -2,7 +2,7 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-j2e.png" width="300" />
 </p>
 
-The `j2e-pac4j` project is an **easy and powerful security library for J2E web applications and web services** which supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
+The `j2e-pac4j` project is an **easy and powerful security library for JEE web applications and web services** which supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
 It's based on Java 8, JavaEE 7 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v3**. It's available under the Apache 2 license.
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
@@ -60,8 +60,9 @@ See the [migration guide](https://github.com/pac4j/j2e-pac4j/wiki/Migration-guid
 
 If you need commercial support (premium support or new/specific features), contact us at [info@pac4j.org](mailto:info@pac4j.org).
 
-If you have any questions, want to contribute or be notified about the new releases, please subscribe to the following [mailing lists](http://www.pac4j.org/mailing-lists.html):
+If you have any questions, want to contribute or be notified about the new releases and security fixes, please subscribe to the following [mailing lists](http://www.pac4j.org/mailing-lists.html):
 
 - [pac4j-users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j-developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
 - [pac4j-announce](https://groups.google.com/forum/?hl=en#!forum/pac4j-announce)
+- [pac4j-security](https://groups.google.com/forum/#!forum/pac4j-security)
