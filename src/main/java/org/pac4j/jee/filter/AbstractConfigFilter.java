@@ -1,4 +1,4 @@
-package org.pac4j.j2e.filter;
+package org.pac4j.jee.filter;
 
 import java.io.IOException;
 
@@ -14,11 +14,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
 import org.pac4j.core.config.ConfigSingleton;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
-import org.pac4j.core.http.adapter.J2ENopHttpActionAdapter;
+import org.pac4j.core.http.adapter.JEENopHttpActionAdapter;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,14 +84,14 @@ public abstract class AbstractConfigFilter implements Filter {
         internalFilter(req, resp, chain);
     }
 
-    protected HttpActionAdapter<Object, J2EContext> retrieveHttpActionAdapter() {
+    protected HttpActionAdapter<Object, JEEContext> retrieveHttpActionAdapter() {
         if (getConfig() != null) {
-            final HttpActionAdapter<Object, J2EContext> configHttpActionAdapter = getConfig().getHttpActionAdapter();
+            final HttpActionAdapter<Object, JEEContext> configHttpActionAdapter = getConfig().getHttpActionAdapter();
             if (configHttpActionAdapter != null) {
                 return configHttpActionAdapter;
             }
         }
-        return J2ENopHttpActionAdapter.INSTANCE;
+        return JEENopHttpActionAdapter.INSTANCE;
     }
 
     protected abstract void internalFilter(final HttpServletRequest request, final HttpServletResponse response,

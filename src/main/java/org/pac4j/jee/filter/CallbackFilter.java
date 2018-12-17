@@ -1,4 +1,4 @@
-package org.pac4j.j2e.filter;
+package org.pac4j.jee.filter;
 
 import java.io.IOException;
 
@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
@@ -34,7 +34,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class CallbackFilter extends AbstractConfigFilter {
 
-    private CallbackLogic<Object, J2EContext> callbackLogic = new DefaultCallbackLogic<>();
+    private CallbackLogic<Object, JEEContext> callbackLogic = new DefaultCallbackLogic<>();
 
     private String defaultUrl;
 
@@ -79,14 +79,14 @@ public class CallbackFilter extends AbstractConfigFilter {
 
         final Config config = getConfig();
         assertNotNull("config", config);
-        final J2EContext context = new J2EContext(request, response, config.getSessionStore());
+        final JEEContext context = new JEEContext(request, response, config.getSessionStore());
 
         retrieveCallbackLogic().perform(context, config, retrieveHttpActionAdapter(), this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient);
     }
 
-    protected CallbackLogic<Object, J2EContext> retrieveCallbackLogic() {
+    protected CallbackLogic<Object, JEEContext> retrieveCallbackLogic() {
         if (getConfig() != null) {
-            final CallbackLogic<Object, J2EContext> configCallbackLogic = getConfig().getCallbackLogic();
+            final CallbackLogic<Object, JEEContext> configCallbackLogic = getConfig().getCallbackLogic();
             if (configCallbackLogic != null) {
                 return configCallbackLogic;
             }
@@ -126,11 +126,11 @@ public class CallbackFilter extends AbstractConfigFilter {
         this.renewSession = renewSession;
     }
 
-    public CallbackLogic<Object, J2EContext> getCallbackLogic() {
+    public CallbackLogic<Object, JEEContext> getCallbackLogic() {
         return callbackLogic;
     }
 
-    public void setCallbackLogic(final CallbackLogic<Object, J2EContext> callbackLogic) {
+    public void setCallbackLogic(final CallbackLogic<Object, JEEContext> callbackLogic) {
         this.callbackLogic = callbackLogic;
     }
 

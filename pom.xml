@@ -11,9 +11,9 @@
     <groupId>org.pac4j</groupId>
     <artifactId>jee-pac4j</artifactId>
     <packaging>jar</packaging>
-    <name>pac4j implementation for J2E</name>
+    <name>pac4j implementation for JEE</name>
     <version>5.0.0-SNAPSHOT</version>
-    <description>Security library for J2E based on pac4j</description>
+    <description>Security library for JEE based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
     <repositories>
@@ -39,9 +39,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/pac4j/j2e-pac4j.git</url>
-        <connection>scm:git:git@github.com:pac4j/j2e-pac4j.git</connection>
-        <developerConnection>scm:git:git@github.com:pac4j/j2e-pac4j.git</developerConnection>
+        <url>https://github.com/pac4j/jee-pac4j.git</url>
+        <connection>scm:git:git@github.com:pac4j/jee-pac4j.git</connection>
+        <developerConnection>scm:git:git@github.com:pac4j/jee-pac4j.git</developerConnection>
     </scm>
 
     <developers>

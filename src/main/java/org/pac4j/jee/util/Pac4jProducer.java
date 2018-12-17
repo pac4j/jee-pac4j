@@ -1,8 +1,8 @@
-package org.pac4j.j2e.util;
+package org.pac4j.jee.util;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigSingleton;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.ProfileManager;
@@ -36,20 +36,20 @@ public class Pac4jProducer {
      * @return a web context associated with the current servlet request
      */
     @Produces
-    J2EContext getWebContext(final HttpServletRequest httpServletRequest,
+    JEEContext getWebContext(final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
         logger.trace("Producing a pac4j web context...");
         final Config config = ConfigSingleton.getConfig();
         if (config == null) {
             throw new TechnicalException("The Config of the ConfigSingleton is null. You must define at least one pac4j filter!");
         }
-        J2EContext j2EContext = new J2EContext(
+        JEEContext jEEContext = new JEEContext(
                 httpServletRequest,
                 httpServletResponse,
                 config.getSessionStore()
         );
         logger.trace("Returning a pac4j web context.");
-        return j2EContext;
+        return jEEContext;
     }
 
     /**

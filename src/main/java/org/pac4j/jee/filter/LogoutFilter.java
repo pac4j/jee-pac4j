@@ -1,7 +1,7 @@
-package org.pac4j.j2e.filter;
+package org.pac4j.jee.filter;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
@@ -33,7 +33,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class LogoutFilter extends AbstractConfigFilter {
 
-    private LogoutLogic<Object, J2EContext> logoutLogic = new DefaultLogoutLogic<>();
+    private LogoutLogic<Object, JEEContext> logoutLogic = new DefaultLogoutLogic<>();
 
     private String defaultUrl;
 
@@ -75,14 +75,14 @@ public class LogoutFilter extends AbstractConfigFilter {
 
         final Config config = getConfig();
         assertNotNull("config", config);
-        final J2EContext context = new J2EContext(request, response, config.getSessionStore());
+        final JEEContext context = new JEEContext(request, response, config.getSessionStore());
 
         retrieveLogoutLogic().perform(context, config, retrieveHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
     }
 
-    protected LogoutLogic<Object, J2EContext> retrieveLogoutLogic() {
+    protected LogoutLogic<Object, JEEContext> retrieveLogoutLogic() {
         if (getConfig() != null) {
-            final LogoutLogic<Object, J2EContext> configLogoutLogic = getConfig().getLogoutLogic();
+            final LogoutLogic<Object, JEEContext> configLogoutLogic = getConfig().getLogoutLogic();
             if (configLogoutLogic != null) {
                 return configLogoutLogic;
             }
@@ -106,11 +106,11 @@ public class LogoutFilter extends AbstractConfigFilter {
         this.logoutUrlPattern = logoutUrlPattern;
     }
 
-    public LogoutLogic<Object, J2EContext> getLogoutLogic() {
+    public LogoutLogic<Object, JEEContext> getLogoutLogic() {
         return logoutLogic;
     }
 
-    public void setLogoutLogic(final LogoutLogic<Object, J2EContext> logoutLogic) {
+    public void setLogoutLogic(final LogoutLogic<Object, JEEContext> logoutLogic) {
         this.logoutLogic = logoutLogic;
     }
 

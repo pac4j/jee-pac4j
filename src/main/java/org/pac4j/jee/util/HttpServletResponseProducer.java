@@ -1,4 +1,4 @@
-package org.pac4j.j2e.util;
+package org.pac4j.jee.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

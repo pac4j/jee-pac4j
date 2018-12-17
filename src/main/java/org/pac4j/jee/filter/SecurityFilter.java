@@ -1,4 +1,4 @@
-package org.pac4j.j2e.filter;
+package org.pac4j.jee.filter;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.*;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
-import org.pac4j.j2e.util.Pac4JHttpServletRequestWrapper;
+import org.pac4j.jee.util.Pac4JHttpServletRequestWrapper;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -33,7 +33,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class SecurityFilter extends AbstractConfigFilter {
 
-    private SecurityLogic<Object, J2EContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<Object, JEEContext> securityLogic = new DefaultSecurityLogic<>();
 
     private String clients;
 
@@ -87,7 +87,7 @@ public class SecurityFilter extends AbstractConfigFilter {
 
         final Config config = getConfig();
         assertNotNull("config", config);
-        final J2EContext context = new J2EContext(request, response, config.getSessionStore());
+        final JEEContext context = new JEEContext(request, response, config.getSessionStore());
 
         retrieveSecurityLogic().perform(context, config, (ctx, profiles, parameters) -> {
             // if no profiles are loaded, pac4j is not concerned with this request
@@ -96,9 +96,9 @@ public class SecurityFilter extends AbstractConfigFilter {
         }, retrieveHttpActionAdapter(), clients, authorizers, matchers, multiProfile);
     }
 
-    protected SecurityLogic<Object, J2EContext> retrieveSecurityLogic() {
+    protected SecurityLogic<Object, JEEContext> retrieveSecurityLogic() {
         if (getConfig() != null) {
-            final SecurityLogic<Object, J2EContext> configSecurityLogic = getConfig().getSecurityLogic();
+            final SecurityLogic<Object, JEEContext> configSecurityLogic = getConfig().getSecurityLogic();
             if (configSecurityLogic != null) {
                 return configSecurityLogic;
             }
@@ -138,11 +138,11 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.multiProfile = multiProfile;
     }
 
-    public SecurityLogic<Object, J2EContext> getSecurityLogic() {
+    public SecurityLogic<Object, JEEContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(final SecurityLogic<Object, J2EContext> securityLogic) {
+    public void setSecurityLogic(final SecurityLogic<Object, JEEContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }

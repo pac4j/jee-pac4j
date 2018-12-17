@@ -1,4 +1,4 @@
-package org.pac4j.j2e.util;
+package org.pac4j.jee.util;
 
 import org.pac4j.core.exception.TechnicalException;
 
