@@ -18,7 +18,7 @@ import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
-import org.pac4j.core.http.adapter.JEENopHttpActionAdapter;
+import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.core.util.CommonHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +91,7 @@ public abstract class AbstractConfigFilter implements Filter {
                 return configHttpActionAdapter;
             }
         }
-        return JEENopHttpActionAdapter.INSTANCE;
+        return JEEHttpActionAdapter.INSTANCE;
     }
 
     protected abstract void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
