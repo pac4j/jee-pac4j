@@ -7,8 +7,8 @@ import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileHelper;
+import org.pac4j.core.profile.UserProfile;
 
 /**
  * This wraps the {@link HttpServletRequest} to make it pac4j-aware by with respect to user-related methods.
@@ -19,9 +19,9 @@ import org.pac4j.core.profile.ProfileHelper;
  */
 public class Pac4JHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private Collection<CommonProfile> profiles;
+    private Collection<UserProfile> profiles;
 
-    public Pac4JHttpServletRequestWrapper(HttpServletRequest request, Collection<CommonProfile> profiles) {
+    public Pac4JHttpServletRequestWrapper(HttpServletRequest request, Collection<UserProfile> profiles) {
         super(request);
         this.profiles = profiles;
     }
@@ -31,12 +31,12 @@ public class Pac4JHttpServletRequestWrapper extends HttpServletRequestWrapper {
         return getPrincipal().map(p -> p.getName()).orElse(null);
     }
 
-    private Optional<CommonProfile> getProfile() {
+    private Optional<UserProfile> getProfile() {
         return ProfileHelper.flatIntoOneProfile(profiles);
     }
 
     private Optional<Principal> getPrincipal() {
-        return getProfile().map(CommonProfile::asPrincipal);
+        return getProfile().map(UserProfile::asPrincipal);
     }
 
     @Override
