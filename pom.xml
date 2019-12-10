@@ -55,7 +55,7 @@
     <properties>
         <pac4j.version>4.0.0-SNAPSHOT</pac4j.version>
         <java.version>1.8</java.version>
-        <javaee.version>7.0</javaee.version>
+        <javaee.version>8.0.1</javaee.version>
     </properties>
 
     <dependencies>
