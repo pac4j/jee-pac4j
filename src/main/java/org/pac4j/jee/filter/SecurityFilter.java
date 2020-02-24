@@ -89,6 +89,12 @@ public class SecurityFilter extends AbstractConfigFilter {
         assertNotNull("config", config);
         final JEEContext context = new JEEContext(request, response, config.getSessionStore());
 
+        //get the client from the request parameter, this will allow a single filter to be used for multiple clients
+        String client = request.getParameter("client");
+        if(StringUtils.isNotBlank(client)){
+            clients = client;
+        }
+
         retrieveSecurityLogic().perform(context, config, (ctx, profiles, parameters) -> {
             // if no profiles are loaded, pac4j is not concerned with this request
             filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
