@@ -2,7 +2,7 @@ package org.pac4j.jee.filter;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContext;
-import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
 

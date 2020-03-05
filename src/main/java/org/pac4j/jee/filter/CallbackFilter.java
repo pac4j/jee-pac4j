@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContext;
-import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
 

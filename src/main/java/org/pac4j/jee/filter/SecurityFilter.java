@@ -12,6 +12,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.*;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.util.Pac4JHttpServletRequestWrapper;
 
 import static org.pac4j.core.util.CommonHelper.*;

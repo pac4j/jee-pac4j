@@ -13,9 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
-import org.pac4j.core.config.ConfigSingleton;
+import org.pac4j.jee.config.ConfigSingleton;
 import org.pac4j.core.context.JEEContext;
-import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.http.adapter.JEEHttpActionAdapter;

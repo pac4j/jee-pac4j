@@ -1,7 +1,7 @@
 package org.pac4j.jee.util;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.config.ConfigSingleton;
+import org.pac4j.jee.config.ConfigSingleton;
 import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
