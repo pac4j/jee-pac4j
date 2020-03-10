@@ -2,9 +2,14 @@ package org.pac4j.jee.filter;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContext;
-import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.context.session.JEESessionStore;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
+import org.pac4j.core.http.adapter.HttpActionAdapter;
+import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
+import org.pac4j.core.util.FindBest;
+import org.pac4j.core.util.Pac4jConstants;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -13,27 +18,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static org.pac4j.core.util.CommonHelper.*;
-
 /**
- * <p>This filter handles the (application + identity provider) logout process, based on the {@link #logoutLogic}.</p>
- *
- * <p>The configuration can be provided via servlet parameters, setters or constructors for the following options:</p>
- * <ul>
- *     <li><code>configFactory</code> (the class name of the factory to build the configuration) or <code>config</code> (the configuration itself)</li>
- *     <li><code>defaultUrl</code> (default logourl url)</li>
- *     <li><code>logoutUrlPattern</code> (pattern that logout urls must match)</li>
- *     <li><code>localLogout</code> (whether the application logout must be performed)</li>
- *     <li><code>destroySession</code> (whether we must destroy the web session during the local logout)</li>
- *     <li><code>centralLogout</code> (whether the centralLogout must be performed)</li>
- * </ul>
+ * <p>This filter handles the (application + identity provider) logout process.</p>
  *
  * @author Jerome Leleu
  * @since 1.2.0
  */
 public class LogoutFilter extends AbstractConfigFilter {
 
-    private LogoutLogic<Object, JEEContext> logoutLogic = new DefaultLogoutLogic<>();
+    private LogoutLogic<Object, JEEContext> logoutLogic;
 
     private String defaultUrl;
 
@@ -71,23 +64,14 @@ public class LogoutFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        assertNotNull("applicationLogoutLogic", logoutLogic);
-
         final Config config = getConfig();
-        assertNotNull("config", config);
-        final JEEContext context = new JEEContext(request, response, config.getSessionStore());
 
-        retrieveLogoutLogic().perform(context, config, retrieveHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
-    }
+        final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
+        final HttpActionAdapter<Object, JEEContext> bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
+        final LogoutLogic<Object, JEEContext> bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
-    protected LogoutLogic<Object, JEEContext> retrieveLogoutLogic() {
-        if (getConfig() != null) {
-            final LogoutLogic<Object, JEEContext> configLogoutLogic = getConfig().getLogoutLogic();
-            if (configLogoutLogic != null) {
-                return configLogoutLogic;
-            }
-        }
-        return logoutLogic;
+        final JEEContext context = new JEEContext(request, response, bestSessionStore);
+        bestLogic.perform(context, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
     }
 
     public String getDefaultUrl() {

@@ -1,11 +1,12 @@
 package org.pac4j.jee.util;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.config.ConfigSingleton;
 import org.pac4j.core.context.JEEContext;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.context.session.JEESessionStore;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.util.FindBest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +40,11 @@ public class Pac4jProducer {
     JEEContext getWebContext(final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
         logger.trace("Producing a pac4j web context...");
-        final Config config = ConfigSingleton.getConfig();
-        if (config == null) {
-            throw new TechnicalException("The Config of the ConfigSingleton is null. You must define at least one pac4j filter!");
-        }
+        final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, Config.INSTANCE, JEESessionStore.INSTANCE);
         JEEContext jEEContext = new JEEContext(
                 httpServletRequest,
                 httpServletResponse,
-                config.getSessionStore()
+                bestSessionStore
         );
         logger.trace("Returning a pac4j web context.");
         return jEEContext;

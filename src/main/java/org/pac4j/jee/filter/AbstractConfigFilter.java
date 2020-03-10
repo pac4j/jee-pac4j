@@ -13,13 +13,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.config.ConfigBuilder;
-import org.pac4j.core.config.ConfigSingleton;
-import org.pac4j.core.context.JEEContext;
-import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.exception.TechnicalException;
-import org.pac4j.core.http.adapter.HttpActionAdapter;
-import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.util.Pac4jConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +28,7 @@ public abstract class AbstractConfigFilter implements Filter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected Config config;
+    private Config config;
 
     public void init(final FilterConfig filterConfig) throws ServletException {
         final String configFactoryParam = filterConfig.getInitParameter(Pac4jConstants.CONFIG_FACTORY);
@@ -67,31 +62,12 @@ public abstract class AbstractConfigFilter implements Filter {
         return value;
     }
 
-    protected void checkForbiddenParameter(final FilterConfig filterConfig, final String name) {
-        final String parameter = getStringParam(filterConfig, name, null);
-        if (CommonHelper.isNotBlank(parameter)) {
-            final String message = "the " + name + " servlet parameter is no longer supported";
-            logger.error(message);
-            throw new TechnicalException(message);
-        }
-    }
-
     public void doFilter(final ServletRequest request, final ServletResponse response, final FilterChain chain)
             throws IOException, ServletException {
         final HttpServletRequest req = (HttpServletRequest) request;
         final HttpServletResponse resp = (HttpServletResponse) response;
 
         internalFilter(req, resp, chain);
-    }
-
-    protected HttpActionAdapter<Object, JEEContext> retrieveHttpActionAdapter() {
-        if (getConfig() != null) {
-            final HttpActionAdapter<Object, JEEContext> configHttpActionAdapter = getConfig().getHttpActionAdapter();
-            if (configHttpActionAdapter != null) {
-                return configHttpActionAdapter;
-            }
-        }
-        return JEEHttpActionAdapter.INSTANCE;
     }
 
     protected abstract void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
@@ -101,15 +77,19 @@ public abstract class AbstractConfigFilter implements Filter {
 
     public Config getConfig() {
         if (this.config == null) {
-            return ConfigSingleton.getConfig();
+            return Config.INSTANCE;
         }
+        return this.config;
+    }
+
+    public Config getConfigOnly() {
         return this.config;
     }
 
     public void setConfig(final Config config) {
         CommonHelper.assertNotNull("config", config);
         this.config = config;
-        ConfigSingleton.setConfig(config);
+        Config.setConfig(config);
     }
 
     public void setConfigOnly(final Config config) {

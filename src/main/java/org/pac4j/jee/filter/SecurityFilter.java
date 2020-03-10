@@ -10,30 +10,25 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.*;
+import org.pac4j.core.context.session.JEESessionStore;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
+import org.pac4j.core.http.adapter.HttpActionAdapter;
+import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
+import org.pac4j.core.util.FindBest;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.util.Pac4JHttpServletRequestWrapper;
 
-import static org.pac4j.core.util.CommonHelper.*;
-
 /**
- * <p>This filter protects an url, based on the {@link #securityLogic}.</p>
- *
- * <p>The configuration can be provided via servlet parameters, setters or constructors for the following options:</p>
- * <ul>
- *     <li><code>configFactory</code> (the class name of the factory to build the configuration) or <code>config</code> (the configuration itself)</li>
- *     <li><code>clients</code> (list of clients for authentication)</li>
- *     <li><code>authorizers</code> (list of authorizers)</li>
- *     <li><code>matchers</code> (list of matchers)</li>
- *     <li><code>multiProfile</code>  (whether multiple profiles should be kept).</li>
- * </ul>
+ * <p>This filter protects an url.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
  */
 public class SecurityFilter extends AbstractConfigFilter {
 
-    private SecurityLogic<Object, JEEContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<Object, JEEContext> securityLogic;
 
     private String clients;
 
@@ -67,43 +62,24 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.authorizers = getStringParam(filterConfig, Pac4jConstants.AUTHORIZERS, this.authorizers);
         this.matchers = getStringParam(filterConfig, Pac4jConstants.MATCHERS, this.matchers);
         this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
-
-        // check backward incompatibility
-        checkForbiddenParameter(filterConfig, "clientsFactory");
-        checkForbiddenParameter(filterConfig, "isAjax");
-        checkForbiddenParameter(filterConfig, "stateless");
-        checkForbiddenParameter(filterConfig, "requireAnyRole");
-        checkForbiddenParameter(filterConfig, "requireAllRoles");
-        checkForbiddenParameter(filterConfig, "clientName");
-        checkForbiddenParameter(filterConfig, "authorizerName");
-        checkForbiddenParameter(filterConfig, "matcherName");
     }
 
     @Override
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain filterChain) throws IOException, ServletException {
 
-        assertNotNull("securityLogic", securityLogic);
-
         final Config config = getConfig();
-        assertNotNull("config", config);
-        final JEEContext context = new JEEContext(request, response, config.getSessionStore());
 
-        retrieveSecurityLogic().perform(context, config, (ctx, profiles, parameters) -> {
+        final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
+        final HttpActionAdapter<Object, JEEContext> bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
+        final SecurityLogic<Object, JEEContext> bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
+
+        final JEEContext context = new JEEContext(request, response, bestSessionStore);
+        bestLogic.perform(context, config, (ctx, profiles, parameters) -> {
             // if no profiles are loaded, pac4j is not concerned with this request
             filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
             return null;
-        }, retrieveHttpActionAdapter(), clients, authorizers, matchers, multiProfile);
-    }
-
-    protected SecurityLogic<Object, JEEContext> retrieveSecurityLogic() {
-        if (getConfig() != null) {
-            final SecurityLogic<Object, JEEContext> configSecurityLogic = getConfig().getSecurityLogic();
-            if (configSecurityLogic != null) {
-                return configSecurityLogic;
-            }
-        }
-        return securityLogic;
+        }, bestAdapter, clients, authorizers, matchers, multiProfile);
     }
 
     public String getClients() {
