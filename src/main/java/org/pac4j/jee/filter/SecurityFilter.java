@@ -41,7 +41,7 @@ public class SecurityFilter extends AbstractConfigFilter {
     public SecurityFilter() {}
 
     public SecurityFilter(final Config config) {
-        setConfig(config);
+        setSharedConfig(config);
     }
 
     public SecurityFilter(final Config config, final String clients) {
@@ -68,7 +68,7 @@ public class SecurityFilter extends AbstractConfigFilter {
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain filterChain) throws IOException, ServletException {
 
-        final Config config = getConfig();
+        final Config config = getSharedConfig();
 
         final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
         final HttpActionAdapter<Object, JEEContext> bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);

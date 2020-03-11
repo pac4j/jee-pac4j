@@ -34,7 +34,7 @@ public abstract class AbstractConfigFilter implements Filter {
         final String configFactoryParam = filterConfig.getInitParameter(Pac4jConstants.CONFIG_FACTORY);
         if (configFactoryParam != null) {
             final Config config = ConfigBuilder.build(configFactoryParam);
-            setConfig(config);
+            setSharedConfig(config);
         }
     }
 
@@ -75,21 +75,21 @@ public abstract class AbstractConfigFilter implements Filter {
 
     public void destroy() {}
 
-    public Config getConfig() {
+    public Config getSharedConfig() {
         if (this.config == null) {
             return Config.INSTANCE;
         }
         return this.config;
     }
 
-    public Config getConfigOnly() {
-        return this.config;
-    }
-
-    public void setConfig(final Config config) {
+    public void setSharedConfig(final Config config) {
         CommonHelper.assertNotNull("config", config);
         this.config = config;
         Config.setConfig(config);
+    }
+
+    public Config getConfigOnly() {
+        return this.config;
     }
 
     public void setConfigOnly(final Config config) {

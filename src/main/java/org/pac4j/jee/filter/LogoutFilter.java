@@ -41,7 +41,7 @@ public class LogoutFilter extends AbstractConfigFilter {
     public LogoutFilter() {}
 
     public LogoutFilter(final Config config) {
-        setConfig(config);
+        setSharedConfig(config);
     }
 
     public LogoutFilter(final Config config, final String defaultUrl) {
@@ -64,7 +64,7 @@ public class LogoutFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        final Config config = getConfig();
+        final Config config = getSharedConfig();
 
         final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
         final HttpActionAdapter<Object, JEEContext> bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
