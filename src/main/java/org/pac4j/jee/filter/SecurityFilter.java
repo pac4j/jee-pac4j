@@ -54,6 +54,11 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.authorizers = authorizers;
     }
 
+    public SecurityFilter(final Config config, final String clients, final String authorizers, final String matchers) {
+        this(config, clients, authorizers);
+        this.matchers = matchers;
+    }
+
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         super.init(filterConfig);
