@@ -12,7 +12,7 @@
     <artifactId>jee-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>pac4j implementation for JEE</name>
-    <version>5.0.0</version>
+    <version>5.0.1-SNAPSHOT</version>
     <description>Security library for JEE based on pac4j</description>
     <url>https://github.com/pac4j/j2e-pac4j</url>
 
