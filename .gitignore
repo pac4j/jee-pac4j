@@ -8,3 +8,4 @@ bin/
 j2e-pac4j.iml
 .pmd
 .pmdruleset.xml
+.DS_Store
