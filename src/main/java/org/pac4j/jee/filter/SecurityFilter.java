@@ -28,15 +28,13 @@ import org.pac4j.jee.util.Pac4JHttpServletRequestWrapper;
  */
 public class SecurityFilter extends AbstractConfigFilter {
 
-    private SecurityLogic<Object, JEEContext> securityLogic;
+    private SecurityLogic securityLogic;
 
     private String clients;
 
     private String authorizers;
 
     private String matchers;
-
-    private Boolean multiProfile;
 
     public SecurityFilter() {}
 
@@ -66,7 +64,6 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.clients = getStringParam(filterConfig, Pac4jConstants.CLIENTS, this.clients);
         this.authorizers = getStringParam(filterConfig, Pac4jConstants.AUTHORIZERS, this.authorizers);
         this.matchers = getStringParam(filterConfig, Pac4jConstants.MATCHERS, this.matchers);
-        this.multiProfile = getBooleanParam(filterConfig, Pac4jConstants.MULTI_PROFILE, this.multiProfile);
     }
 
     @Override
@@ -75,16 +72,17 @@ public class SecurityFilter extends AbstractConfigFilter {
 
         final Config config = getSharedConfig();
 
-        final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
-        final HttpActionAdapter<Object, JEEContext> bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
-        final SecurityLogic<Object, JEEContext> bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
+        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
+        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
+        final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        final JEEContext context = new JEEContext(request, response, bestSessionStore);
+        final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response, bestSessionStore);
+
         bestLogic.perform(context, config, (ctx, profiles, parameters) -> {
             // if no profiles are loaded, pac4j is not concerned with this request
             filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
             return null;
-        }, bestAdapter, clients, authorizers, matchers, multiProfile);
+        }, bestAdapter, clients, authorizers, matchers);
     }
 
     public String getClients() {
@@ -111,19 +109,11 @@ public class SecurityFilter extends AbstractConfigFilter {
         this.matchers = matchers;
     }
 
-    public Boolean getMultiProfile() {
-        return multiProfile;
-    }
-
-    public void setMultiProfile(final Boolean multiProfile) {
-        this.multiProfile = multiProfile;
-    }
-
-    public SecurityLogic<Object, JEEContext> getSecurityLogic() {
+    public SecurityLogic getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(final SecurityLogic<Object, JEEContext> securityLogic) {
+    public void setSecurityLogic(final SecurityLogic securityLogic) {
         this.securityLogic = securityLogic;
     }
 }

@@ -1,7 +1,8 @@
 package org.pac4j.jee.filter;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.context.JEEContextFactory;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.JEESessionStore;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultLogoutLogic;
@@ -26,7 +27,7 @@ import java.io.IOException;
  */
 public class LogoutFilter extends AbstractConfigFilter {
 
-    private LogoutLogic<Object, JEEContext> logoutLogic;
+    private LogoutLogic logoutLogic;
 
     private String defaultUrl;
 
@@ -66,11 +67,12 @@ public class LogoutFilter extends AbstractConfigFilter {
 
         final Config config = getSharedConfig();
 
-        final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
-        final HttpActionAdapter<Object, JEEContext> bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
-        final LogoutLogic<Object, JEEContext> bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
+        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
+        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
+        final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
-        final JEEContext context = new JEEContext(request, response, bestSessionStore);
+        final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response, bestSessionStore);
+
         bestLogic.perform(context, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
     }
 
@@ -90,11 +92,11 @@ public class LogoutFilter extends AbstractConfigFilter {
         this.logoutUrlPattern = logoutUrlPattern;
     }
 
-    public LogoutLogic<Object, JEEContext> getLogoutLogic() {
+    public LogoutLogic getLogoutLogic() {
         return logoutLogic;
     }
 
-    public void setLogoutLogic(final LogoutLogic<Object, JEEContext> logoutLogic) {
+    public void setLogoutLogic(final LogoutLogic logoutLogic) {
         this.logoutLogic = logoutLogic;
     }
 

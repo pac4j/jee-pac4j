@@ -40,7 +40,7 @@ public class Pac4jProducer {
     JEEContext getWebContext(final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
         logger.trace("Producing a pac4j web context...");
-        final SessionStore<JEEContext> bestSessionStore = FindBest.sessionStore(null, Config.INSTANCE, JEESessionStore.INSTANCE);
+        final SessionStore bestSessionStore = FindBest.sessionStore(null, Config.INSTANCE, JEESessionStore.INSTANCE);
         JEEContext jEEContext = new JEEContext(
                 httpServletRequest,
                 httpServletResponse,
