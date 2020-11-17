@@ -11,6 +11,7 @@ import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
+import org.pac4j.core.util.filter.AbstractConfigFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
