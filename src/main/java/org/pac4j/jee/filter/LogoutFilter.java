@@ -1,5 +1,6 @@
 package org.pac4j.jee.filter;
 
+import org.pac4j.core.config.AbstractConfigFilter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContextFactory;
 import org.pac4j.core.context.WebContext;
@@ -11,7 +12,6 @@ import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.http.adapter.JEEHttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
-import org.pac4j.core.util.filter.AbstractConfigFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
