@@ -22,7 +22,7 @@ import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.util.Pac4JHttpServletRequestWrapper;
 
 /**
- * <p>This filter protects an url.</p>
+ * <p>This filter protects an URL.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
