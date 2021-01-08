@@ -2,6 +2,7 @@ package org.pac4j.jee.util;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.JEEContext;
+import org.pac4j.core.context.JEEContextFactory;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.JEESessionStore;
 import org.pac4j.core.context.session.SessionStore;
@@ -40,26 +41,39 @@ public class Pac4jProducer {
     JEEContext getWebContext(final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
         logger.trace("Producing a pac4j web context...");
-        final SessionStore bestSessionStore = FindBest.sessionStore(null, Config.INSTANCE, JEESessionStore.INSTANCE);
-        JEEContext jEEContext = new JEEContext(
-                httpServletRequest,
-                httpServletResponse,
-                bestSessionStore
-        );
+        final JEEContext jeeContext = (JEEContext) FindBest.webContextFactory(null, Config.INSTANCE, JEEContextFactory.INSTANCE)
+                .newContext(httpServletRequest, httpServletResponse);
         logger.trace("Returning a pac4j web context.");
-        return jEEContext;
+        return jeeContext;
+    }
+
+    /**
+     * Factory method which produces a pac4j session store.
+     *
+     * @param httpServletRequest the http servlet request to be used for building the web context
+     * @param httpServletResponse the http servlet response to be used for building the web context
+     * @return a session store associated with the current servlet request
+     */
+    @Produces
+    SessionStore getSessionStore(final HttpServletRequest httpServletRequest,
+                             final HttpServletResponse httpServletResponse) {
+        logger.trace("Producing a pac4j session store...");
+        final SessionStore sessionStore = FindBest.sessionStore(null, Config.INSTANCE, JEESessionStore.INSTANCE);
+        logger.trace("Returning a pac4j session store.");
+        return sessionStore;
     }
 
     /**
      * Factory method which produces a pac4j profile manager.
      *
      * @param webContext the web context to be used for building the profile manager
+     * @param sessionStore the session store to be used for building the profile manager
      * @return a profile manager associated with the current servlet request
      */
     @Produces
-    ProfileManager getProfileManager(final WebContext webContext) {
+    ProfileManager getProfileManager(final WebContext webContext, final SessionStore sessionStore) {
         logger.trace("Producing a pac4j profile manager...");
-        ProfileManager profileManager = new ProfileManager(webContext);
+        ProfileManager profileManager = new ProfileManager(webContext, sessionStore);
         logger.trace("Returning a pac4j profile manager.");
         return profileManager;
     }
