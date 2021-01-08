@@ -50,8 +50,8 @@ public class Pac4jProducer {
     /**
      * Factory method which produces a pac4j session store.
      *
-     * @param httpServletRequest the http servlet request to be used for building the web context
-     * @param httpServletResponse the http servlet response to be used for building the web context
+     * @param httpServletRequest the http servlet request to be used for building the session store
+     * @param httpServletResponse the http servlet response to be used for building the session store
      * @return a session store associated with the current servlet request
      */
     @Produces
