@@ -77,9 +77,9 @@ public class SecurityFilter extends AbstractConfigFilter {
         final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
         final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response, bestSessionStore);
+        final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response);
 
-        bestLogic.perform(context, config, (ctx, profiles, parameters) -> {
+        bestLogic.perform(context, bestSessionStore, config, (ctx, session, profiles, parameters) -> {
             // if no profiles are loaded, pac4j is not concerned with this request
             filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
             return null;
