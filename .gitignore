@@ -5,7 +5,7 @@ target/
 test-output/
 bin/
 .idea
-j2e-pac4j.iml
+*.iml
 .pmd
 .pmdruleset.xml
 .DS_Store

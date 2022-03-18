@@ -5,17 +5,19 @@
 The `jee-pac4j` project is an **easy and powerful security library for JEE web applications and web services** which supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
 It's based on Java 11, JavaEE 8 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v5**. It's available under the Apache 2 license.
 
-[**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
+Two dependencies can be used: `javaee-pac4j` for any JavaEE webapp or `jakartaee-pac4j` for any JakartaEE webapp.
 
-1) A [**client**](http://www.pac4j.org/docs/clients.html) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for web applications authentication while a direct client is for web services authentication:
+[**Main concepts and components:**](https://www.pac4j.org/docs/main-concepts-and-components.html)
+
+1) A [**client**](https://www.pac4j.org/docs/clients.html) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for web applications authentication while a direct client is for web services authentication:
 
 &#9656; OAuth - SAML - CAS - OpenID Connect - HTTP - Google App Engine - Kerberos - LDAP - SQL - JWT - MongoDB - CouchDB - IP address - REST API
 
-2) An [**authorizer**](http://www.pac4j.org/docs/authorizers.html) is meant to check authorizations on the authenticated user profile(s) or on the current web context:
+2) An [**authorizer**](https://www.pac4j.org/docs/authorizers.html) is meant to check authorizations on the authenticated user profile(s) or on the current web context:
 
 &#9656; Roles / permissions - Anonymous / remember-me / (fully) authenticated - Profile type, attribute -  CORS - CSRF - Security headers - IP address, HTTP method
 
-3) A [**matcher**](http://www.pac4j.org/docs/matchers.html) defines whether the `SecurityFilter` must be applied and can be used for additional web processing
+3) A [**matcher**](https://www.pac4j.org/docs/matchers.html) defines whether the `SecurityFilter` must be applied and can be used for additional web processing
 
 4) The `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
 
@@ -53,11 +55,11 @@ Two demo webapps: [jee-pac4j-demo](https://github.com/pac4j/jee-pac4j-demo) (a s
 The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/jee-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/jee-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
 The [next version](https://github.com/pac4j/jee-pac4j/wiki/Next-version) is under development.
 
-See the [release notes](https://github.com/pac4j/jee-pac4j/wiki/Release-Notes). Learn more by browsing the [pac4j documentation](https://www.javadoc.io/doc/org.pac4j/pac4j-core/5.2.0/index.html) and the [jee-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/jee-pac4j/6.1.0).
+See the [release notes](https://github.com/pac4j/jee-pac4j/wiki/Release-Notes). Learn more by browsing the [pac4j documentation](https://www.javadoc.io/doc/org.pac4j/pac4j-core/5.4.0/index.html) and the [jee-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/javaee-pac4j/7.0.0).
 
 See the [migration guide](https://github.com/pac4j/jee-pac4j/wiki/Migration-guide) as well.
 
 
 ## Need help?
 
-You can use the [mailing lists](http://www.pac4j.org/mailing-lists.html) or the [commercial support](http://www.pac4j.org/commercial-support.html).
+You can use the [mailing lists](https://www.pac4j.org/mailing-lists.html) or the [commercial support](https://www.pac4j.org/commercial-support.html).
