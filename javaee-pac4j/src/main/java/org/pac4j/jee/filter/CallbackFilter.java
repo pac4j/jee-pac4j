@@ -1,13 +1,5 @@
 package org.pac4j.jee.filter;
 
-import java.io.IOException;
-
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -18,8 +10,15 @@ import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.config.AbstractConfigFilter;
 import org.pac4j.jee.context.JEEContextFactory;
-import org.pac4j.jee.context.session.JEESessionStore;
+import org.pac4j.jee.context.session.JEESessionStoreFactory;
 import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
+
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * <p>This filter finishes the login process for an indirect client.</p>
@@ -63,13 +62,13 @@ public class CallbackFilter extends AbstractConfigFilter {
 
         final Config config = getSharedConfig();
 
-        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
         final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
         final CallbackLogic bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
 
         final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response);
+        final SessionStore sessionStore = FindBest.sessionStoreFactory(null, config, JEESessionStoreFactory.INSTANCE).newSessionStore(request, response);
 
-        bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.renewSession, this.defaultClient);
+        bestLogic.perform(context, sessionStore, config, bestAdapter, this.defaultUrl, this.renewSession, this.defaultClient);
     }
 
     public String getDefaultUrl() {

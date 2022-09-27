@@ -10,7 +10,7 @@ import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.config.AbstractConfigFilter;
 import org.pac4j.jee.context.JEEContextFactory;
-import org.pac4j.jee.context.session.JEESessionStore;
+import org.pac4j.jee.context.session.JEESessionStoreFactory;
 import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
 
 import javax.servlet.FilterChain;
@@ -68,13 +68,13 @@ public class LogoutFilter extends AbstractConfigFilter {
 
         final Config config = getSharedConfig();
 
-        final SessionStore bestSessionStore = FindBest.sessionStore(null, config, JEESessionStore.INSTANCE);
         final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
         final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
         final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response);
+        final SessionStore sessionStore = FindBest.sessionStoreFactory(null, config, JEESessionStoreFactory.INSTANCE).newSessionStore(request, response);
 
-        bestLogic.perform(context, bestSessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
+        bestLogic.perform(context, sessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
     }
 
     public String getDefaultUrl() {
