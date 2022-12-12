@@ -5,14 +5,12 @@
 The `jee-pac4j` project is an **easy and powerful security library for JEE web applications and web services** which supports authentication and authorization, but also logout and advanced features like session fixation and CSRF protection.
 It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
-| jee-pac4j    | Available modules                | JDK | pac4j | Usage of Lombok |
-|--------------|----------------------------------|-----|-------|-----------------|
-| version >= 8 | javaee-pac4j & jakartaee-pac4j   | 17  | v6    | Yes             |
-| version >= 7 | javaee-pac4j & jakartaee-pac4j   | 11  | v5    | No              |
-| version >= 6 | jee-pac4j                        | 11  | v5    | No              |
-| version >= 5 | jee-pac4j                        | 8   | v4    | No              |
-
-Two dependencies may be used: `javaee-pac4j` for any JavaEE webapp or `jakartaee-pac4j` for any JakartaEE webapp.
+| jee-pac4j    | Module for JavaEE webapp | Module for JakartaEE webapp | JDK | pac4j | Usage of Lombok |
+|--------------|--------------------------|-----------------------------|-----|-------|-----------------|
+| version >= 8 | javaee-pac4j             | jakartaee-pac4j             | 17  | v6    | Yes             |
+| version >= 7 | javaee-pac4j             | jakartaee-pac4j             | 11  | v5    | No              |
+| version >= 6 | jee-pac4j                |                             | 11  | v5    | No              |
+| version >= 5 | jee-pac4j                |                             | 8   | v4    | No              |
 
 [**Main concepts and components:**](https://www.pac4j.org/docs/main-concepts-and-components.html)
 
