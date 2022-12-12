@@ -1,14 +1,12 @@
 package org.pac4j.jee.util;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.core.util.FindBest;
-import org.pac4j.jee.context.JEEContextFactory;
-import org.pac4j.jee.context.session.JEESessionStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.pac4j.jee.config.Pac4jJEEConfig;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
@@ -24,53 +22,67 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Named
 @RequestScoped
+@Slf4j
 public class Pac4jProducer {
-
-    /** The static logger instance. */
-    private static final Logger logger = LoggerFactory.getLogger(Pac4jProducer.class);
 
     /**
      * Factory method which produces a pac4j web context.
      *
-     * @param httpServletRequest the http servlet request to be used for building the web context
-     * @param httpServletResponse the http servlet response to be used for building the web context
+     * @param config the configuration
+     * @param httpServletRequest the HTTP servlet request
+     * @param httpServletResponse the HTTP servlet response
      * @return a web context associated with the current servlet request
      */
     @Produces
-    WebContext getWebContext(final HttpServletRequest httpServletRequest,
+    WebContext getWebContext(final Config config,
+                             final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
-        logger.trace("Producing a pac4j web context...");
-        final WebContext webContext = FindBest.webContextFactory(null, Config.INSTANCE, JEEContextFactory.INSTANCE)
-                .newContext(httpServletRequest, httpServletResponse);
-        logger.trace("Returning a pac4j web context.");
+
+        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+
+        LOGGER.trace("Producing a pac4j web context...");
+        val webContext = config.getWebContextFactory().newContext(httpServletRequest, httpServletResponse);
+        LOGGER.trace("Returning a pac4j web context.");
         return webContext;
     }
 
     /**
      * Factory method which produces a pac4j session store.
      *
+     * @param config the configuration
+     * @param httpServletRequest the HTTP servlet request
+     * @param httpServletResponse the HTTP servlet response
      * @return a session store associated with the current servlet request
      */
     @Produces
-    SessionStore getSessionStore() {
-        logger.trace("Producing a pac4j session store...");
-        final SessionStore sessionStore = FindBest.sessionStore(null, Config.INSTANCE, JEESessionStore.INSTANCE);
-        logger.trace("Returning a pac4j session store.");
+    SessionStore getSessionStore(final Config config,
+                                 final HttpServletRequest httpServletRequest,
+                                 final HttpServletResponse httpServletResponse) {
+
+        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+
+        LOGGER.trace("Producing a pac4j session store...");
+        val sessionStore = config.getSessionStoreFactory().newSessionStore(httpServletRequest, httpServletResponse);
+        LOGGER.trace("Returning a pac4j session store.");
         return sessionStore;
     }
 
     /**
      * Factory method which produces a pac4j profile manager.
      *
+     * @param config the configuration
      * @param webContext the web context to be used for building the profile manager
      * @param sessionStore the session store to be used for building the profile manager
      * @return a profile manager associated with the current servlet request
      */
     @Produces
-    ProfileManager getProfileManager(final WebContext webContext, final SessionStore sessionStore) {
-        logger.trace("Producing a pac4j profile manager...");
-        ProfileManager profileManager = new ProfileManager(webContext, sessionStore);
-        logger.trace("Returning a pac4j profile manager.");
+    ProfileManager getProfileManager(final Config config, final WebContext webContext, final SessionStore sessionStore) {
+
+        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+
+        LOGGER.trace("Producing a pac4j profile manager...");
+        val profileManager = config.getProfileManagerFactory().apply(webContext, sessionStore);
+        LOGGER.trace("Returning a pac4j profile manager.");
         return profileManager;
     }
 }

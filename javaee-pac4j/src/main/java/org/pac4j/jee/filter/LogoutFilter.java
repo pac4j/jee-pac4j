@@ -1,17 +1,12 @@
 package org.pac4j.jee.filter;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.val;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
-import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.engine.DefaultLogoutLogic;
-import org.pac4j.core.engine.LogoutLogic;
-import org.pac4j.core.http.adapter.HttpActionAdapter;
-import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.config.AbstractConfigFilter;
-import org.pac4j.jee.context.JEEContextFactory;
-import org.pac4j.jee.context.session.JEESessionStoreFactory;
-import org.pac4j.jee.http.adapter.JEEHttpActionAdapter;
+import org.pac4j.jee.config.Pac4jJEEConfig;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -26,9 +21,9 @@ import java.io.IOException;
  * @author Jerome Leleu
  * @since 1.2.0
  */
+@Getter
+@Setter
 public class LogoutFilter extends AbstractConfigFilter {
-
-    private LogoutLogic logoutLogic;
 
     private String defaultUrl;
 
@@ -43,7 +38,7 @@ public class LogoutFilter extends AbstractConfigFilter {
     public LogoutFilter() {}
 
     public LogoutFilter(final Config config) {
-        setSharedConfig(config);
+        setConfig(config);
     }
 
     public LogoutFilter(final Config config, final String defaultUrl) {
@@ -66,62 +61,10 @@ public class LogoutFilter extends AbstractConfigFilter {
     protected void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                            final FilterChain chain) throws IOException, ServletException {
 
-        final Config config = getSharedConfig();
+        val config = getSharedConfig();
 
-        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, JEEHttpActionAdapter.INSTANCE);
-        final LogoutLogic bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
+        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
 
-        final WebContext context = FindBest.webContextFactory(null, config, JEEContextFactory.INSTANCE).newContext(request, response);
-        final SessionStore sessionStore = FindBest.sessionStoreFactory(null, config, JEESessionStoreFactory.INSTANCE).newSessionStore(request, response);
-
-        bestLogic.perform(context, sessionStore, config, bestAdapter, this.defaultUrl, this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout);
-    }
-
-    public String getDefaultUrl() {
-        return this.defaultUrl;
-    }
-
-    public void setDefaultUrl(final String defaultUrl) {
-        this.defaultUrl = defaultUrl;
-    }
-
-    public String getLogoutUrlPattern() {
-        return logoutUrlPattern;
-    }
-
-    public void setLogoutUrlPattern(String logoutUrlPattern) {
-        this.logoutUrlPattern = logoutUrlPattern;
-    }
-
-    public LogoutLogic getLogoutLogic() {
-        return logoutLogic;
-    }
-
-    public void setLogoutLogic(final LogoutLogic logoutLogic) {
-        this.logoutLogic = logoutLogic;
-    }
-
-    public Boolean getLocalLogout() {
-        return localLogout;
-    }
-
-    public void setLocalLogout(final Boolean localLogout) {
-        this.localLogout = localLogout;
-    }
-
-    public Boolean getDestroySession() {
-        return destroySession;
-    }
-
-    public void setDestroySession(final Boolean destroySession) {
-        this.destroySession = destroySession;
-    }
-
-    public Boolean getCentralLogout() {
-        return centralLogout;
-    }
-
-    public void setCentralLogout(final Boolean centralLogout) {
-        this.centralLogout = centralLogout;
+        config.getLogoutLogic().perform(config, defaultUrl, logoutUrlPattern, localLogout, destroySession, centralLogout);
     }
 }

@@ -1,7 +1,6 @@
 package org.pac4j.jee.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
@@ -17,10 +16,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Named
 @RequestScoped
+@Slf4j
 public class HttpServletResponseProducer {
-
-    /** The static logger instance. */
-    private static final Logger logger = LoggerFactory.getLogger(HttpServletResponseProducer.class);
 
     /**
      * Factory method which produces an http servlet response.
@@ -29,11 +26,11 @@ public class HttpServletResponseProducer {
      */
     @Produces
     HttpServletResponse getHttpServletResponse() {
-        logger.trace("Producing an http servlet response...");
+        LOGGER.trace("Producing an http servlet response...");
         HttpServletResponse httpServletResponse = (HttpServletResponse) FacesContext.getCurrentInstance()
                 .getExternalContext()
                 .getResponse();
-        logger.trace("Returning an http servlet response. (is null: {})", httpServletResponse == null);
+        LOGGER.trace("Returning an http servlet response. (is null: {})", httpServletResponse == null);
         return httpServletResponse;
     }
 }
