@@ -9,6 +9,7 @@ import org.pac4j.core.util.security.SecurityEndpoint;
 import org.pac4j.core.util.security.SecurityEndpointBuilder;
 import org.pac4j.jee.config.AbstractConfigFilter;
 import org.pac4j.jee.config.Pac4jJEEConfig;
+import org.pac4j.jee.context.JEEFrameworkParameters;
 import org.pac4j.jee.util.Pac4JHttpServletRequestWrapper;
 
 import javax.servlet.FilterChain;
@@ -82,6 +83,6 @@ public class SecurityFilter extends AbstractConfigFilter implements SecurityEndp
             // if no profiles are loaded, pac4j is not concerned with this request
             filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
             return null;
-        }, clients, authorizers, matchers);
+        }, clients, authorizers, matchers, new JEEFrameworkParameters(request, response));
     }
 }

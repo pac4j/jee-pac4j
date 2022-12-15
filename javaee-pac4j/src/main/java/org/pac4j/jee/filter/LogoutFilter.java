@@ -7,6 +7,7 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.config.AbstractConfigFilter;
 import org.pac4j.jee.config.Pac4jJEEConfig;
+import org.pac4j.jee.context.JEEFrameworkParameters;
 
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -65,6 +66,6 @@ public class LogoutFilter extends AbstractConfigFilter {
 
         Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
 
-        config.getLogoutLogic().perform(config, defaultUrl, logoutUrlPattern, localLogout, destroySession, centralLogout);
+        config.getLogoutLogic().perform(config, defaultUrl, logoutUrlPattern, localLogout, destroySession, centralLogout, new JEEFrameworkParameters(request, response));
     }
 }

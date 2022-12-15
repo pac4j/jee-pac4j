@@ -7,6 +7,7 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jee.config.Pac4jJEEConfig;
+import org.pac4j.jee.context.JEEFrameworkParameters;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Produces;
@@ -41,7 +42,7 @@ public class Pac4jProducer {
         Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
 
         LOGGER.trace("Producing a pac4j web context...");
-        val webContext = config.getWebContextFactory().newContext(httpServletRequest, httpServletResponse);
+        val webContext = config.getWebContextFactory().newContext(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
         LOGGER.trace("Returning a pac4j web context.");
         return webContext;
     }
@@ -62,7 +63,7 @@ public class Pac4jProducer {
         Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
 
         LOGGER.trace("Producing a pac4j session store...");
-        val sessionStore = config.getSessionStoreFactory().newSessionStore(httpServletRequest, httpServletResponse);
+        val sessionStore = config.getSessionStoreFactory().newSessionStore(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
         LOGGER.trace("Returning a pac4j session store.");
         return sessionStore;
     }
