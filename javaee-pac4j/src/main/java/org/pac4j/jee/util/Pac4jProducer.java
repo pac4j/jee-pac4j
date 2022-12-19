@@ -2,11 +2,11 @@ package org.pac4j.jee.util;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.jee.config.Pac4jJEEConfig;
 import org.pac4j.jee.context.JEEFrameworkParameters;
 
 import javax.enterprise.context.RequestScoped;
@@ -39,7 +39,7 @@ public class Pac4jProducer {
                              final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
 
-        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
         LOGGER.trace("Producing a pac4j web context...");
         val webContext = config.getWebContextFactory().newContext(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
@@ -60,7 +60,7 @@ public class Pac4jProducer {
                                  final HttpServletRequest httpServletRequest,
                                  final HttpServletResponse httpServletResponse) {
 
-        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
         LOGGER.trace("Producing a pac4j session store...");
         val sessionStore = config.getSessionStoreFactory().newSessionStore(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
@@ -79,7 +79,7 @@ public class Pac4jProducer {
     @Produces
     ProfileManager getProfileManager(final Config config, final WebContext webContext, final SessionStore sessionStore) {
 
-        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
         LOGGER.trace("Producing a pac4j profile manager...");
         val profileManager = config.getProfileManagerFactory().apply(webContext, sessionStore);

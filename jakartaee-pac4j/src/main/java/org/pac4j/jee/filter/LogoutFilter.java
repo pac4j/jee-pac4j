@@ -8,10 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.val;
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.jee.config.AbstractConfigFilter;
-import org.pac4j.jee.config.Pac4jJEEConfig;
 import org.pac4j.jee.context.JEEFrameworkParameters;
 
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class LogoutFilter extends AbstractConfigFilter {
 
         val config = getSharedConfig();
 
-        Pac4jJEEConfig.applyJEESettingsIfUndefined(config);
+        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
         config.getLogoutLogic().perform(config, defaultUrl, logoutUrlPattern, localLogout, destroySession, centralLogout, new JEEFrameworkParameters(request, response));
     }
