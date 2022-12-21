@@ -79,7 +79,7 @@ public class SecurityFilter extends AbstractConfigFilter implements SecurityEndp
 
         FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-        config.getSecurityLogic().perform(config, (ctx, session, profiles, parameters) -> {
+        config.getSecurityLogic().perform(config, (ctx, session, profiles) -> {
             // if no profiles are loaded, pac4j is not concerned with this request
             filterChain.doFilter(profiles.isEmpty() ? request : new Pac4JHttpServletRequestWrapper(request, profiles), response);
             return null;
