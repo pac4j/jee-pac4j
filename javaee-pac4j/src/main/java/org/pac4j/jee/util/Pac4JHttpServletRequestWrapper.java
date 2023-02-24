@@ -1,14 +1,13 @@
 package org.pac4j.jee.util;
 
-import java.security.Principal;
-import java.util.Collection;
-import java.util.Optional;
+import org.pac4j.core.profile.ProfileHelper;
+import org.pac4j.core.profile.UserProfile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-
-import org.pac4j.core.profile.ProfileHelper;
-import org.pac4j.core.profile.UserProfile;
+import java.security.Principal;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * This wraps the {@link HttpServletRequest} to make it pac4j-aware by with respect to user-related methods.
@@ -21,7 +20,7 @@ public class Pac4JHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private Collection<UserProfile> profiles;
 
-    public Pac4JHttpServletRequestWrapper(HttpServletRequest request, Collection<UserProfile> profiles) {
+    public Pac4JHttpServletRequestWrapper(final HttpServletRequest request, final Collection<UserProfile> profiles) {
         super(request);
         this.profiles = profiles;
     }
