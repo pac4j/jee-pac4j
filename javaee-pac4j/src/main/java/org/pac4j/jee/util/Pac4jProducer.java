@@ -10,6 +10,7 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.jee.context.JEEFrameworkParameters;
 
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
@@ -29,61 +30,84 @@ public class Pac4jProducer {
     /**
      * Factory method which produces a pac4j web context.
      *
-     * @param config the configuration
+     * @param instanceConfig the configuration
      * @param httpServletRequest the HTTP servlet request
      * @param httpServletResponse the HTTP servlet response
      * @return a web context associated with the current servlet request
      */
     @Produces
-    WebContext getWebContext(final Config config,
+    WebContext getWebContext(final Instance<Config> instanceConfig,
                              final HttpServletRequest httpServletRequest,
                              final HttpServletResponse httpServletResponse) {
 
-        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+        if (instanceConfig.isResolvable()) {
+            val config = instanceConfig.get();
+            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-        LOGGER.trace("Producing a pac4j web context...");
-        val webContext = config.getWebContextFactory().newContext(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
-        LOGGER.trace("Returning a pac4j web context.");
-        return webContext;
+            LOGGER.trace("Producing a pac4j web context...");
+            val webContext = config.getWebContextFactory().newContext(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
+            LOGGER.trace("Returning a pac4j web context.");
+            return webContext;
+        } else {
+            LOGGER.debug("Unable to produce a web context: no Config available");
+        }
+
+        return null;
     }
 
     /**
      * Factory method which produces a pac4j session store.
      *
-     * @param config the configuration
+     * @param instanceConfig the configuration
      * @param httpServletRequest the HTTP servlet request
      * @param httpServletResponse the HTTP servlet response
      * @return a session store associated with the current servlet request
      */
     @Produces
-    SessionStore getSessionStore(final Config config,
+    SessionStore getSessionStore(final Instance<Config> instanceConfig,
                                  final HttpServletRequest httpServletRequest,
                                  final HttpServletResponse httpServletResponse) {
 
-        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+        if (instanceConfig.isResolvable()) {
+            val config = instanceConfig.get();
+            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-        LOGGER.trace("Producing a pac4j session store...");
-        val sessionStore = config.getSessionStoreFactory().newSessionStore(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
-        LOGGER.trace("Returning a pac4j session store.");
-        return sessionStore;
+            LOGGER.trace("Producing a pac4j session store...");
+            val sessionStore = config.getSessionStoreFactory().newSessionStore(new JEEFrameworkParameters(httpServletRequest, httpServletResponse));
+            LOGGER.trace("Returning a pac4j session store.");
+            return sessionStore;
+        } else {
+            LOGGER.debug("Unable to produce a session store: no Config available");
+        }
+
+        return null;
     }
 
     /**
      * Factory method which produces a pac4j profile manager.
      *
-     * @param config the configuration
+     * @param instanceConfig the configuration
      * @param webContext the web context to be used for building the profile manager
      * @param sessionStore the session store to be used for building the profile manager
      * @return a profile manager associated with the current servlet request
      */
     @Produces
-    ProfileManager getProfileManager(final Config config, final WebContext webContext, final SessionStore sessionStore) {
+    ProfileManager getProfileManager(final Instance<Config> instanceConfig,
+                                     final WebContext webContext,
+                                     final SessionStore sessionStore) {
 
-        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
+        if (instanceConfig.isResolvable()) {
+            val config = instanceConfig.get();
+            FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-        LOGGER.trace("Producing a pac4j profile manager...");
-        val profileManager = config.getProfileManagerFactory().apply(webContext, sessionStore);
-        LOGGER.trace("Returning a pac4j profile manager.");
-        return profileManager;
+            LOGGER.trace("Producing a pac4j profile manager...");
+            val profileManager = config.getProfileManagerFactory().apply(webContext, sessionStore);
+            LOGGER.trace("Returning a pac4j profile manager.");
+            return profileManager;
+        } else {
+            LOGGER.debug("Unable to produce a profile manager: no Config available");
+        }
+
+        return null;
     }
 }
