@@ -57,8 +57,7 @@ Two demo webapps: [jee-pac4j-demo](https://github.com/pac4j/jee-pac4j-demo) (a s
 
 ## Versions
 
-The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/jee-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/jee-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
-The [next version](https://github.com/pac4j/jee-pac4j/wiki/Next-version) is under development.
+The latest released version is the [![Maven Central](https://img.shields.io/maven-central/v/org.pac4j/jee-pac4j-parent.svg)](https://repo1.maven.org/maven2/org/pac4j/jee-pac4j-parent/). The [next version](https://github.com/pac4j/jee-pac4j/wiki/Next-version) is under development.
 
 See the [release notes](https://github.com/pac4j/jee-pac4j/wiki/Release-Notes).
 
