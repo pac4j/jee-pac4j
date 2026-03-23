@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * You should upgrade to the new <code>jakartaee-pac4j</code> library.
+ *
  * <p>This filter handles the (application + identity provider) logout process.</p>
  *
  * @author Jerome Leleu
@@ -24,6 +26,7 @@ import java.io.IOException;
  */
 @Getter
 @Setter
+@Deprecated
 public class LogoutFilter extends AbstractConfigFilter {
 
     private String defaultUrl;

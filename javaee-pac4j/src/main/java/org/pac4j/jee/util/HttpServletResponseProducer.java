@@ -9,6 +9,8 @@ import javax.inject.Named;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * You should upgrade to the new <code>jakartaee-pac4j</code> library.
+ *
  * Produces a servlet response object corresponding to the response for the current request.
  *
  * @author Phillip Ross
@@ -17,6 +19,7 @@ import javax.servlet.http.HttpServletResponse;
 @Named
 @RequestScoped
 @Slf4j
+@Deprecated
 public class HttpServletResponseProducer {
 
     /**

@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
+ * You should upgrade to the new <code>jakartaee-pac4j</code> library.
+ *
  * Produces request-scoped web context and profile manager.
  *
  * @author Phillip Ross
@@ -25,6 +27,7 @@ import javax.servlet.http.HttpServletResponse;
 @Named
 @RequestScoped
 @Slf4j
+@Deprecated
 public class Pac4jProducer {
 
     /**

@@ -10,12 +10,15 @@ import java.util.Collection;
 import java.util.Optional;
 
 /**
+ * You should upgrade to the new <code>jakartaee-pac4j</code> library.
+ *
  * This wraps the {@link HttpServletRequest} to make it pac4j-aware by with respect to user-related methods.
  * 
  * @author Victor Noel
  * @since 4.0.0
  *
  */
+@Deprecated
 public class Pac4JHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
     private Collection<UserProfile> profiles;

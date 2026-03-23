@@ -10,14 +10,18 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import static org.pac4j.core.util.CommonHelper.*;
+import static org.pac4j.core.util.CommonHelper.assertNotBlank;
+import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
 /**
+ * You should upgrade to the new <code>jakartaee-pac4j</code> library.
+ *
  * Helper to define filter mappings.
  *
  * @author Jerome Leleu
  * @since 3.0.0
  */
+@Deprecated
 public class FilterHelper {
 
     private final ServletContext servletContext;

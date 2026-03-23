@@ -20,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
+ * You should upgrade to the new <code>jakartaee-pac4j</code> library.
+ *
  * <p>This filter protects an URL.</p>
  *
  * @author Jerome Leleu, Michael Remond
@@ -27,6 +29,7 @@ import java.io.IOException;
  */
 @Getter
 @Setter
+@Deprecated
 public class SecurityFilter extends AbstractConfigFilter implements SecurityEndpoint {
 
     private String clients;
