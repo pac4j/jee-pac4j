@@ -62,7 +62,6 @@
     <properties>
         <pac4j.version>6.3.3</pac4j.version>
         <java.version>17</java.version>
-        <pmdVersion>6.55.0</pmdVersion>
     </properties>
 
     <dependencies>
@@ -149,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.21.2</version>
+                <version>3.28.0</version>
                 <configuration>
                     <includeTests>true</includeTests>
                     <printFailingErrors>true</printFailingErrors>
@@ -163,28 +162,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-core</artifactId>
-                        <version>${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-java</artifactId>
-                        <version>${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-javascript</artifactId>
-                        <version>${pmdVersion}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>net.sourceforge.pmd</groupId>
-                        <artifactId>pmd-jsp</artifactId>
-                        <version>${pmdVersion}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
