@@ -10,7 +10,7 @@
 
     <groupId>org.pac4j</groupId>
     <artifactId>javaee-pac4j</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>pac4j implementation for JavaEE</name>
     <description>Security library for JavaEE based on pac4j</description>
 
