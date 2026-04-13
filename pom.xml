@@ -6,7 +6,7 @@
     <artifactId>jee-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>jee-pac4j parent</name>
-    <version>8.0.3</version>
+    <version>8.0.4-SNAPSHOT</version>
     <description>JEE pac4j libraries</description>
     <url>https://github.com/pac4j/jee-pac4j</url>
 
@@ -44,7 +44,7 @@
         <url>https://github.com/pac4j/jee-pac4j.git</url>
         <connection>scm:git:git@github.com:pac4j/jee-pac4j.git</connection>
         <developerConnection>scm:git:git@github.com:pac4j/jee-pac4j.git</developerConnection>
-      <tag>jee-pac4j-parent-8.0.3</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <developers>
