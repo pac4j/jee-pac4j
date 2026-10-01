@@ -20,51 +20,99 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * You should upgrade to the new <code>jakartaee-pac4j</code> library.
- *
- * <p>This filter protects an URL.</p>
+ * <p>Protects a URL using the configured authentication clients, authorizers and matchers.</p>
  *
  * @author Jerome Leleu, Michael Remond
  * @since 1.0.0
+ * @deprecated Use the corresponding class from the {@code jakartaee-pac4j} library.
  */
 @Getter
 @Setter
 @Deprecated
 public class SecurityFilter extends AbstractConfigFilter implements SecurityEndpoint {
 
+    /**
+     * Comma-separated names of authentication clients.
+     */
     private String clients;
 
+    /**
+     * Comma-separated names of authorizers.
+     */
     private String authorizers;
 
+    /**
+     * Comma-separated names of matchers.
+     */
     private String matchers;
 
+    /**
+     * Creates a security filter configured through servlet initialization parameters or setters.
+     */
     public SecurityFilter() {}
 
+    /**
+     * Creates a security filter using the supplied configuration.
+     *
+     * @param config the pac4j configuration
+     */
     public SecurityFilter(final Config config) {
         setConfig(config);
     }
 
+    /**
+     * Creates a security filter with the specified clients.
+     *
+     * @param config the pac4j configuration
+     * @param clients the comma-separated client names
+     */
     public SecurityFilter(final Config config, final String clients) {
         this(config);
         this.clients = clients;
     }
 
+    /**
+     * Creates a security filter with the specified clients and authorizers.
+     *
+     * @param config the pac4j configuration
+     * @param clients the comma-separated client names
+     * @param authorizers the comma-separated authorizer names
+     */
     public SecurityFilter(final Config config, final String clients, final String authorizers) {
         this(config, clients);
         this.authorizers = authorizers;
     }
 
+    /**
+     * Creates a security filter with the specified clients, authorizers and matchers.
+     *
+     * @param config the pac4j configuration
+     * @param clients the comma-separated client names
+     * @param authorizers the comma-separated authorizer names
+     * @param matchers the comma-separated matcher names
+     */
     public SecurityFilter(final Config config, final String clients, final String authorizers, final String matchers) {
         this(config, clients, authorizers);
         this.matchers = matchers;
     }
 
+    /**
+     * Builds a security filter using {@link SecurityEndpointBuilder}.
+     * A configuration, client, authorizer or matcher instance can be supplied. When a configuration
+     * is supplied, up to three strings select client, authorizer and matcher names, in that order.
+     * Client, authorizer and matcher instances, and strings, may also be grouped in collections or object arrays.
+     *
+     * @param parameters the configuration and security components to apply
+     * @return the configured security filter
+     * @throws org.pac4j.core.exception.TechnicalException if a parameter type or combination is unsupported
+     */
     public static SecurityFilter build(final Object... parameters) {
         final SecurityFilter securityFilter = new SecurityFilter();
         SecurityEndpointBuilder.buildConfig(securityFilter, parameters);
         return securityFilter;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void init(final FilterConfig filterConfig) throws ServletException {
         super.init(filterConfig);
@@ -74,6 +122,7 @@ public class SecurityFilter extends AbstractConfigFilter implements SecurityEndp
         this.matchers = getStringParam(filterConfig, Pac4jConstants.MATCHERS, this.matchers);
     }
 
+    /** {@inheritDoc} */
     @Override
     protected final void internalFilter(final HttpServletRequest request, final HttpServletResponse response,
                                         final FilterChain filterChain) throws IOException, ServletException {

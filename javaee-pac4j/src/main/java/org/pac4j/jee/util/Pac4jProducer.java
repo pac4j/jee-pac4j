@@ -17,12 +17,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * You should upgrade to the new <code>jakartaee-pac4j</code> library.
- *
- * Produces request-scoped web context and profile manager.
+ * Produces web contexts, session stores and configured profile managers for servlet requests.
  *
  * @author Phillip Ross
  * @since 3.0.0
+ * @deprecated Use the corresponding class from the {@code jakartaee-pac4j} library.
  */
 @Named
 @RequestScoped
@@ -31,12 +30,17 @@ import javax.servlet.http.HttpServletResponse;
 public class Pac4jProducer {
 
     /**
+     * Creates a CDI producer for pac4j components associated with servlet requests.
+     */
+    public Pac4jProducer() {}
+
+    /**
      * Factory method which produces a pac4j web context.
      *
-     * @param instanceConfig the configuration
+     * @param instanceConfig the CDI lookup for a unique pac4j configuration
      * @param httpServletRequest the HTTP servlet request
      * @param httpServletResponse the HTTP servlet response
-     * @return a web context associated with the current servlet request
+     * @return the configured web context, or {@code null} if the configuration cannot be resolved
      */
     @Produces
     WebContext getWebContext(final Instance<Config> instanceConfig,
@@ -61,10 +65,10 @@ public class Pac4jProducer {
     /**
      * Factory method which produces a pac4j session store.
      *
-     * @param instanceConfig the configuration
+     * @param instanceConfig the CDI lookup for a unique pac4j configuration
      * @param httpServletRequest the HTTP servlet request
      * @param httpServletResponse the HTTP servlet response
-     * @return a session store associated with the current servlet request
+     * @return the configured session store, or {@code null} if the configuration cannot be resolved
      */
     @Produces
     SessionStore getSessionStore(final Instance<Config> instanceConfig,
@@ -87,12 +91,12 @@ public class Pac4jProducer {
     }
 
     /**
-     * Factory method which produces a pac4j profile manager.
+     * Creates a pac4j profile manager and supplies its configuration for profile renewal.
      *
-     * @param instanceConfig the configuration
+     * @param instanceConfig the CDI lookup for a unique pac4j configuration
      * @param webContext the web context to be used for building the profile manager
      * @param sessionStore the session store to be used for building the profile manager
-     * @return a profile manager associated with the current servlet request
+     * @return the configured profile manager, or {@code null} if the configuration cannot be resolved
      */
     @Produces
     ProfileManager getProfileManager(final Instance<Config> instanceConfig,
@@ -105,6 +109,7 @@ public class Pac4jProducer {
 
             LOGGER.trace("Producing a pac4j profile manager...");
             val profileManager = config.getProfileManagerFactory().apply(webContext, sessionStore);
+            profileManager.setConfig(config);
             LOGGER.trace("Returning a pac4j profile manager.");
             return profileManager;
         } else {

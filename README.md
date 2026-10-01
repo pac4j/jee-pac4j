@@ -61,6 +61,26 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 ### 4) [Get the authenticated user profiles](https://github.com/pac4j/jee-pac4j/wiki/Get-the-authenticated-user-profiles)
 
 
+### CDI outside JSF
+
+`HttpServletResponseFilter` exposes the current servlet response to the CDI producers, so `WebContext`
+and `ProfileManager` can also be injected in servlet and REST requests. The filter is discovered
+through `@WebFilter` when the library is packaged in `WEB-INF/lib` and annotation scanning is enabled.
+If scanning is disabled (for example, with `metadata-complete="true"`), register this filter explicitly
+before components which inject the response or a pac4j web context. Existing JSF applications can
+still use the FacesContext fallback.
+
+To allow a servlet behind a filter to call `startAsync()`, enable asynchronous support when registering
+that filter. `FilterHelper` enables it automatically for mappings containing `DispatcherType.ASYNC`,
+or accepts an explicit Boolean among its parameters:
+
+```java
+filterHelper.addFilterMapping("security", securityFilter, true, "/protected/*");
+```
+
+All filters and the servlet in the request chain must support asynchronous operations.
+
+
 ## Demos
 
 Two demo webapps: [jee-pac4j-demo](https://github.com/pac4j/jee-pac4j-demo) (a simple JSP/servlets demo) and [jee-pac4j-cdi-demo](https://github.com/pac4j/jee-pac4j-cdi-demo) (a more advanced demo using JSF and CDI) are available for tests and implements many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
