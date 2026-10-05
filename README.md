@@ -41,7 +41,7 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 
 6) The `LogoutFilter` logs out the user from the application and triggers the logout at the identity provider level
 
-7) The `JEEContext` and the `ProfileManager` components can be injected
+7) The `WebContext`, `SessionStore` and `ProfileManager` components can be injected via CDI
 
 8) The `FilterHelper` handles the filters and their related mappings.
 
@@ -61,14 +61,16 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 ### 4) [Get the authenticated user profiles](https://github.com/pac4j/jee-pac4j/wiki/Get-the-authenticated-user-profiles)
 
 
-### CDI outside JSF
+### CDI outside JSF (8.0.4+)
 
 `HttpServletResponseFilter` exposes the current servlet response to the CDI producers, so `WebContext`
 and `ProfileManager` can also be injected in servlet and REST requests. The filter is discovered
 through `@WebFilter` when the library is packaged in `WEB-INF/lib` and annotation scanning is enabled.
 If scanning is disabled (for example, with `metadata-complete="true"`), register this filter explicitly
 before components which inject the response or a pac4j web context. Existing JSF applications can
-still use the FacesContext fallback.
+still use the FacesContext fallback. See the [CDI setup](https://github.com/pac4j/jee-pac4j/wiki/Get-the-authenticated-user-profiles#3-cdi-outside-jsf-804) for explicit registration examples.
+
+### Asynchronous requests (8.0.4+)
 
 To allow a servlet behind a filter to call `startAsync()`, enable asynchronous support when registering
 that filter. `FilterHelper` enables it automatically for mappings containing `DispatcherType.ASYNC`,
@@ -83,14 +85,19 @@ All filters and the servlet in the request chain must support asynchronous opera
 
 ## Demos
 
-Two demo webapps: [jee-pac4j-demo](https://github.com/pac4j/jee-pac4j-demo) (a simple JSP/servlets demo) and [jee-pac4j-cdi-demo](https://github.com/pac4j/jee-pac4j-cdi-demo) (a more advanced demo using JSF and CDI) are available for tests and implements many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
+Two demo webapps: [jee-pac4j-demo](https://github.com/pac4j/jee-pac4j-demo) (a simple JSP/servlets demo) and [jee-pac4j-cdi-demo](https://github.com/pac4j/jee-pac4j-cdi-demo) (a more advanced demo using JSF and CDI) demonstrate many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
 
 
 ## Versions
 
+Version **8.0.4** is available for both modules and uses **pac4j 6.5.9**. It adds CDI support outside JSF
+and configurable asynchronous filter support, fixes renewal of expired profiles through CDI, and
+supports building the library with Java 23+ through explicit Lombok annotation processing.
+The CI verifies builds on Java 17 and 25. See the [8.0.4 release notes](https://github.com/pac4j/jee-pac4j/wiki/Release-notes).
+
 The latest released version is the [![Maven Central](https://img.shields.io/maven-central/v/org.pac4j/jee-pac4j-parent.svg)](https://repo1.maven.org/maven2/org/pac4j/jee-pac4j-parent/). The [next version](https://github.com/pac4j/jee-pac4j/wiki/Next-version) is under development.
 
-See the [release notes](https://github.com/pac4j/jee-pac4j/wiki/Release-Notes).
+See the [release notes](https://github.com/pac4j/jee-pac4j/wiki/Release-notes).
 
 See the [migration guide](https://github.com/pac4j/jee-pac4j/wiki/Migration-guide) as well.
 
